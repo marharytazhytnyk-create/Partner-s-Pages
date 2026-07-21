@@ -5,129 +5,158 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Звіти партнерів</title>
   <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
       font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #0f0f13;
-      color: #e8e8f0;
+      background: #f5f5f7;
+      color: #1d1d1f;
       min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 60px 20px;
+      padding: 48px 32px;
     }
 
     header {
-      text-align: center;
-      margin-bottom: 60px;
+      margin-bottom: 32px;
     }
 
     header h1 {
-      font-size: 2rem;
+      font-size: 1.6rem;
       font-weight: 700;
-      letter-spacing: -0.5px;
-      color: #ffffff;
+      color: #1d1d1f;
     }
 
     header p {
-      margin-top: 10px;
-      color: #7a7a9a;
-      font-size: 0.95rem;
+      margin-top: 4px;
+      color: #6e6e73;
+      font-size: 0.88rem;
     }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-      gap: 24px;
-      width: 100%;
-      max-width: 860px;
+    .toolbar {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #d2d2d7;
+      color: #6e6e73;
+      font-size: 0.82rem;
     }
 
-    .card {
-      background: #1a1a24;
-      border: 1px solid #2a2a3a;
-      border-radius: 16px;
-      padding: 32px 28px;
-      text-decoration: none;
-      color: inherit;
-      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+    .toolbar span { color: #1d1d1f; font-weight: 500; }
+
+    .folder-grid {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .folder {
       display: flex;
       flex-direction: column;
-      gap: 12px;
+      align-items: center;
+      gap: 8px;
+      padding: 16px 12px 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      color: #1d1d1f;
+      width: 120px;
+      cursor: pointer;
+      transition: background 0.15s;
     }
 
-    .card:hover {
-      transform: translateY(-4px);
-      border-color: #5a5aff;
-      box-shadow: 0 8px 32px rgba(90, 90, 255, 0.15);
+    .folder:hover {
+      background: rgba(0, 0, 0, 0.06);
     }
 
-    .card-icon {
-      font-size: 2.2rem;
-      line-height: 1;
+    .folder:active {
+      background: rgba(0, 122, 255, 0.12);
     }
 
-    .card-title {
-      font-size: 1.25rem;
-      font-weight: 700;
-      color: #ffffff;
+    .folder-icon {
+      position: relative;
+      width: 72px;
+      height: 56px;
     }
 
-    .card-subtitle {
-      font-size: 0.85rem;
-      color: #7a7a9a;
+    .folder-icon svg {
+      width: 100%;
+      height: 100%;
     }
 
-    .card-badge {
-      display: inline-block;
-      margin-top: 8px;
-      padding: 4px 12px;
-      background: rgba(90, 90, 255, 0.12);
-      border: 1px solid rgba(90, 90, 255, 0.3);
-      border-radius: 20px;
-      font-size: 0.75rem;
-      color: #9a9aff;
-      width: fit-content;
+    .folder-name {
+      font-size: 0.78rem;
+      text-align: center;
+      line-height: 1.3;
+      word-break: break-word;
+      color: #1d1d1f;
     }
 
-    footer {
-      margin-top: 80px;
-      color: #3a3a5a;
-      font-size: 0.8rem;
+    .status-dot {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      position: absolute;
+      bottom: 6px;
+      right: 4px;
     }
+    .dot-green { background: #34c759; }
+    .dot-gray  { background: #aeaeb2; }
   </style>
 </head>
 <body>
 
   <header>
-    <h1>Звіти партнерів</h1>
+    <h1>📁 Звіти партнерів</h1>
     <p>Bolt Food · Poltava · Щотижневі звіти</p>
   </header>
 
-  <div class="grid">
+  <div class="toolbar">
+    Папки: <span>2</span> &nbsp;·&nbsp; Оновлено: <span id="updated"></span>
+  </div>
 
-    <a class="card" href="ARIZONA/WBR_Arizona.html">
-      <div class="card-icon">🏜️</div>
-      <div class="card-title">ARIZONA</div>
-      <div class="card-subtitle">WBR · Weekly Business Report</div>
-      <div class="card-badge">Активний</div>
+  <div class="folder-grid">
+
+    <a class="folder" href="ARIZONA/">
+      <div class="folder-icon">
+        <svg viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="10" width="72" height="44" rx="6" fill="#FFD60A"/>
+          <rect x="0" y="10" width="72" height="44" rx="6" fill="url(#g1)"/>
+          <path d="M0 16C0 12.7 2.7 10 6 10H28L34 4H66C69.3 4 72 6.7 72 10V16H0Z" fill="#FFE34D"/>
+          <defs>
+            <linearGradient id="g1" x1="36" y1="10" x2="36" y2="54" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFE259"/>
+              <stop offset="1" stop-color="#F5A623"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="status-dot dot-green"></div>
+      </div>
+      <div class="folder-name">ARIZONA</div>
     </a>
 
-    <a class="card" href="IZI BURGER/">
-      <div class="card-icon">🍔</div>
-      <div class="card-title">IZI BURGER</div>
-      <div class="card-subtitle">WBR · Weekly Business Report</div>
-      <div class="card-badge">Очікує звіт</div>
+    <a class="folder" href="IZI%20BURGER/">
+      <div class="folder-icon">
+        <svg viewBox="0 0 72 56" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="0" y="10" width="72" height="44" rx="6" fill="#FFD60A"/>
+          <rect x="0" y="10" width="72" height="44" rx="6" fill="url(#g2)"/>
+          <path d="M0 16C0 12.7 2.7 10 6 10H28L34 4H66C69.3 4 72 6.7 72 10V16H0Z" fill="#FFE34D"/>
+          <defs>
+            <linearGradient id="g2" x1="36" y1="10" x2="36" y2="54" gradientUnits="userSpaceOnUse">
+              <stop stop-color="#FFE259"/>
+              <stop offset="1" stop-color="#F5A623"/>
+            </linearGradient>
+          </defs>
+        </svg>
+        <div class="status-dot dot-gray"></div>
+      </div>
+      <div class="folder-name">IZI BURGER</div>
     </a>
 
   </div>
 
-  <footer>Оновлено автоматично · Partner-s-Pages</footer>
+  <script>
+    document.getElementById('updated').textContent = new Date().toLocaleDateString('uk-UA');
+  </script>
 
 </body>
 </html>
