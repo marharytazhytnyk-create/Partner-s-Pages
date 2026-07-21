@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Звіти партнерів</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: #0f0f13;
+      color: #e8e8f0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 60px 20px;
+    }
+
+    header {
+      text-align: center;
+      margin-bottom: 60px;
+    }
+
+    header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.5px;
+      color: #ffffff;
+    }
+
+    header p {
+      margin-top: 10px;
+      color: #7a7a9a;
+      font-size: 0.95rem;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 24px;
+      width: 100%;
+      max-width: 860px;
+    }
+
+    .card {
+      background: #1a1a24;
+      border: 1px solid #2a2a3a;
+      border-radius: 16px;
+      padding: 32px 28px;
+      text-decoration: none;
+      color: inherit;
+      transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      border-color: #5a5aff;
+      box-shadow: 0 8px 32px rgba(90, 90, 255, 0.15);
+    }
+
+    .card-icon {
+      font-size: 2.2rem;
+      line-height: 1;
+    }
+
+    .card-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    .card-subtitle {
+      font-size: 0.85rem;
+      color: #7a7a9a;
+    }
+
+    .card-badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 4px 12px;
+      background: rgba(90, 90, 255, 0.12);
+      border: 1px solid rgba(90, 90, 255, 0.3);
+      border-radius: 20px;
+      font-size: 0.75rem;
+      color: #9a9aff;
+      width: fit-content;
+    }
+
+    footer {
+      margin-top: 80px;
+      color: #3a3a5a;
+      font-size: 0.8rem;
+    }
+  </style>
+</head>
+<body>
+
+  <header>
+    <h1>Звіти партнерів</h1>
+    <p>Bolt Food · Poltava · Щотижневі звіти</p>
+  </header>
+
+  <div class="grid">
+
+    <a class="card" href="ARIZONA/WBR_Arizona.html">
+      <div class="card-icon">🏜️</div>
+      <div class="card-title">ARIZONA</div>
+      <div class="card-subtitle">WBR · Weekly Business Report</div>
+      <div class="card-badge">Активний</div>
+    </a>
+
+    <a class="card" href="IZI BURGER/">
+      <div class="card-icon">🍔</div>
+      <div class="card-title">IZI BURGER</div>
+      <div class="card-subtitle">WBR · Weekly Business Report</div>
+      <div class="card-badge">Очікує звіт</div>
+    </a>
+
+  </div>
+
+  <footer>Оновлено автоматично · Partner-s-Pages</footer>
+
+</body>
+</html>
