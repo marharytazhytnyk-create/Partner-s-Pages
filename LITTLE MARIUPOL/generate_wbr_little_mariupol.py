@@ -138,8 +138,8 @@ EMPTY_WEEK = {
     "avail": 0, "accept": 0, "refunds": 0,
     "del_time": 0, "acc_time": 0, "prep_time": 0, "wait_time": 0, "c2m_time": 0, "c2e_time": 0,
     "new_users": 0, "sessions": 0, "imp_menu": 0, "menu_prod": 0, "rating": 0,
-    "discounts": 0, "camp_bolt": 0, "camp_merch": 0, "active_users": 0, "freq": 0,
-    "bad_provider_count": 0, "bad_provider_pct": 0.0,
+    "discounts": 0, "camp_bolt": 0, "camp_merch": 0, "rating_weight": 0.0,
+    "active_users": 0, "freq": 0, "bad_provider_count": 0, "bad_provider_pct": 0.0,
 }
 
 
@@ -257,7 +257,9 @@ def _parse_loc_week(row: list, active_users: int = 0) -> dict:
         "imp_menu": round(menu_viewed / sessions * 100, 2) if sessions else 0,
         "menu_prod": round(_sf(row[18]), 2), "rating": round(_sf(row[19]), 2),
         "discounts": round(_sf(row[20]), 0), "camp_bolt": round(_sf(row[21]), 0),
-        "camp_merch": round(_sf(row[22]), 0), "active_users": au,
+        "camp_merch": round(_sf(row[22]), 0),
+        "rating_weight": _sf(row[23]) if len(row) > 23 else 0.0,
+        "active_users": au,
         "freq": round(orders / au, 2) if au else 0,
         "bad_provider_count": 0, "bad_provider_pct": 0.0,
     }
@@ -317,10 +319,12 @@ def fetch_data() -> dict:
             SUM(f.provider_impressions_sessions_count) AS sessions,
             SUM(f.provider_menu_viewed_sessions_count) AS menu_viewed,
             AVG(f.provider_product_added_from_menu_viewed_rate_value) * 100 AS menu_prod,
-            AVG(f.provider_rating_per_order_value) AS rating,
+            SUM(f.provider_rating_per_order_value * f.provider_rating_per_order_weight) /
+              NULLIF(SUM(f.provider_rating_per_order_weight), 0) AS rating,
             SUM(f.total_campaign_discount) AS discounts,
             SUM(f.total_campaign_spend_bolt) AS camp_bolt,
-            SUM(f.total_campaign_spend_provider) AS camp_merch
+            SUM(f.total_campaign_spend_provider) AS camp_merch,
+            SUM(f.provider_rating_per_order_weight) AS rating_weight
         FROM ng_delivery_spark.fact_provider_weekly f
         JOIN ng_delivery_spark.dim_provider_v2 d ON f.provider_id = d.provider_id
         WHERE f.provider_id IN ({pids_sql})
@@ -404,6 +408,10 @@ def fetch_data() -> dict:
             rec["label"] = label
             weeks_data.append(rec)
         loc["weeks"] = weeks_data
+        total_weight = sum(w.get("rating_weight", 0) for w in weeks_data)
+        total_score = sum(w.get("rating", 0) * w.get("rating_weight", 0)
+                         for w in weeks_data if w.get("rating"))
+        loc["rolling_rating"] = round(total_score / total_weight, 2) if total_weight else 0.0
         locations.append(loc)
 
     # Group by brand

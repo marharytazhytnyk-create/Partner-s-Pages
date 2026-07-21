@@ -287,6 +287,7 @@ def _parse_loc_week(row: list, active_users: int = 0) -> dict:
         "discounts": round(_sf(row[20]), 0),
         "camp_bolt": round(_sf(row[21]), 0),
         "camp_merch": round(_sf(row[22]), 0),
+        "rating_weight": _sf(row[23]) if len(row) > 23 else 0.0,
         "active_users": au,
         "freq": round(orders / au, 2) if au else 0,
         "bad_provider_count": 0,
@@ -299,8 +300,8 @@ EMPTY_WEEK = {
     "avail": 0, "accept": 0, "refunds": 0,
     "del_time": 0, "acc_time": 0, "prep_time": 0, "wait_time": 0, "c2m_time": 0, "c2e_time": 0,
     "new_users": 0, "sessions": 0, "imp_menu": 0, "menu_prod": 0, "rating": 0,
-    "discounts": 0, "camp_bolt": 0, "camp_merch": 0, "active_users": 0, "freq": 0,
-    "bad_provider_count": 0, "bad_provider_pct": 0.0,
+    "discounts": 0, "camp_bolt": 0, "camp_merch": 0, "rating_weight": 0.0,
+    "active_users": 0, "freq": 0, "bad_provider_count": 0, "bad_provider_pct": 0.0,
 }
 
 
@@ -361,10 +362,12 @@ def fetch_data() -> dict:
             SUM(f.provider_impressions_sessions_count) AS sessions,
             SUM(f.provider_menu_viewed_sessions_count) AS menu_viewed,
             AVG(f.provider_product_added_from_menu_viewed_rate_value) * 100 AS menu_prod,
-            AVG(f.provider_rating_per_order_value) AS rating,
+            SUM(f.provider_rating_per_order_value * f.provider_rating_per_order_weight) /
+              NULLIF(SUM(f.provider_rating_per_order_weight), 0) AS rating,
             SUM(f.total_campaign_discount) AS discounts,
             SUM(f.total_campaign_spend_bolt) AS camp_bolt,
-            SUM(f.total_campaign_spend_provider) AS camp_merch
+            SUM(f.total_campaign_spend_provider) AS camp_merch,
+            SUM(f.provider_rating_per_order_weight) AS rating_weight
         FROM ng_delivery_spark.fact_provider_weekly f
         JOIN ng_delivery_spark.dim_provider_v2 d ON f.provider_id = d.provider_id
         WHERE f.provider_id IN ({pids_sql})
@@ -482,6 +485,11 @@ def fetch_data() -> dict:
             rec["label"] = label
             weeks_data.append(rec)
         loc["weeks"] = weeks_data
+        # Compute rolling weighted rating over all 8 weeks
+        total_weight = sum(w.get("rating_weight", 0) for w in weeks_data)
+        total_score = sum(w.get("rating", 0) * w.get("rating_weight", 0)
+                         for w in weeks_data if w.get("rating"))
+        loc["rolling_rating"] = round(total_score / total_weight, 2) if total_weight else 0.0
         promo = promo_map.get(pid, {})
         loc["has_smart_promotion"] = promo.get("has_smart_promotion", False)
         loc["has_sponsored_listing"] = promo.get("has_sponsored_listing", False)
@@ -781,8 +789,9 @@ def analyze_location(loc: dict, city_median_conv: float = 2.5, city_median_impr:
         )
         severity += 1
 
-    if last["rating"] and last["rating"] < 4.4:
-        issues.append(f"Середня оцінка закладу нижча за комфортну — {last['rating']:.2f} з 5.")
+    rolling_r = loc.get("rolling_rating", 0)
+    if rolling_r and rolling_r < 4.4:
+        issues.append(f"Середня оцінка закладу нижча за комфортну — {rolling_r:.2f} з 5 (за 8 тижнів).")
         advice.append(
             "Подивіться останні низькі відгуки: комплектація, температура страв, "
             "запізнення. Виправте найчастіші причини."
@@ -875,6 +884,7 @@ def analyze_location(loc: dict, city_median_conv: float = 2.5, city_median_impr:
         "prev": prev,
         "last": last,
         "o_chg": o_chg,
+        "rolling_rating": loc.get("rolling_rating", 0),
     }
 
 
@@ -916,12 +926,13 @@ def rank_strongest_locations(locations: list[dict], analyses: list[dict], top_n:
         elif last["accept"] >= 95:
             score += 4
 
-        if last["rating"] >= 4.7:
+        rolling_r = loc.get("rolling_rating", 0)
+        if rolling_r >= 4.7:
             score += 10
-            reasons.append(f"Високий рейтинг від гостей — {last['rating']:.2f} з 5.")
-        elif last["rating"] >= 4.5:
+            reasons.append(f"Високий рейтинг від гостей — {rolling_r:.2f} з 5.")
+        elif rolling_r >= 4.5:
             score += 5
-            reasons.append(f"Добрий рейтинг — {last['rating']:.2f} з 5.")
+            reasons.append(f"Добрий рейтинг — {rolling_r:.2f} з 5.")
 
         if last["bad_provider_pct"] <= 5 and last["orders"] >= 10:
             score += 10
@@ -961,7 +972,7 @@ def rank_strongest_locations(locations: list[dict], analyses: list[dict], top_n:
             "gross": last["gross"],
             "avail": last["avail"],
             "accept": last["accept"],
-            "rating": last["rating"],
+            "rating": loc.get("rolling_rating", last["rating"]),
             "bad_provider_pct": last["bad_provider_pct"],
             "o_chg": o_chg,
             "reasons": reasons[:4],
@@ -1073,7 +1084,7 @@ def _location_analysis_block(analysis: dict) -> str:
       <div class="analysis-kpi">
         <span>Замовлення: <b>{prev['orders']}</b> → <b>{last['orders']}</b></span>
         <span>Доступність: <b>{prev['avail']:.1f}%</b> → <b>{last['avail']:.1f}%</b></span>
-        <span>Рейтинг: <b>{prev['rating']:.2f}</b> → <b>{last['rating']:.2f}</b></span>
+        <span>Рейтинг (8 тижнів): <b>{analysis.get('rolling_rating', last['rating']):.2f}</b></span>
         <span>Компенсації: <b>{prev['refunds']:.1f}%</b> → <b>{last['refunds']:.1f}%</b></span>
         <span>Погані замовлення (заклад): <b>{prev['bad_provider_count']}</b> → <b>{last['bad_provider_count']}</b> · <b>{last['bad_provider_pct']:.1f}%</b></span>
       </div>
@@ -1175,6 +1186,20 @@ def _analysis_html(insights: list[dict]) -> str:
     return f"""
     <div class="section-title">Висновки по бренду</div>
     <div class="insights-grid">{insight_cards}</div>"""
+
+
+def _brand_rolling_rating(locations: list[dict]) -> float:
+    """Зважений ковзний рейтинг по всіх локаціях бренду."""
+    total_w = sum(
+        sum(w.get("rating_weight", 0) for w in loc.get("weeks", []))
+        for loc in locations
+    )
+    total_s = sum(
+        sum(w.get("rating", 0) * w.get("rating_weight", 0)
+            for w in loc.get("weeks", []) if w.get("rating"))
+        for loc in locations
+    )
+    return round(total_s / total_w, 2) if total_w else 0.0
 
 
 def generate_html(data: dict) -> str:
@@ -1415,7 +1440,7 @@ def generate_html(data: dict) -> str:
     <div class="kpi-card"><div class="kpi-label">Availability</div><div class="kpi-value">{last['avail']:.1f}%</div></div>
     <div class="kpi-card"><div class="kpi-label">Acceptance</div><div class="kpi-value">{last['accept']:.1f}%</div></div>
     <div class="kpi-card"><div class="kpi-label">Active Users</div><div class="kpi-value">{last['active_users']}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Rating</div><div class="kpi-value">{last['rating']:.2f}</div></div>
+    <div class="kpi-card"><div class="kpi-label">Rating (8 тижнів)</div><div class="kpi-value">{_brand_rolling_rating(locations):.2f}</div></div>
     <div class="kpi-card"><div class="kpi-label">Погані замовлення (заклад)</div><div class="kpi-value">{last['bad_provider_count']} · {last['bad_provider_pct']:.1f}%</div></div>
   </div>
   <p class="section-hint" style="margin-top:8px">{BAD_ORDERS_EXPLAIN_UA}</p>
