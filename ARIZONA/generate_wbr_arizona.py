@@ -19,8 +19,8 @@ from pathlib import Path
 import requests
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
-DATABRICKS_HOST = os.getenv("DATABRICKS_HOST", "https://bolt-incentives.cloud.databricks.com")
-CLUSTER_ID = os.getenv("DATABRICKS_CLUSTER_ID", "0221-081903-9ag4bh69")
+DATABRICKS_HOST = os.getenv("DATABRICKS_HOST") or ("https://bolt-incentives.cloud.databricks.com")
+CLUSTER_ID = os.getenv("DATABRICKS_CLUSTER_ID") or ("0221-081903-9ag4bh69")
 BRAND_NAME = "#ARIZONA"
 N_WEEKS = 8
 SCRIPT_DIR = Path(__file__).parent
