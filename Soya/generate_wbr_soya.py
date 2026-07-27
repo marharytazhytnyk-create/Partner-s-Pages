@@ -283,6 +283,7 @@ def fetch_data() -> dict:
         SELECT provider_id, provider_name, brand_name, city_name, zone_name
         FROM ng_delivery_spark.dim_provider_v2
         WHERE brand_name IN ({brands_sql})
+          AND country_code = 'ua'
         ORDER BY brand_name, city_name, provider_name
         """)
         if not loc_rows:
