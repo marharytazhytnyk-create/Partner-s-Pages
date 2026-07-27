@@ -21,6 +21,23 @@ import requests
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST") or ("https://bolt-incentives.cloud.databricks.com")
 CLUSTER_ID = os.getenv("DATABRICKS_CLUSTER_ID") or ("0221-081903-9ag4bh69")
+# Всі локації партнера #ARIZONA (за provider_id, бо кожна під окремим брендом)
+ARIZONA_PROVIDER_IDS = [
+    172714,  # Академія шаурми
+    123575,  # Arizona
+    137454,  # Золотий дракон
+    117449,  # Fellini Pizza
+    136690,  # Luciano pizza by#AriZona
+    137455,  # Ace Burger
+    136694,  # Original sushi by #AriZona
+    137451,  # GANGSTER DOG
+    136693,  # Fitnes shaurma
+    136685,  # Prima Pasta
+    115669,  # Big Bro Burgers
+    109500,  # Salatoria
+    110411,  # Самурай
+    115868,  # Шава від Шефа
+]
 BRAND_NAME = "#ARIZONA"
 N_WEEKS = 8
 SCRIPT_DIR = Path(__file__).parent
@@ -317,14 +334,15 @@ def fetch_data() -> dict:
     ensure_cluster_running()
     ctx = create_context()
     try:
+        pids_fixed = ", ".join(str(p) for p in ARIZONA_PROVIDER_IDS)
         loc_rows = run_query(ctx, f"""
         SELECT provider_id, provider_name, brand_name, city_name, zone_name
         FROM ng_delivery_spark.dim_provider_v2
-        WHERE brand_name = '{BRAND_NAME}'
+        WHERE provider_id IN ({pids_fixed})
         ORDER BY city_name, provider_name
         """)
         if not loc_rows:
-            raise RuntimeError(f"Не знайдено локацій для бренду {BRAND_NAME}")
+            raise RuntimeError(f"Не знайдено локацій для #ARIZONA (provider_ids)")
 
         providers = [
             {
