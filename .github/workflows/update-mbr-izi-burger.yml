@@ -1,0 +1,40 @@
+name: Update MBR IZI BURGER
+
+on:
+  schedule:
+    # 14:00 Kyiv (EEST, UTC+3) on 1st of every month
+    - cron: '0 11 1 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-mbr-izi-burger:
+    name: MBR IZI BURGER — 6 months
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate MBR IZI BURGER report
+        env:
+          DATABRICKS_HOST:       ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN:      ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_CLUSTER_ID: ${{ secrets.DATABRICKS_CLUSTER_ID }}
+        run: python "IZI BURGER/generate_mbr_izi_burger.py"
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "IZI BURGER/"
+          git diff --staged --quiet || git commit -m "MBR IZI BURGER — auto-update $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push
