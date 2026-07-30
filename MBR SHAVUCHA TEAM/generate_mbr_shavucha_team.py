@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MBR IZI BURGER — щомісячний звіт (Харків).
+MBR SHAVUCHA TEAM — щомісячний звіт (Черкаси).
 Останні 6 завершених місяців, HTML українською, валюта UAH.
 Автооновлення: 1-го числа кожного місяця о 14:00 (Київ) через GitHub Actions.
 """
@@ -22,12 +22,12 @@ import requests
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST") or "https://bolt-incentives.cloud.databricks.com"
 CLUSTER_ID = os.getenv("DATABRICKS_CLUSTER_ID") or "0221-081903-9ag4bh69"
 
-PROVIDER_IDS = [139923, 169006, 184043]
-PARTNER_TITLE = "IZI BURGER"
-CITY = "Kharkiv"
+PROVIDER_IDS = [91332, 93073, 157668]
+PARTNER_TITLE = "SHAVUCHA TEAM"
+CITY = "Cherkasy"
 N_MONTHS = 6
 SCRIPT_DIR = Path(__file__).parent
-OUTPUT_HTML = SCRIPT_DIR / "MBR_IziBurger.html"
+OUTPUT_HTML = SCRIPT_DIR / "MBR_ShavuchaTeam.html"
 POLL_INTERVAL_S = 4
 MAX_POLL_S = 600
 
@@ -169,22 +169,44 @@ def ensure_cluster_running() -> None:
         state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
         print(f"  cluster: {state}")
         if state == "RUNNING":
+            time.sleep(15)  # Extra wait for cluster to fully initialize
             return
     raise TimeoutError("Cluster did not start in time")
 
 
+
+
 def create_context() -> str:
-    return _post("/api/1.2/contexts/create", {"language": "sql", "clusterId": CLUSTER_ID})["id"]
+    for attempt in range(5):
+        try:
+            return _post("/api/1.2/contexts/create", {"language": "sql", "clusterId": CLUSTER_ID})["id"]
+        except Exception as e:
+            if attempt < 4 and ("500" in str(e) or "Internal Server Error" in str(e)):
+                print(f"  ⚠ context create failed, retry in 20s... ({attempt+1}/4)")
+                time.sleep(20)
+                continue
+            raise
 
 
 def run_query(ctx_id: str, sql: str) -> list[list]:
     cmd_id = _post("/api/1.2/commands/execute",
                    {"language": "sql", "clusterId": CLUSTER_ID, "contextId": ctx_id, "command": sql})["id"]
     deadline = time.time() + MAX_POLL_S
+    consecutive_500 = 0
     while time.time() < deadline:
         time.sleep(POLL_INTERVAL_S)
-        resp = _get("/api/1.2/commands/status",
-                    {"clusterId": CLUSTER_ID, "contextId": ctx_id, "commandId": cmd_id})
+        try:
+            resp = _get("/api/1.2/commands/status",
+                        {"clusterId": CLUSTER_ID, "contextId": ctx_id, "commandId": cmd_id})
+            consecutive_500 = 0
+        except Exception as e:
+            if "500" in str(e) or "Internal Server Error" in str(e):
+                consecutive_500 += 1
+                if consecutive_500 <= 5:
+                    print(f"  ⚠ status check 500, retry {consecutive_500}/5...")
+                    time.sleep(10)
+                    continue
+            raise
         status = resp.get("status")
         if status == "Finished":
             result = resp.get("results", {})
@@ -751,7 +773,7 @@ def generate_html(data: dict) -> str:
 
 <footer class="footer">
   <span>Bolt Food</span> · MBR {PARTNER_TITLE} · Автооновлення: 1-го числа кожного місяця о 14:00 (Київ) ·
-  <a href="https://github.com/marharytazhytnyk-create/Partner-s-Pages/tree/main/IZI%20BURGER" style="color:var(--green)">GitHub</a>
+  <a href="https://github.com/marharytazhytnyk-create/Partner-s-Pages/tree/main/MBR%20SHAVUCHA%20TEAM" style="color:var(--green)">GitHub</a>
 </footer>
 
 <script>
