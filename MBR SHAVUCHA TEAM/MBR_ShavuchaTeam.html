@@ -1,0 +1,3566 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+  <title>MBR SHAVUCHA TEAM · Січ 2026 — Черв 2026</title>
+  <style>
+    :root {
+      --green:#34D186; --green-d:#0d8a52; --black:#0d0d0d;
+      --gray-700:#4a4a4a; --gray-400:#9a9a9a; --gray-100:#f5f5f5;
+      --positive:#1aad6a; --warning:#e67e22; --danger:#c0392b;
+    }
+    *{margin:0;padding:0;box-sizing:border-box}
+    body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+      font-size:14px;line-height:1.55;color:#1a1a1a;background:var(--gray-100)}
+    .header{background:var(--black);padding:20px 40px;display:flex;align-items:flex-start;
+      justify-content:space-between;border-bottom:4px solid var(--green);flex-wrap:wrap;gap:16px}
+    .header-left{display:flex;align-items:center;gap:14px}
+    .bolt-logo{width:44px;height:44px;background:var(--green);border-radius:10px;
+      display:flex;align-items:center;justify-content:center}
+    .header-title h1{font-size:22px;font-weight:700;color:#fff}
+    .header-title p{font-size:11px;color:var(--green);text-transform:uppercase;
+      letter-spacing:1.2px;font-weight:600;margin-top:4px}
+    .header-meta{text-align:right;color:var(--gray-400);font-size:12px;line-height:1.9}
+    .header-meta strong{color:var(--green)}
+    .container{max-width:1320px;margin:0 auto;padding:28px 40px 48px}
+    .period-bar{background:#fff;border-radius:12px;padding:14px 20px;margin-bottom:20px;
+      display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+      color:var(--gray-700);padding-bottom:10px;border-bottom:2px solid var(--green);margin:28px 0 10px}
+    .section-hint{font-size:12px;color:var(--gray-400);margin-bottom:14px}
+    .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px;margin-bottom:8px}
+    .kpi-card{background:#fff;border-radius:12px;padding:14px 16px;border-top:3px solid var(--green);
+      box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray-400);margin-bottom:4px}
+    .kpi-value{font-size:20px;font-weight:700}
+    .charts-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px;margin-bottom:12px}
+    .chart-card{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+    .chart-card h3{font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:4px}
+    .metric-desc{font-size:11px;color:var(--gray-700);margin-bottom:4px}
+    .unit{font-size:10px;color:var(--gray-400);margin-bottom:8px}
+    .bars-scroll{overflow-x:auto;padding-bottom:4px}
+    .bars{display:flex;gap:6px;align-items:flex-end;min-height:120px;padding-top:6px}
+    .bar-col{display:flex;flex-direction:column;align-items:center;min-width:42px;flex-shrink:0;
+      height:110px;justify-content:flex-end}
+    .bar-val{font-size:8px;font-weight:700;color:var(--gray-700);margin-bottom:3px;text-align:center;max-width:48px}
+    .bar{width:36px;border-radius:5px 5px 0 0;min-height:4px}
+    .bar-lbl{font-size:9px;color:var(--gray-400);margin-top:3px;text-align:center}
+    .loc-card{background:#fff;border-radius:12px;margin:0 0 10px;
+      box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #eee;overflow:hidden}
+    .loc-row{display:flex;align-items:center;justify-content:space-between;gap:16px;
+      padding:14px 18px;flex-wrap:wrap}
+    .loc-row-info h2{font-size:15px;font-weight:700}
+    .loc-open-btn{padding:9px 16px;border:none;border-radius:8px;background:var(--green-d);
+      color:#fff;font-size:13px;font-weight:600;cursor:pointer}
+    .loc-open-btn:hover{background:var(--green);color:var(--black)}
+    .loc-open-btn[aria-expanded="true"]{background:#eee;color:var(--gray-700)}
+    .loc-body{padding:0 18px 20px;border-top:1px solid #f0f0f0}
+    .loc-body[hidden]{display:none}
+    .loc-section-title{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;
+      color:var(--green-d);margin:18px 0 10px}
+    .loc-meta{font-size:12px;color:var(--gray-400);margin-top:2px}
+    .loc-analysis{background:var(--gray-100);border-radius:10px;padding:16px 18px;margin-top:20px;border-left:4px solid var(--gray-400)}
+    .loc-analysis.sev-high{border-left-color:var(--danger);background:#fff8f6}
+    .loc-analysis.sev-mid{border-left-color:var(--warning);background:#fffaf3}
+    .loc-analysis.sev-ok{border-left-color:var(--positive)}
+    .loc-analysis-head{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px}
+    .loc-analysis h4{font-size:12px;margin:10px 0 4px;color:var(--gray-700)}
+    .loc-analysis ul{margin-left:18px;font-size:13px}
+    .loc-analysis ul.advice{color:var(--green-d)}
+    .bad-explain{font-size:12px;color:var(--gray-700);padding:10px 12px;background:#fff;
+      border-radius:8px;border:1px solid #eee;margin-bottom:12px}
+    .sev-badge{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--warning)}
+    .analysis-kpi{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--gray-400);
+      margin-bottom:10px;padding:8px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
+    .analysis-kpi b{color:var(--gray-700)}
+    .footer{background:var(--black);color:var(--gray-400);font-size:11px;padding:22px 40px;text-align:center}
+    .footer span{color:var(--green)}
+    @media(max-width:700px){
+      .container{padding:16px} .charts-grid{grid-template-columns:1fr} .header{padding:16px}
+    }
+  </style>
+</head>
+<body>
+<header class="header">
+  <div class="header-left">
+    <div class="bolt-logo">
+      <svg viewBox="0 0 24 24" width="26" height="26"><path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13V2Z" fill="#0d0d0d"/></svg>
+    </div>
+    <div class="header-title">
+      <h1>MBR SHAVUCHA TEAM</h1>
+      <p>Bolt Food · Щомісячний звіт · Cherkasy</p>
+    </div>
+  </div>
+  <div class="header-meta">
+    <div>Період: <strong>Січ 2026 — Черв 2026</strong></div>
+    <div>Місяців: <strong>6</strong> · Локацій: <strong>3</strong></div>
+    <div>Оновлено: <strong>30.07.2026 14:30</strong></div>
+  </div>
+</header>
+
+<div class="container">
+  <div class="period-bar">
+    <span style="font-size:11px;font-weight:700;text-transform:uppercase;color:var(--gray-700)">Період:</span>
+    <span style="font-size:12px;color:var(--gray-700)">Січ 2026 — Черв 2026 · валюта UAH (₴)</span>
+    <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">Останній місяць: Черв 2026</span>
+  </div>
+
+  <div class="section-title">Огляд бренду — останній місяць</div>
+  <div class="kpi-grid">
+    <div class="kpi-card"><div class="kpi-label">Gross Sales</div><div class="kpi-value">175 188 ₴</div></div>
+    <div class="kpi-card"><div class="kpi-label">Net Sales</div><div class="kpi-value">145 237 ₴</div></div>
+    <div class="kpi-card"><div class="kpi-label">Delivered Orders</div><div class="kpi-value">350</div></div>
+    <div class="kpi-card"><div class="kpi-label">AOV</div><div class="kpi-value">501 ₴</div></div>
+    <div class="kpi-card"><div class="kpi-label">Availability</div><div class="kpi-value">96.1%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Acceptance</div><div class="kpi-value">99.2%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Active Users</div><div class="kpi-value">325</div></div>
+    <div class="kpi-card"><div class="kpi-label">Rating (6 міс.)</div><div class="kpi-value">4.79</div></div>
+    <div class="kpi-card"><div class="kpi-label">Погані замовлення</div><div class="kpi-value">3 · 0.9%</div></div>
+  </div>
+  <p class="section-hint" style="margin-top:8px">Погані замовлення (Bad Orders) — доставлені замовлення, з якими у клієнта виникла проблема: затримка з вини закладу, неповний склад, холодна/неякісна їжа тощо. Високий показник знижує рейтинг і зменшує шанс повторного замовлення.</p>
+
+  <div class="section-title">1. Продажі — увесь бренд</div><p class="section-hint">Сума / середнє по всіх 3 локаціях · 6 місяців</p><div class="charts-grid">
+    <div class="chart-card" id="brand-gross">
+      <h3>Gross Sales</h3>
+      <p class="metric-desc">Сума до знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">179 343</div>
+          <div class="bar" style="height:84%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">212 358</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">201 408</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">195 080</div>
+          <div class="bar" style="height:92%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">137 590</div>
+          <div class="bar" style="height:65%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">175 188</div>
+          <div class="bar" style="height:82%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-net">
+      <h3>Net Sales</h3>
+      <p class="metric-desc">Сума після знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">135 476</div>
+          <div class="bar" style="height:84%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">161 045</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">152 541</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">148 155</div>
+          <div class="bar" style="height:92%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">107 652</div>
+          <div class="bar" style="height:67%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">145 237</div>
+          <div class="bar" style="height:90%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-orders">
+      <h3>Delivered Orders</h3>
+      <p class="metric-desc">Доставлені замовлення</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">307</div>
+          <div class="bar" style="height:75%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">408</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">360</div>
+          <div class="bar" style="height:88%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">342</div>
+          <div class="bar" style="height:84%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">248</div>
+          <div class="bar" style="height:61%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">350</div>
+          <div class="bar" style="height:86%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-aov">
+      <h3>AOV (середній чек)</h3>
+      <p class="metric-desc">Середня сума замовлення</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">584</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">520</div>
+          <div class="bar" style="height:89%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">559</div>
+          <div class="bar" style="height:96%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">570</div>
+          <div class="bar" style="height:98%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">555</div>
+          <div class="bar" style="height:95%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">501</div>
+          <div class="bar" style="height:86%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="section-title">2. Операційні показники — увесь бренд</div><p class="section-hint">Сума / середнє по всіх 3 локаціях · 6 місяців</p><div class="charts-grid">
+    <div class="chart-card" id="brand-avail">
+      <h3>Availability</h3>
+      <p class="metric-desc">Частка часу онлайн</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">94.3%</div>
+          <div class="bar" style="height:97%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">97.3%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">97.6%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">87.8%</div>
+          <div class="bar" style="height:90%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">96.2%</div>
+          <div class="bar" style="height:99%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">96.1%</div>
+          <div class="bar" style="height:98%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-accept">
+      <h3>Acceptance Rate</h3>
+      <p class="metric-desc">Прийняття замовлень вчасно</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">97.5%</div>
+          <div class="bar" style="height:98%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.0%</div>
+          <div class="bar" style="height:99%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.5%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.7%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.6%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.2%</div>
+          <div class="bar" style="height:99%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-refunds">
+      <h3>Refunds Rate</h3>
+      <p class="metric-desc">Компенсації клієнтам</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">0.3%</div>
+          <div class="bar" style="height:19%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.7%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.1%</div>
+          <div class="bar" style="height:64%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.6%</div>
+          <div class="bar" style="height:34%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.6%</div>
+          <div class="bar" style="height:94%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.8%</div>
+          <div class="bar" style="height:50%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-del_time">
+      <h3>Avg. Delivery Time</h3>
+      <p class="metric-desc">Середній час доставки</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">39.7</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34.2</div>
+          <div class="bar" style="height:86%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">30.6</div>
+          <div class="bar" style="height:77%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">31.7</div>
+          <div class="bar" style="height:80%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">32.2</div>
+          <div class="bar" style="height:81%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29.4</div>
+          <div class="bar" style="height:74%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-acc_time">
+      <h3>Avg. Acceptance Time</h3>
+      <p class="metric-desc">Середній час прийняття</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">0.7</div>
+          <div class="bar" style="height:73%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.4</div>
+          <div class="bar" style="height:48%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:33%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:36%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.9</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:33%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-prep_time">
+      <h3>Avg. Prep Time</h3>
+      <p class="metric-desc">Середній час приготування</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">16.9</div>
+          <div class="bar" style="height:99%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15.6</div>
+          <div class="bar" style="height:91%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15.9</div>
+          <div class="bar" style="height:93%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">16.2</div>
+          <div class="bar" style="height:95%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">17.0</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">14.2</div>
+          <div class="bar" style="height:83%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-wait_time">
+      <h3>Courier Wait Time</h3>
+      <p class="metric-desc">Очікування курʼєром</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">2.0</div>
+          <div class="bar" style="height:93%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.0</div>
+          <div class="bar" style="height:95%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.1</div>
+          <div class="bar" style="height:99%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.8</div>
+          <div class="bar" style="height:85%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.1</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.5</div>
+          <div class="bar" style="height:69%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="section-title">2a. Погані замовлення з вини закладу — увесь бренд</div><p class="section-hint">Сума / середнє по всіх 3 локаціях · 6 місяців</p><div class="charts-grid">
+    <div class="chart-card" id="brand-bad_provider_count">
+      <h3>Погані замовлення (шт.)</h3>
+      <p class="metric-desc">Кількість поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">10</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6</div>
+          <div class="bar" style="height:60%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4</div>
+          <div class="bar" style="height:40%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2</div>
+          <div class="bar" style="height:20%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6</div>
+          <div class="bar" style="height:60%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3</div>
+          <div class="bar" style="height:30%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-bad_provider_pct">
+      <h3>Погані замовлення (%)</h3>
+      <p class="metric-desc">Відсоток поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">3.3%</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.5%</div>
+          <div class="bar" style="height:45%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.1%</div>
+          <div class="bar" style="height:34%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.6%</div>
+          <div class="bar" style="height:18%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.4%</div>
+          <div class="bar" style="height:74%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.9%</div>
+          <div class="bar" style="height:26%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="section-title">3. Клієнти — увесь бренд</div><p class="section-hint">Сума / середнє по всіх 3 локаціях · 6 місяців</p><div class="charts-grid">
+    <div class="chart-card" id="brand-active_users">
+      <h3>Active Users</h3>
+      <p class="metric-desc">Унікальних клієнтів</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">272</div>
+          <div class="bar" style="height:78%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">350</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">328</div>
+          <div class="bar" style="height:94%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">312</div>
+          <div class="bar" style="height:89%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">227</div>
+          <div class="bar" style="height:65%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">325</div>
+          <div class="bar" style="height:93%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-freq">
+      <h3>Order Frequency</h3>
+      <p class="metric-desc">Замовлень на клієнта</p>
+      <p class="unit">Одиниця: зам. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.13</div>
+          <div class="bar" style="height:97%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.17</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.10</div>
+          <div class="bar" style="height:94%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.10</div>
+          <div class="bar" style="height:94%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.09</div>
+          <div class="bar" style="height:93%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.08</div>
+          <div class="bar" style="height:92%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-new_users">
+      <h3>New Users</h3>
+      <p class="metric-desc">Нові клієнти</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">151</div>
+          <div class="bar" style="height:90%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">167</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">134</div>
+          <div class="bar" style="height:80%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">112</div>
+          <div class="bar" style="height:67%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">74</div>
+          <div class="bar" style="height:44%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">102</div>
+          <div class="bar" style="height:61%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-sessions">
+      <h3>Sessions</h3>
+      <p class="metric-desc">Перегляди в застосунку</p>
+      <p class="unit">Одиниця: сесій · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">20 154</div>
+          <div class="bar" style="height:99%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">20 447</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">18 068</div>
+          <div class="bar" style="height:88%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 544</div>
+          <div class="bar" style="height:61%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 139</div>
+          <div class="bar" style="height:59%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">13 513</div>
+          <div class="bar" style="height:66%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-imp_menu">
+      <h3>Impression → Menu</h3>
+      <p class="metric-desc">Відкрили меню з переглядів</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">6.0%</div>
+          <div class="bar" style="height:68%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">7.4%</div>
+          <div class="bar" style="height:84%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">7.2%</div>
+          <div class="bar" style="height:81%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.8%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.2%</div>
+          <div class="bar" style="height:93%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.4%</div>
+          <div class="bar" style="height:95%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-menu_prod">
+      <h3>Menu → Cart</h3>
+      <p class="metric-desc">Додали в кошик з меню</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">42.0%</div>
+          <div class="bar" style="height:95%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">41.4%</div>
+          <div class="bar" style="height:93%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">42.3%</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">44.5%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">39.4%</div>
+          <div class="bar" style="height:89%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">43.2%</div>
+          <div class="bar" style="height:97%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-rating">
+      <h3>Rating</h3>
+      <p class="metric-desc">Середня оцінка</p>
+      <p class="unit">Одиниця: з 5 · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4.81</div>
+          <div class="bar" style="height:98%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.76</div>
+          <div class="bar" style="height:97%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.64</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.84</div>
+          <div class="bar" style="height:99%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.91</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.85</div>
+          <div class="bar" style="height:99%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="section-title">4. Знижки — увесь бренд</div><p class="section-hint">Сума / середнє по всіх 3 локаціях · 6 місяців</p><div class="charts-grid">
+    <div class="chart-card" id="brand-discounts">
+      <h3>Total Discounts</h3>
+      <p class="metric-desc">Знижки для клієнтів</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">43 868</div>
+          <div class="bar" style="height:85%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">51 312</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">48 870</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">46 916</div>
+          <div class="bar" style="height:91%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29 938</div>
+          <div class="bar" style="height:58%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29 951</div>
+          <div class="bar" style="height:58%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-camp_bolt">
+      <h3>Campaigns by Bolt</h3>
+      <p class="metric-desc">Витрати Bolt на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">18 903</div>
+          <div class="bar" style="height:73%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">25 736</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">25 678</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">18 440</div>
+          <div class="bar" style="height:72%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9 482</div>
+          <div class="bar" style="height:37%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 269</div>
+          <div class="bar" style="height:13%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="brand-camp_merch">
+      <h3>Campaigns by Merchant</h3>
+      <p class="metric-desc">Витрати партнера на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">24 965</div>
+          <div class="bar" style="height:88%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">25 576</div>
+          <div class="bar" style="height:90%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">23 191</div>
+          <div class="bar" style="height:81%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">28 477</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">20 458</div>
+          <div class="bar" style="height:72%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">26 683</div>
+          <div class="bar" style="height:94%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div>
+
+  <div class="section-title">Локації бренду</div>
+  <p class="section-hint">Натисніть «Відкрити деталі» для графіків і порад по локації</p>
+  <div id="locations">
+    
+    <section class="loc-card" id="loc-157668">
+      <div class="loc-row">
+        <div class="loc-row-info">
+          <h2>Шавуха street food вул. Смілянська</h2>
+          <p class="loc-meta">Cherkasy · Cherkasy - Center Zone · ID 157668</p>
+        </div>
+        <button type="button" class="loc-open-btn" data-loc-id="157668" aria-expanded="false">
+          Відкрити деталі
+        </button>
+      </div>
+      <div class="loc-body" id="loc-body-157668" hidden>
+        <div class="loc-section-title">1. Продажі</div><div class="charts-grid">
+    <div class="chart-card" id="c-157668-gross">
+      <h3>Gross Sales</h3>
+      <p class="metric-desc">Сума до знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">63 362</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">54 290</div>
+          <div class="bar" style="height:86%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34 354</div>
+          <div class="bar" style="height:54%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">45 264</div>
+          <div class="bar" style="height:71%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">22 227</div>
+          <div class="bar" style="height:35%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34 785</div>
+          <div class="bar" style="height:55%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-net">
+      <h3>Net Sales</h3>
+      <p class="metric-desc">Сума після знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">47 408</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">41 665</div>
+          <div class="bar" style="height:88%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">26 398</div>
+          <div class="bar" style="height:56%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34 326</div>
+          <div class="bar" style="height:72%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">17 566</div>
+          <div class="bar" style="height:37%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29 365</div>
+          <div class="bar" style="height:62%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-orders">
+      <h3>Delivered Orders</h3>
+      <p class="metric-desc">Доставлені замовлення</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">102</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">101</div>
+          <div class="bar" style="height:99%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">61</div>
+          <div class="bar" style="height:60%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">75</div>
+          <div class="bar" style="height:74%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">40</div>
+          <div class="bar" style="height:39%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">67</div>
+          <div class="bar" style="height:66%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-aov">
+      <h3>AOV (середній чек)</h3>
+      <p class="metric-desc">Середня сума замовлення</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">621</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">538</div>
+          <div class="bar" style="height:87%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">563</div>
+          <div class="bar" style="height:91%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">604</div>
+          <div class="bar" style="height:97%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">556</div>
+          <div class="bar" style="height:90%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">519</div>
+          <div class="bar" style="height:84%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">2. Операційні показники</div><div class="charts-grid">
+    <div class="chart-card" id="c-157668-avail">
+      <h3>Availability</h3>
+      <p class="metric-desc">Частка часу онлайн</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">93.5%</div>
+          <div class="bar" style="height:94%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.5%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.8%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">92.7%</div>
+          <div class="bar" style="height:93%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.8%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.8%</div>
+          <div class="bar" style="height:100%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-accept">
+      <h3>Acceptance Rate</h3>
+      <p class="metric-desc">Прийняття замовлень вчасно</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">98.5%</div>
+          <div class="bar" style="height:99%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-refunds">
+      <h3>Refunds Rate</h3>
+      <p class="metric-desc">Компенсації клієнтам</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.0%</div>
+          <div class="bar" style="height:20%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.0%</div>
+          <div class="bar" style="height:20%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.8%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.5%</div>
+          <div class="bar" style="height:52%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-del_time">
+      <h3>Avg. Delivery Time</h3>
+      <p class="metric-desc">Середній час доставки</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">44.0</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34.2</div>
+          <div class="bar" style="height:78%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">31.3</div>
+          <div class="bar" style="height:71%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">31.9</div>
+          <div class="bar" style="height:72%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">32.8</div>
+          <div class="bar" style="height:75%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">30.6</div>
+          <div class="bar" style="height:70%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-acc_time">
+      <h3>Avg. Acceptance Time</h3>
+      <p class="metric-desc">Середній час прийняття</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.0</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.2</div>
+          <div class="bar" style="height:20%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:30%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.4</div>
+          <div class="bar" style="height:40%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:30%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:30%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-prep_time">
+      <h3>Avg. Prep Time</h3>
+      <p class="metric-desc">Середній час приготування</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">15.5</div>
+          <div class="bar" style="height:93%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">13.9</div>
+          <div class="bar" style="height:84%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15.6</div>
+          <div class="bar" style="height:94%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15.7</div>
+          <div class="bar" style="height:95%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">16.6</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">13.6</div>
+          <div class="bar" style="height:82%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-wait_time">
+      <h3>Courier Wait Time</h3>
+      <p class="metric-desc">Очікування курʼєром</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">3.0</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.8</div>
+          <div class="bar" style="height:60%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.0</div>
+          <div class="bar" style="height:67%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.1</div>
+          <div class="bar" style="height:70%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.2</div>
+          <div class="bar" style="height:73%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.2</div>
+          <div class="bar" style="height:40%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">2a. Погані замовлення з вини закладу</div><div class="charts-grid">
+    <div class="chart-card" id="c-157668-bad_provider_count">
+      <h3>Погані замовлення (шт.)</h3>
+      <p class="metric-desc">Кількість поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">3</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0</div>
+          <div class="bar" style="height:4%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0</div>
+          <div class="bar" style="height:4%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2</div>
+          <div class="bar" style="height:67%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0</div>
+          <div class="bar" style="height:4%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-bad_provider_pct">
+      <h3>Погані замовлення (%)</h3>
+      <p class="metric-desc">Відсоток поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">2.8%</div>
+          <div class="bar" style="height:52%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5.4%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.2%</div>
+          <div class="bar" style="height:78%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">3. Клієнти</div><div class="charts-grid">
+    <div class="chart-card" id="c-157668-active_users">
+      <h3>Active Users</h3>
+      <p class="metric-desc">Унікальних клієнтів</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">89</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">86</div>
+          <div class="bar" style="height:97%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">55</div>
+          <div class="bar" style="height:62%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">62</div>
+          <div class="bar" style="height:70%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">38</div>
+          <div class="bar" style="height:43%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">62</div>
+          <div class="bar" style="height:70%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-freq">
+      <h3>Order Frequency</h3>
+      <p class="metric-desc">Замовлень на клієнта</p>
+      <p class="unit">Одиниця: зам. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.15</div>
+          <div class="bar" style="height:95%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.17</div>
+          <div class="bar" style="height:97%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.11</div>
+          <div class="bar" style="height:92%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.21</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.05</div>
+          <div class="bar" style="height:87%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.08</div>
+          <div class="bar" style="height:89%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-new_users">
+      <h3>New Users</h3>
+      <p class="metric-desc">Нові клієнти</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">53</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">50</div>
+          <div class="bar" style="height:94%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">21</div>
+          <div class="bar" style="height:40%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">27</div>
+          <div class="bar" style="height:51%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">20</div>
+          <div class="bar" style="height:38%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">26</div>
+          <div class="bar" style="height:49%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-sessions">
+      <h3>Sessions</h3>
+      <p class="metric-desc">Перегляди в застосунку</p>
+      <p class="unit">Одиниця: сесій · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">7 777</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 472</div>
+          <div class="bar" style="height:83%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 110</div>
+          <div class="bar" style="height:66%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 663</div>
+          <div class="bar" style="height:47%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4 280</div>
+          <div class="bar" style="height:55%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 877</div>
+          <div class="bar" style="height:50%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-imp_menu">
+      <h3>Impression → Menu</h3>
+      <p class="metric-desc">Відкрили меню з переглядів</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">5.3%</div>
+          <div class="bar" style="height:81%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6.5%</div>
+          <div class="bar" style="height:99%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5.5%</div>
+          <div class="bar" style="height:82%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6.6%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6.1%</div>
+          <div class="bar" style="height:92%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6.5%</div>
+          <div class="bar" style="height:99%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-menu_prod">
+      <h3>Menu → Cart</h3>
+      <p class="metric-desc">Додали в кошик з меню</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">42.4%</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">37.5%</div>
+          <div class="bar" style="height:88%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">36.2%</div>
+          <div class="bar" style="height:85%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">41.6%</div>
+          <div class="bar" style="height:98%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29.1%</div>
+          <div class="bar" style="height:69%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34.6%</div>
+          <div class="bar" style="height:82%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-rating">
+      <h3>Rating</h3>
+      <p class="metric-desc">Середня оцінка</p>
+      <p class="unit">Одиниця: з 5 · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4.55</div>
+          <div class="bar" style="height:91%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.88</div>
+          <div class="bar" style="height:98%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3.59</div>
+          <div class="bar" style="height:72%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5.00</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5.00</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.73</div>
+          <div class="bar" style="height:95%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">4. Знижки</div><div class="charts-grid">
+    <div class="chart-card" id="c-157668-discounts">
+      <h3>Total Discounts</h3>
+      <p class="metric-desc">Знижки для клієнтів</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">15 955</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 625</div>
+          <div class="bar" style="height:79%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">7 957</div>
+          <div class="bar" style="height:50%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">10 938</div>
+          <div class="bar" style="height:69%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4 661</div>
+          <div class="bar" style="height:29%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 421</div>
+          <div class="bar" style="height:34%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-camp_bolt">
+      <h3>Campaigns by Bolt</h3>
+      <p class="metric-desc">Витрати Bolt на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">7 318</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 155</div>
+          <div class="bar" style="height:84%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 803</div>
+          <div class="bar" style="height:52%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4 279</div>
+          <div class="bar" style="height:58%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1 605</div>
+          <div class="bar" style="height:22%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">619</div>
+          <div class="bar" style="height:8%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-157668-camp_merch">
+      <h3>Campaigns by Merchant</h3>
+      <p class="metric-desc">Витрати партнера на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">8 637</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 470</div>
+          <div class="bar" style="height:75%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4 154</div>
+          <div class="bar" style="height:48%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 660</div>
+          <div class="bar" style="height:77%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 057</div>
+          <div class="bar" style="height:35%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4 802</div>
+          <div class="bar" style="height:56%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div>
+        
+    <div class="loc-analysis sev-ok">
+      <div class="loc-analysis-head">
+        <h3>Що помітили і що зробити</h3>
+        <span class="sev-badge">Огляд</span>
+      </div>
+      <p class="bad-explain">Погані замовлення (Bad Orders) — доставлені замовлення, з якими у клієнта виникла проблема: затримка з вини закладу, неповний склад, холодна/неякісна їжа тощо. Високий показник знижує рейтинг і зменшує шанс повторного замовлення.</p>
+      <div class="analysis-kpi">
+        <span>Замовлення: <b>40</b> → <b>67</b></span>
+        <span>Доступність: <b>99.8%</b> → <b>99.8%</b></span>
+        <span>Рейтинг (6 міс.): <b>4.64</b></span>
+        <span>Компенсації: <b>2.5%</b> → <b>0.0%</b></span>
+        <span>Погані замовлення: <b>0</b> · <b>0.0%</b></span>
+      </div>
+      <h4>Що відбувається</h4>
+      <ul><li>Зростання замовлень: 40 → 67 (+68%).</li></ul>
+      <h4>Поради</h4>
+      <ul class="advice"><li>Підтримуйте поточний рівень.</li></ul>
+    </div>
+      </div>
+    </section>
+
+    <section class="loc-card" id="loc-91332">
+      <div class="loc-row">
+        <div class="loc-row-info">
+          <h2>Шавуха Team вул. Припортова</h2>
+          <p class="loc-meta">Cherkasy · Cherkasy - Mytnytsia Zone · ID 91332</p>
+        </div>
+        <button type="button" class="loc-open-btn" data-loc-id="91332" aria-expanded="false">
+          Відкрити деталі
+        </button>
+      </div>
+      <div class="loc-body" id="loc-body-91332" hidden>
+        <div class="loc-section-title">1. Продажі</div><div class="charts-grid">
+    <div class="chart-card" id="c-91332-gross">
+      <h3>Gross Sales</h3>
+      <p class="metric-desc">Сума до знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">73 470</div>
+          <div class="bar" style="height:71%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">103 360</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">97 023</div>
+          <div class="bar" style="height:94%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">83 866</div>
+          <div class="bar" style="height:81%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">72 618</div>
+          <div class="bar" style="height:70%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">87 920</div>
+          <div class="bar" style="height:85%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-net">
+      <h3>Net Sales</h3>
+      <p class="metric-desc">Сума після знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">55 857</div>
+          <div class="bar" style="height:72%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">77 515</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">73 564</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">63 301</div>
+          <div class="bar" style="height:82%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">56 350</div>
+          <div class="bar" style="height:73%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">72 398</div>
+          <div class="bar" style="height:93%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-orders">
+      <h3>Delivered Orders</h3>
+      <p class="metric-desc">Доставлені замовлення</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">129</div>
+          <div class="bar" style="height:63%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">204</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">182</div>
+          <div class="bar" style="height:89%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">155</div>
+          <div class="bar" style="height:76%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">133</div>
+          <div class="bar" style="height:65%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">185</div>
+          <div class="bar" style="height:91%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-aov">
+      <h3>AOV (середній чек)</h3>
+      <p class="metric-desc">Середня сума замовлення</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">570</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">507</div>
+          <div class="bar" style="height:89%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">533</div>
+          <div class="bar" style="height:94%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">541</div>
+          <div class="bar" style="height:95%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">546</div>
+          <div class="bar" style="height:96%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">475</div>
+          <div class="bar" style="height:83%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">2. Операційні показники</div><div class="charts-grid">
+    <div class="chart-card" id="c-91332-avail">
+      <h3>Availability</h3>
+      <p class="metric-desc">Частка часу онлайн</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">94.2%</div>
+          <div class="bar" style="height:97%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">96.4%</div>
+          <div class="bar" style="height:99%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">96.9%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">86.5%</div>
+          <div class="bar" style="height:89%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">96.2%</div>
+          <div class="bar" style="height:99%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">95.6%</div>
+          <div class="bar" style="height:99%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-accept">
+      <h3>Acceptance Rate</h3>
+      <p class="metric-desc">Прийняття замовлень вчасно</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">96.3%</div>
+          <div class="bar" style="height:96%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">98.1%</div>
+          <div class="bar" style="height:98%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">98.9%</div>
+          <div class="bar" style="height:99%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-refunds">
+      <h3>Refunds Rate</h3>
+      <p class="metric-desc">Компенсації клієнтам</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.0%</div>
+          <div class="bar" style="height:64%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.7%</div>
+          <div class="bar" style="height:43%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.5%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.5%</div>
+          <div class="bar" style="height:35%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-del_time">
+      <h3>Avg. Delivery Time</h3>
+      <p class="metric-desc">Середній час доставки</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">36.4</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">33.1</div>
+          <div class="bar" style="height:91%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">27.8</div>
+          <div class="bar" style="height:76%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29.2</div>
+          <div class="bar" style="height:80%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">29.4</div>
+          <div class="bar" style="height:81%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">26.8</div>
+          <div class="bar" style="height:74%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-acc_time">
+      <h3>Avg. Acceptance Time</h3>
+      <p class="metric-desc">Середній час прийняття</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">0.6</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.6</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:50%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:50%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:50%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:50%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-prep_time">
+      <h3>Avg. Prep Time</h3>
+      <p class="metric-desc">Середній час приготування</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">15.8</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15.7</div>
+          <div class="bar" style="height:99%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">14.3</div>
+          <div class="bar" style="height:91%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15.1</div>
+          <div class="bar" style="height:96%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">14.9</div>
+          <div class="bar" style="height:94%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12.3</div>
+          <div class="bar" style="height:78%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-wait_time">
+      <h3>Courier Wait Time</h3>
+      <p class="metric-desc">Очікування курʼєром</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.4</div>
+          <div class="bar" style="height:58%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.4</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.2</div>
+          <div class="bar" style="height:92%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.9</div>
+          <div class="bar" style="height:79%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.3</div>
+          <div class="bar" style="height:96%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.4</div>
+          <div class="bar" style="height:58%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">2a. Погані замовлення з вини закладу</div><div class="charts-grid">
+    <div class="chart-card" id="c-91332-bad_provider_count">
+      <h3>Погані замовлення (шт.)</h3>
+      <p class="metric-desc">Кількість поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0</div>
+          <div class="bar" style="height:4%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1</div>
+          <div class="bar" style="height:25%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2</div>
+          <div class="bar" style="height:50%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1</div>
+          <div class="bar" style="height:25%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-bad_provider_pct">
+      <h3>Погані замовлення (%)</h3>
+      <p class="metric-desc">Відсоток поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">3.2%</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.9%</div>
+          <div class="bar" style="height:59%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.6%</div>
+          <div class="bar" style="height:20%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.3%</div>
+          <div class="bar" style="height:42%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.6%</div>
+          <div class="bar" style="height:19%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">3. Клієнти</div><div class="charts-grid">
+    <div class="chart-card" id="c-91332-active_users">
+      <h3>Active Users</h3>
+      <p class="metric-desc">Унікальних клієнтів</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">111</div>
+          <div class="bar" style="height:64%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">169</div>
+          <div class="bar" style="height:98%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">172</div>
+          <div class="bar" style="height:99%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">147</div>
+          <div class="bar" style="height:85%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">120</div>
+          <div class="bar" style="height:69%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">173</div>
+          <div class="bar" style="height:100%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-freq">
+      <h3>Order Frequency</h3>
+      <p class="metric-desc">Замовлень на клієнта</p>
+      <p class="unit">Одиниця: зам. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.16</div>
+          <div class="bar" style="height:96%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.21</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.06</div>
+          <div class="bar" style="height:88%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.05</div>
+          <div class="bar" style="height:87%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.11</div>
+          <div class="bar" style="height:92%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.07</div>
+          <div class="bar" style="height:88%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-new_users">
+      <h3>New Users</h3>
+      <p class="metric-desc">Нові клієнти</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">54</div>
+          <div class="bar" style="height:72%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">75</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">67</div>
+          <div class="bar" style="height:89%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">48</div>
+          <div class="bar" style="height:64%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">37</div>
+          <div class="bar" style="height:49%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">46</div>
+          <div class="bar" style="height:61%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-sessions">
+      <h3>Sessions</h3>
+      <p class="metric-desc">Перегляди в застосунку</p>
+      <p class="unit">Одиниця: сесій · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">6 978</div>
+          <div class="bar" style="height:83%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8 398</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">7 505</div>
+          <div class="bar" style="height:89%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 383</div>
+          <div class="bar" style="height:64%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4 725</div>
+          <div class="bar" style="height:56%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 312</div>
+          <div class="bar" style="height:75%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-imp_menu">
+      <h3>Impression → Menu</h3>
+      <p class="metric-desc">Відкрили меню з переглядів</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">6.6%</div>
+          <div class="bar" style="height:67%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.1%</div>
+          <div class="bar" style="height:82%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.1%</div>
+          <div class="bar" style="height:83%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9.7%</div>
+          <div class="bar" style="height:99%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9.8%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9.3%</div>
+          <div class="bar" style="height:95%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-menu_prod">
+      <h3>Menu → Cart</h3>
+      <p class="metric-desc">Додали в кошик з меню</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">44.7%</div>
+          <div class="bar" style="height:97%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">46.1%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">45.9%</div>
+          <div class="bar" style="height:99%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">46.2%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">46.2%</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">45.2%</div>
+          <div class="bar" style="height:98%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-rating">
+      <h3>Rating</h3>
+      <p class="metric-desc">Середня оцінка</p>
+      <p class="unit">Одиниця: з 5 · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4.88</div>
+          <div class="bar" style="height:98%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.72</div>
+          <div class="bar" style="height:95%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.75</div>
+          <div class="bar" style="height:95%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.74</div>
+          <div class="bar" style="height:95%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.90</div>
+          <div class="bar" style="height:98%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.98</div>
+          <div class="bar" style="height:100%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">4. Знижки</div><div class="charts-grid">
+    <div class="chart-card" id="c-91332-discounts">
+      <h3>Total Discounts</h3>
+      <p class="metric-desc">Знижки для клієнтів</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">17 613</div>
+          <div class="bar" style="height:68%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">25 845</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">23 460</div>
+          <div class="bar" style="height:91%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">20 556</div>
+          <div class="bar" style="height:80%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">16 268</div>
+          <div class="bar" style="height:63%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15 522</div>
+          <div class="bar" style="height:60%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-camp_bolt">
+      <h3>Campaigns by Bolt</h3>
+      <p class="metric-desc">Витрати Bolt на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">7 166</div>
+          <div class="bar" style="height:55%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">13 099</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 547</div>
+          <div class="bar" style="height:96%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8 174</div>
+          <div class="bar" style="height:62%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 283</div>
+          <div class="bar" style="height:40%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1 864</div>
+          <div class="bar" style="height:14%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-91332-camp_merch">
+      <h3>Campaigns by Merchant</h3>
+      <p class="metric-desc">Витрати партнера на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">10 447</div>
+          <div class="bar" style="height:76%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 746</div>
+          <div class="bar" style="height:93%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">10 913</div>
+          <div class="bar" style="height:80%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 382</div>
+          <div class="bar" style="height:91%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">10 986</div>
+          <div class="bar" style="height:80%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">13 658</div>
+          <div class="bar" style="height:100%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div>
+        
+    <div class="loc-analysis sev-ok">
+      <div class="loc-analysis-head">
+        <h3>Що помітили і що зробити</h3>
+        <span class="sev-badge">Огляд</span>
+      </div>
+      <p class="bad-explain">Погані замовлення (Bad Orders) — доставлені замовлення, з якими у клієнта виникла проблема: затримка з вини закладу, неповний склад, холодна/неякісна їжа тощо. Високий показник знижує рейтинг і зменшує шанс повторного замовлення.</p>
+      <div class="analysis-kpi">
+        <span>Замовлення: <b>133</b> → <b>185</b></span>
+        <span>Доступність: <b>96.2%</b> → <b>95.6%</b></span>
+        <span>Рейтинг (6 міс.): <b>4.81</b></span>
+        <span>Компенсації: <b>1.5%</b> → <b>0.5%</b></span>
+        <span>Погані замовлення: <b>1</b> · <b>0.6%</b></span>
+      </div>
+      <h4>Що відбувається</h4>
+      <ul><li>Зростання замовлень: 133 → 185 (+39%).</li></ul>
+      <h4>Поради</h4>
+      <ul class="advice"><li>Підтримуйте поточний рівень.</li></ul>
+    </div>
+      </div>
+    </section>
+
+    <section class="loc-card" id="loc-93073">
+      <div class="loc-row">
+        <div class="loc-row-info">
+          <h2>Шавуха Team вул. Хрещатик</h2>
+          <p class="loc-meta">Cherkasy · Cherkasy - Center Zone · ID 93073</p>
+        </div>
+        <button type="button" class="loc-open-btn" data-loc-id="93073" aria-expanded="false">
+          Відкрити деталі
+        </button>
+      </div>
+      <div class="loc-body" id="loc-body-93073" hidden>
+        <div class="loc-section-title">1. Продажі</div><div class="charts-grid">
+    <div class="chart-card" id="c-93073-gross">
+      <h3>Gross Sales</h3>
+      <p class="metric-desc">Сума до знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">42 511</div>
+          <div class="bar" style="height:61%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">54 708</div>
+          <div class="bar" style="height:78%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">70 031</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">65 950</div>
+          <div class="bar" style="height:94%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">42 745</div>
+          <div class="bar" style="height:61%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">52 483</div>
+          <div class="bar" style="height:75%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-net">
+      <h3>Net Sales</h3>
+      <p class="metric-desc">Сума після знижок</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">32 211</div>
+          <div class="bar" style="height:61%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">41 865</div>
+          <div class="bar" style="height:80%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">52 579</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">50 528</div>
+          <div class="bar" style="height:96%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">33 736</div>
+          <div class="bar" style="height:64%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">43 474</div>
+          <div class="bar" style="height:83%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-orders">
+      <h3>Delivered Orders</h3>
+      <p class="metric-desc">Доставлені замовлення</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">76</div>
+          <div class="bar" style="height:65%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">103</div>
+          <div class="bar" style="height:88%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">117</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">112</div>
+          <div class="bar" style="height:96%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">75</div>
+          <div class="bar" style="height:64%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">98</div>
+          <div class="bar" style="height:84%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-aov">
+      <h3>AOV (середній чек)</h3>
+      <p class="metric-desc">Середня сума замовлення</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">559</div>
+          <div class="bar" style="height:93%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">531</div>
+          <div class="bar" style="height:89%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">599</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">589</div>
+          <div class="bar" style="height:98%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">570</div>
+          <div class="bar" style="height:95%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">536</div>
+          <div class="bar" style="height:89%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">2. Операційні показники</div><div class="charts-grid">
+    <div class="chart-card" id="c-93073-avail">
+      <h3>Availability</h3>
+      <p class="metric-desc">Частка часу онлайн</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">95.3%</div>
+          <div class="bar" style="height:98%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">96.9%</div>
+          <div class="bar" style="height:99%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">97.7%</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">86.4%</div>
+          <div class="bar" style="height:88%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">94.2%</div>
+          <div class="bar" style="height:96%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">94.6%</div>
+          <div class="bar" style="height:97%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-accept">
+      <h3>Acceptance Rate</h3>
+      <p class="metric-desc">Прийняття замовлень вчасно</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">96.2%</div>
+          <div class="bar" style="height:96%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">98.3%</div>
+          <div class="bar" style="height:98%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">99.1%</div>
+          <div class="bar" style="height:99%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">98.7%</div>
+          <div class="bar" style="height:99%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">100.0%</div>
+          <div class="bar" style="height:100%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-refunds">
+      <h3>Refunds Rate</h3>
+      <p class="metric-desc">Компенсації клієнтам</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">0.0%</div>
+          <div class="bar" style="height:4%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3.9%</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.8%</div>
+          <div class="bar" style="height:22%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.9%</div>
+          <div class="bar" style="height:23%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.3%</div>
+          <div class="bar" style="height:33%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.0%</div>
+          <div class="bar" style="height:52%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-del_time">
+      <h3>Avg. Delivery Time</h3>
+      <p class="metric-desc">Середній час доставки</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">39.6</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">36.4</div>
+          <div class="bar" style="height:92%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">34.6</div>
+          <div class="bar" style="height:87%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">35.1</div>
+          <div class="bar" style="height:89%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">36.9</div>
+          <div class="bar" style="height:93%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">33.4</div>
+          <div class="bar" style="height:84%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-acc_time">
+      <h3>Avg. Acceptance Time</h3>
+      <p class="metric-desc">Середній час прийняття</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:13%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:13%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:13%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:13%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.3</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.3</div>
+          <div class="bar" style="height:13%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-prep_time">
+      <h3>Avg. Prep Time</h3>
+      <p class="metric-desc">Середній час приготування</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">20.6</div>
+          <div class="bar" style="height:98%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">16.9</div>
+          <div class="bar" style="height:80%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">18.5</div>
+          <div class="bar" style="height:88%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">18.0</div>
+          <div class="bar" style="height:86%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">21.0</div>
+          <div class="bar" style="height:100%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">18.2</div>
+          <div class="bar" style="height:87%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-wait_time">
+      <h3>Courier Wait Time</h3>
+      <p class="metric-desc">Очікування курʼєром</p>
+      <p class="unit">Одиниця: хв · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.6</div>
+          <div class="bar" style="height:80%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.5</div>
+          <div class="bar" style="height:75%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.0</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.5</div>
+          <div class="bar" style="height:75%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.8</div>
+          <div class="bar" style="height:90%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.8</div>
+          <div class="bar" style="height:90%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">2a. Погані замовлення з вини закладу</div><div class="charts-grid">
+    <div class="chart-card" id="c-93073-bad_provider_count">
+      <h3>Погані замовлення (шт.)</h3>
+      <p class="metric-desc">Кількість поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: шт. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">3</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2</div>
+          <div class="bar" style="height:67%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1</div>
+          <div class="bar" style="height:33%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1</div>
+          <div class="bar" style="height:33%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2</div>
+          <div class="bar" style="height:67%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2</div>
+          <div class="bar" style="height:67%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-bad_provider_pct">
+      <h3>Погані замовлення (%)</h3>
+      <p class="metric-desc">Відсоток поганих замовлень з вини закладу</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4.0%</div>
+          <div class="bar" style="height:100%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.9%</div>
+          <div class="bar" style="height:48%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.9%</div>
+          <div class="bar" style="height:23%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">0.9%</div>
+          <div class="bar" style="height:22%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.4%</div>
+          <div class="bar" style="height:59%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2.2%</div>
+          <div class="bar" style="height:54%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">3. Клієнти</div><div class="charts-grid">
+    <div class="chart-card" id="c-93073-active_users">
+      <h3>Active Users</h3>
+      <p class="metric-desc">Унікальних клієнтів</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">72</div>
+          <div class="bar" style="height:70%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">95</div>
+          <div class="bar" style="height:92%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">101</div>
+          <div class="bar" style="height:98%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">103</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">69</div>
+          <div class="bar" style="height:67%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">90</div>
+          <div class="bar" style="height:87%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-freq">
+      <h3>Order Frequency</h3>
+      <p class="metric-desc">Замовлень на клієнта</p>
+      <p class="unit">Одиниця: зам. · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1.06</div>
+          <div class="bar" style="height:91%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.08</div>
+          <div class="bar" style="height:93%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.16</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.09</div>
+          <div class="bar" style="height:94%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.09</div>
+          <div class="bar" style="height:94%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1.09</div>
+          <div class="bar" style="height:94%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-new_users">
+      <h3>New Users</h3>
+      <p class="metric-desc">Нові клієнти</p>
+      <p class="unit">Одиниця: осіб · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">44</div>
+          <div class="bar" style="height:96%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">42</div>
+          <div class="bar" style="height:91%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">46</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">37</div>
+          <div class="bar" style="height:80%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">17</div>
+          <div class="bar" style="height:37%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">30</div>
+          <div class="bar" style="height:65%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-sessions">
+      <h3>Sessions</h3>
+      <p class="metric-desc">Перегляди в застосунку</p>
+      <p class="unit">Одиниця: сесій · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">5 399</div>
+          <div class="bar" style="height:97%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 577</div>
+          <div class="bar" style="height:100%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 453</div>
+          <div class="bar" style="height:98%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 498</div>
+          <div class="bar" style="height:63%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 134</div>
+          <div class="bar" style="height:56%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">3 324</div>
+          <div class="bar" style="height:60%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-imp_menu">
+      <h3>Impression → Menu</h3>
+      <p class="metric-desc">Відкрили меню з переглядів</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">6.1%</div>
+          <div class="bar" style="height:63%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">7.2%</div>
+          <div class="bar" style="height:75%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">7.4%</div>
+          <div class="bar" style="height:77%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9.7%</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.7%</div>
+          <div class="bar" style="height:90%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8.7%</div>
+          <div class="bar" style="height:90%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-menu_prod">
+      <h3>Menu → Cart</h3>
+      <p class="metric-desc">Додали в кошик з меню</p>
+      <p class="unit">Одиниця: % · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">38.0%</div>
+          <div class="bar" style="height:77%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">38.7%</div>
+          <div class="bar" style="height:78%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">43.0%</div>
+          <div class="bar" style="height:87%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">44.8%</div>
+          <div class="bar" style="height:91%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">43.0%</div>
+          <div class="bar" style="height:87%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">49.5%</div>
+          <div class="bar" style="height:100%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-rating">
+      <h3>Rating</h3>
+      <p class="metric-desc">Середня оцінка</p>
+      <p class="unit">Одиниця: з 5 · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4.93</div>
+          <div class="bar" style="height:99%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.76</div>
+          <div class="bar" style="height:96%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.97</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.88</div>
+          <div class="bar" style="height:98%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.87</div>
+          <div class="bar" style="height:98%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">4.72</div>
+          <div class="bar" style="height:95%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div><div class="loc-section-title">4. Знижки</div><div class="charts-grid">
+    <div class="chart-card" id="c-93073-discounts">
+      <h3>Total Discounts</h3>
+      <p class="metric-desc">Знижки для клієнтів</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">10 300</div>
+          <div class="bar" style="height:59%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">12 842</div>
+          <div class="bar" style="height:74%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">17 453</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">15 422</div>
+          <div class="bar" style="height:88%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9 009</div>
+          <div class="bar" style="height:52%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9 008</div>
+          <div class="bar" style="height:52%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-camp_bolt">
+      <h3>Campaigns by Bolt</h3>
+      <p class="metric-desc">Витрати Bolt на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">4 419</div>
+          <div class="bar" style="height:47%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 482</div>
+          <div class="bar" style="height:69%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9 328</div>
+          <div class="bar" style="height:100%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">5 987</div>
+          <div class="bar" style="height:64%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">2 594</div>
+          <div class="bar" style="height:28%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">786</div>
+          <div class="bar" style="height:8%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div>
+    <div class="chart-card" id="c-93073-camp_merch">
+      <h3>Campaigns by Merchant</h3>
+      <p class="metric-desc">Витрати партнера на промо</p>
+      <p class="unit">Одиниця: ₴ · 6 місяців</p>
+      <div class="bars-scroll"><div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">5 881</div>
+          <div class="bar" style="height:62%;background:#0a5c38"></div>
+          <div class="bar-lbl">Січ 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 360</div>
+          <div class="bar" style="height:67%;background:#0d8a52"></div>
+          <div class="bar-lbl">Лют 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8 124</div>
+          <div class="bar" style="height:86%;background:#12a35f"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">9 435</div>
+          <div class="bar" style="height:100%;background:#34D186"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6 415</div>
+          <div class="bar" style="height:68%;background:#5cdb9a"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">8 223</div>
+          <div class="bar" style="height:87%;background:#7ee0ad"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div></div></div>
+    </div></div>
+        
+    <div class="loc-analysis sev-ok">
+      <div class="loc-analysis-head">
+        <h3>Що помітили і що зробити</h3>
+        <span class="sev-badge">Огляд</span>
+      </div>
+      <p class="bad-explain">Погані замовлення (Bad Orders) — доставлені замовлення, з якими у клієнта виникла проблема: затримка з вини закладу, неповний склад, холодна/неякісна їжа тощо. Високий показник знижує рейтинг і зменшує шанс повторного замовлення.</p>
+      <div class="analysis-kpi">
+        <span>Замовлення: <b>75</b> → <b>98</b></span>
+        <span>Доступність: <b>94.2%</b> → <b>94.6%</b></span>
+        <span>Рейтинг (6 міс.): <b>4.85</b></span>
+        <span>Компенсації: <b>1.3%</b> → <b>2.0%</b></span>
+        <span>Погані замовлення: <b>2</b> · <b>2.2%</b></span>
+      </div>
+      <h4>Що відбувається</h4>
+      <ul><li>Зростання замовлень: 75 → 98 (+31%).</li></ul>
+      <h4>Поради</h4>
+      <ul class="advice"><li>Підтримуйте поточний рівень.</li></ul>
+    </div>
+      </div>
+    </section>
+  </div>
+</div>
+
+<footer class="footer">
+  <span>Bolt Food</span> · MBR SHAVUCHA TEAM · Автооновлення: 1-го числа кожного місяця о 14:00 (Київ) ·
+  <a href="https://github.com/marharytazhytnyk-create/Partner-s-Pages/tree/main/MBR%20SHAVUCHA%20TEAM" style="color:var(--green)">GitHub</a>
+</footer>
+
+<script>
+(function() {
+  document.querySelectorAll('.loc-open-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const pid = btn.dataset.locId;
+      const body = document.getElementById('loc-body-' + pid);
+      const open = body.hidden;
+      body.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.textContent = open ? 'Згорнути' : 'Відкрити деталі';
+      if (open) document.getElementById('loc-' + pid).scrollIntoView({behavior:'smooth',block:'start'});
+    });
+  });
+})();
+</script>
+</body>
+</html>
