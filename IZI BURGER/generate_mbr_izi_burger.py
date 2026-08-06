@@ -244,7 +244,8 @@ def fetch_data() -> dict:
         ]
         print(f"  локацій: {len(providers)}, період: {global_start} → {global_end}")
 
-        # Monthly aggregation from weekly fact table
+        # Monthly grain: weekly rows straddle month boundaries, so a month would get
+        # 4 or 5 whole weeks depending on where Mondays fall. Use the monthly fact table.
         fact_rows = run_query(ctx, f"""
         SELECT
             f.provider_id,
@@ -278,7 +279,7 @@ def fetch_data() -> dict:
             SUM(f.total_campaign_spend_bolt) AS camp_bolt,
             SUM(f.total_campaign_spend_provider) AS camp_merch,
             SUM(f.provider_rating_per_order_weight) AS rating_weight
-        FROM ng_delivery_spark.fact_provider_weekly f
+        FROM ng_delivery_spark.fact_provider_monthly f
         JOIN ng_delivery_spark.dim_provider_v2 d ON f.provider_id = d.provider_id
         WHERE f.provider_id IN ({pids_sql})
           AND f.metric_timestamp_partition >= '{global_start}'
@@ -294,7 +295,7 @@ def fetch_data() -> dict:
             SUM(provider_deliveries_unique_user_count) AS active_users
         FROM ng_delivery_spark.int_provider_metrics_non_additive
         WHERE entity_id IN ({pids_str})
-          AND timeframe_name = 'week'
+          AND timeframe_name = 'month'
           AND metric_timestamp_partition >= '{global_start}'
           AND metric_timestamp_partition <= '{global_end}'
         GROUP BY 1, 2
