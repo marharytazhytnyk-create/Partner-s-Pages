@@ -3,45 +3,176 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>IZI BURGER — Звіти</title>
+  <title>IZI BURGER — звіти Bolt Food</title>
   <style>
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background: #f5f5f7; color: #1d1d1f; min-height: 100vh; padding: 48px 32px; }
-    header { margin-bottom: 32px; }
-    .header-info h1 { font-size: 1.6rem; font-weight: 700; }
-    .header-info p { margin-top: 4px; color: #6e6e73; font-size: 0.88rem; }
-    .toolbar { display: flex; align-items: center; gap: 8px; margin-bottom: 20px;
-      padding-bottom: 16px; border-bottom: 1px solid #d2d2d7; color: #6e6e73; font-size: 0.82rem; }
-    .toolbar span { color: #1d1d1f; font-weight: 500; }
-    .file-list { display: flex; flex-direction: column; gap: 2px; }
-    .file-row { display: flex; align-items: center; gap: 14px; padding: 10px 12px;
-      border-radius: 8px; text-decoration: none; color: #1d1d1f; transition: background 0.15s; }
-    .file-row:hover { background: rgba(0,0,0,0.05); }
-    .file-icon { font-size: 1.5rem; flex-shrink: 0; }
-    .file-info { flex: 1; }
-    .file-name { font-size: 0.95rem; font-weight: 500; }
-    .file-meta { font-size: 0.78rem; color: #6e6e73; margin-top: 2px; }
-    .file-arrow { color: #aeaeb2; font-size: 0.9rem; }
+
+    :root {
+      --green: #34d186;
+      --green-dark: #0d8a52;
+      --ink: #1a1d1f;
+      --gray: #6b7280;
+      --line: #e8eaed;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+      background: #f7f8fa;
+      color: var(--ink);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      padding: 64px 24px;
+      -webkit-font-smoothing: antialiased;
+    }
+
+    .wrap { width: 100%; max-width: 620px; }
+
+    header { margin-bottom: 36px; }
+
+    .brand {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 6px 12px;
+      border-radius: 999px;
+      background: rgba(52, 209, 134, 0.12);
+      color: var(--green-dark);
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+      margin-bottom: 18px;
+    }
+
+    .brand::before {
+      content: "";
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .subtitle {
+      margin-top: 8px;
+      color: var(--gray);
+      font-size: 0.95rem;
+    }
+
+    .card {
+      display: flex;
+      align-items: center;
+      gap: 18px;
+      padding: 24px;
+      background: #fff;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      text-decoration: none;
+      color: inherit;
+      box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+      transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+    }
+
+    .card:hover {
+      border-color: rgba(52, 209, 134, 0.55);
+      box-shadow: 0 8px 24px rgba(16, 24, 40, 0.09);
+      transform: translateY(-2px);
+    }
+
+    .card-icon {
+      flex-shrink: 0;
+      width: 52px;
+      height: 52px;
+      border-radius: 13px;
+      background: linear-gradient(135deg, #34d186, #0d8a52);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .card-icon svg { width: 26px; height: 26px; }
+
+    .card-body { flex: 1; min-width: 0; }
+
+    .card-title {
+      font-size: 1.08rem;
+      font-weight: 650;
+      letter-spacing: -0.01em;
+    }
+
+    .card-desc {
+      margin-top: 5px;
+      color: var(--gray);
+      font-size: 0.88rem;
+      line-height: 1.45;
+    }
+
+    .card-arrow {
+      flex-shrink: 0;
+      color: #c4c8cd;
+      font-size: 1.5rem;
+      line-height: 1;
+      transition: color 0.18s ease, transform 0.18s ease;
+    }
+
+    .card:hover .card-arrow {
+      color: var(--green-dark);
+      transform: translateX(3px);
+    }
+
+    footer {
+      margin-top: 28px;
+      padding-top: 20px;
+      border-top: 1px solid var(--line);
+      color: #9aa0a6;
+      font-size: 0.8rem;
+      line-height: 1.6;
+    }
+
+    @media (max-width: 520px) {
+      body { padding: 40px 18px; }
+      h1 { font-size: 1.6rem; }
+      .card { padding: 20px; gap: 14px; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="header-info">
-      <h1>📁 IZI BURGER</h1>
-      <p>Bolt Food · Kharkiv · Щомісячні звіти · 3 локації</p>
-    </div>
-  </header>
-  <div class="toolbar">Файли: <span>1</span></div>
-  <div class="file-list">
-    <a class="file-row" href="MBR_IziBurger.html">
-      <div class="file-icon">📊</div>
-      <div class="file-info">
-        <div class="file-name">MBR IZI BURGER</div>
-        <div class="file-meta">Monthly Business Report · Bolt Food · Kharkiv</div>
+
+  <div class="wrap">
+
+    <header>
+      <div class="brand">Bolt Food</div>
+      <h1>IZI BURGER</h1>
+      <p class="subtitle">Харків · 3 локації · щомісячна аналітика партнера</p>
+    </header>
+
+    <a class="card" href="MBR_IziBurger.html">
+      <div class="card-icon">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <rect x="3" y="13" width="4" height="8" rx="1.2" fill="#fff" opacity="0.75"/>
+          <rect x="10" y="8" width="4" height="13" rx="1.2" fill="#fff"/>
+          <rect x="17" y="4" width="4" height="17" rx="1.2" fill="#fff" opacity="0.9"/>
+        </svg>
       </div>
-      <div class="file-arrow">›</div>
+      <div class="card-body">
+        <div class="card-title">Місячний звіт (MBR)</div>
+        <div class="card-desc">Продажі, операційні показники, клієнти та знижки за останні 6 місяців — по бренду й окремо по кожній локації</div>
+      </div>
+      <div class="card-arrow">›</div>
     </a>
+
+    <footer>
+      Звіт оновлюється автоматично на початку кожного місяця.<br />
+      Питання щодо показників — до вашого менеджера Bolt Food.
+    </footer>
+
   </div>
+
 </body>
 </html>
