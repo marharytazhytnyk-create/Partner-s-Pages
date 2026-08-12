@@ -20,8 +20,10 @@ from pathlib import Path
 import requests
 
 # ─── CONFIG ────────────────────────────────────────────────────────────────────
-DATABRICKS_HOST = os.getenv("DATABRICKS_HOST", "https://bolt-incentives.cloud.databricks.com")
-CLUSTER_ID      = os.getenv("DATABRICKS_CLUSTER_ID", "0221-081903-9ag4bh69")
+# `or` rather than a getenv default: CI passes these as empty strings when the
+# repository secret is unset, and an empty host builds a scheme-less URL.
+DATABRICKS_HOST = os.getenv("DATABRICKS_HOST") or "https://bolt-incentives.cloud.databricks.com"
+CLUSTER_ID      = os.getenv("DATABRICKS_CLUSTER_ID") or "0221-081903-9ag4bh69"
 N_MONTHS        = 8
 SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Mavra.html"
