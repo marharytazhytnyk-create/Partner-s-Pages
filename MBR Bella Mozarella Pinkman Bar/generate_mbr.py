@@ -234,45 +234,61 @@ def fetch_brand_data(brand: dict) -> dict:
             ORDER BY provider_name
         """)
 
-        # Monthly metrics per location (aggregate weekly → monthly)
+        # Monthly grain: a weekly row is stamped with its Monday and lands whole in that
+        # Monday's month, so a month collected 4 or 5 entire weeks depending on where the
+        # Mondays fell — July 2026 meant 6 Jul — 2 Aug instead of 1—31 Jul. The monthly
+        # fact table gives calendar months, 1st to last day.
         fact_rows = run_query(ctx, f"""
             SELECT
                 f.provider_id,
                 d.provider_name,
-                DATE_FORMAT(DATE_TRUNC('month', f.metric_timestamp_local), 'yyyy-MM-dd') AS mstart,
+                DATE_FORMAT(DATE_TRUNC('month', f.metric_timestamp_partition), 'yyyy-MM-dd') AS mstart,
                 SUM(f.delivered_orders_count)                                        AS orders,
                 SUM(f.total_gmv_before_discounts)                                    AS gross,
                 SUM(f.total_gmv_after_discounts)                                     AS net,
-                SUM(f.delivered_orders_count * f.provider_active_rate_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS avail,
-                SUM(f.delivered_orders_count * f.provider_acceptance_rate_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS accept,
-                SUM(f.delivered_orders_count * f.customer_refunded_order_rate_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS refunds,
-                SUM(f.delivered_orders_count * f.order_total_minutes_per_order_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS del_time,
-                SUM(f.delivered_orders_count * f.provider_acceptance_minutes_per_order_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS acc_time,
-                SUM(f.delivered_orders_count * f.provider_processing_minutes_per_order_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS prep_time,
+                SUM(f.provider_active_rate_value * f.provider_active_rate_weight)
+                    / NULLIF(SUM(f.provider_active_rate_weight), 0) * 100            AS avail,
+                SUM(f.provider_acceptance_rate_value * f.provider_acceptance_rate_weight)
+                    / NULLIF(SUM(f.provider_acceptance_rate_weight), 0) * 100        AS accept,
+                SUM(f.customer_refunded_order_rate_value * f.customer_refunded_order_rate_weight)
+                    / NULLIF(SUM(f.customer_refunded_order_rate_weight), 0) * 100    AS refunds,
+                SUM(f.order_total_minutes_per_order_value * f.order_total_minutes_per_order_weight)
+                    / NULLIF(SUM(f.order_total_minutes_per_order_weight), 0)         AS del_time,
+                SUM(f.provider_acceptance_minutes_per_order_value * f.provider_acceptance_minutes_per_order_weight)
+                    / NULLIF(SUM(f.provider_acceptance_minutes_per_order_weight), 0) AS acc_time,
+                SUM(f.provider_preparation_minutes_per_order_value * f.provider_preparation_minutes_per_order_weight)
+                    / NULLIF(SUM(f.provider_preparation_minutes_per_order_weight), 0) AS prep_time,
                 SUM(f.users_activated_vendor_count)                                  AS new_users,
                 SUM(f.provider_impressions_sessions_count)                           AS sessions,
                 SUM(f.provider_menu_viewed_sessions_count)                           AS menu_views,
-                SUM(f.delivered_orders_count * f.provider_product_added_from_menu_viewed_rate_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS menu_prod,
-                SUM(f.delivered_orders_count * f.provider_rating_per_order_value)
-                    / NULLIF(SUM(f.delivered_orders_count), 0)                       AS rating,
+                SUM(f.provider_product_added_from_menu_viewed_rate_value * f.provider_product_added_from_menu_viewed_rate_weight)
+                    / NULLIF(SUM(f.provider_product_added_from_menu_viewed_rate_weight), 0) * 100 AS menu_prod,
+                SUM(f.provider_rating_per_order_value * f.provider_rating_per_order_weight)
+                    / NULLIF(SUM(f.provider_rating_per_order_weight), 0)             AS rating,
                 SUM(f.total_campaign_discount)                                       AS discounts,
                 SUM(f.total_campaign_spend_bolt)                                     AS camp_bolt,
-                SUM(f.total_campaign_spend_provider)                                 AS camp_merch,
-                SUM(f.users_activated_provider_count)                                AS active_users
-            FROM ng_delivery_spark.fact_provider_weekly f
+                SUM(f.total_campaign_spend_provider)                                 AS camp_merch
+            FROM ng_delivery_spark.fact_provider_monthly f
             JOIN ng_delivery_spark.dim_provider_v2 d ON f.provider_id = d.provider_id
             WHERE f.provider_id IN ({pids_sql})
-              AND CAST(f.metric_timestamp_local AS DATE) >= '{global_start}'
-              AND CAST(f.metric_timestamp_local AS DATE) < '{global_end}'
+              AND f.metric_timestamp_partition >= '{global_start}'
+              AND f.metric_timestamp_partition <  '{global_end}'
             GROUP BY 1, 2, 3
             ORDER BY d.provider_name, 3
+        """)
+
+        # Unique customers can't be summed across weeks, so take the monthly figure.
+        users_rows = run_query(ctx, f"""
+            SELECT
+                entity_id AS provider_id,
+                DATE_FORMAT(DATE_TRUNC('month', metric_timestamp_partition), 'yyyy-MM-dd') AS mstart,
+                SUM(provider_deliveries_unique_user_count) AS active_users
+            FROM ng_delivery_spark.int_provider_metrics_non_additive
+            WHERE entity_id IN ({pids_sql})
+              AND timeframe_name = 'month'
+              AND metric_timestamp_partition >= '{global_start}'
+              AND metric_timestamp_partition <  '{global_end}'
+            GROUP BY 1, 2
         """)
 
     finally:
@@ -282,6 +298,11 @@ def fetch_brand_data(brand: dict) -> dict:
     loc_map = {int(r[0]): {"name": str(r[1]), "city": str(r[2] or "Харків"), "zone": str(r[3] or "")}
                for r in loc_rows}
 
+    # Active users per location-month, keyed the same way as the fact rows
+    users_map: dict[tuple[int, str], int] = {}
+    for row in users_rows:
+        users_map[(int(row[0]), str(row[1])[:7])] = _si(row[2])
+
     # Parse fact rows into by_pid structure
     by_pid: dict[int, dict] = {}
     for row in fact_rows:
@@ -290,21 +311,21 @@ def fetch_brand_data(brand: dict) -> dict:
         orders    = _si(row[3])
         gross     = _sf(row[4])
         net       = _sf(row[5])
-        avail     = round(_sf(row[6]) * 100, 1)
-        accept    = round(_sf(row[7]) * 100, 1)
-        refunds   = round(_sf(row[8]) * 100, 1)
+        avail     = round(_sf(row[6]), 1)
+        accept    = round(_sf(row[7]), 1)
+        refunds   = round(_sf(row[8]), 1)
         del_time  = round(_sf(row[9]),  1)
         acc_time  = round(_sf(row[10]), 1)
         prep_time = round(_sf(row[11]), 1)
         new_users = _si(row[12])
         sessions  = _si(row[13])
         menu_views= _si(row[14])
-        menu_prod = round(_sf(row[15]) * 100, 1)
+        menu_prod = round(_sf(row[15]), 1)
         rating    = round(_sf(row[16]), 2)
         discounts = round(_sf(row[17]), 0)
         camp_bolt = round(_sf(row[18]), 0)
         camp_merch= round(_sf(row[19]), 0)
-        active_u  = _si(row[20]) or orders
+        active_u  = users_map.get((pid, mk)) or orders
         aov       = round(gross / orders, 0) if orders else 0
         freq      = round(orders / active_u, 2) if active_u else 0
         imp_menu  = round(menu_views / sessions * 100, 1) if sessions else 0
