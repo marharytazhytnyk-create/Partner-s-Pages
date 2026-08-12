@@ -770,7 +770,7 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
 <head>
   <meta charset="UTF-8"/>
   <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-  <title>MBR · Bella Mozzarella / Pinkman Bar · Харків</title>
+  <title>MBR · Mavra / Josper Svintuz / Coffee Art</title>
   <style>
     :root{{
       --green:#34D186;--green-d:#0d8a52;--black:#0d0d0d;

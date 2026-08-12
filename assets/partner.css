@@ -1,0 +1,176 @@
+/* Спільні стилі сторінки партнера. Одна сторінка на папку: заголовок,
+   картка-посилання на звіт, підпис із періодом. Правити дизайн — тут. */
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+:root {
+  --green: #34d186;
+  --green-dark: #0d8a52;
+  --ink: #1a1d1f;
+  --gray: #6b7280;
+  --line: #e8eaed;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Inter, sans-serif;
+  background: #f7f8fa;
+  color: var(--ink);
+  min-height: 100vh;
+  display: flex;
+  justify-content: center;
+  padding: 64px 24px;
+  -webkit-font-smoothing: antialiased;
+}
+
+.wrap { width: 100%; max-width: 620px; }
+
+header { margin-bottom: 36px; }
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: rgba(52, 209, 134, 0.12);
+  color: var(--green-dark);
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  margin-bottom: 18px;
+}
+
+.brand::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--green);
+}
+
+h1 {
+  font-size: 2rem;
+  font-weight: 700;
+  letter-spacing: -0.02em;
+}
+
+.subtitle {
+  margin-top: 8px;
+  color: var(--gray);
+  font-size: 0.95rem;
+}
+
+.chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 16px;
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  padding: 5px 11px;
+  border-radius: 999px;
+  background: #fff;
+  border: 1px solid var(--line);
+  font-size: 0.8rem;
+  font-weight: 600;
+  color: var(--gray);
+}
+
+.chip::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--c, var(--green));
+}
+
+.card {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+  padding: 24px;
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  text-decoration: none;
+  color: inherit;
+  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.04);
+  transition: box-shadow 0.18s ease, transform 0.18s ease, border-color 0.18s ease;
+}
+
+.card:hover {
+  border-color: rgba(52, 209, 134, 0.55);
+  box-shadow: 0 8px 24px rgba(16, 24, 40, 0.09);
+  transform: translateY(-2px);
+}
+
+/* Іконка-стовпчики на зеленому градієнті */
+.card::before {
+  content: "";
+  flex-shrink: 0;
+  width: 52px;
+  height: 52px;
+  border-radius: 13px;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect x='3' y='13' width='4' height='8' rx='1.2' fill='white' opacity='.75'/%3E%3Crect x='10' y='8' width='4' height='13' rx='1.2' fill='white'/%3E%3Crect x='17' y='4' width='4' height='17' rx='1.2' fill='white' opacity='.9'/%3E%3C/svg%3E") center / 26px 26px no-repeat,
+    linear-gradient(135deg, #34d186, #0d8a52);
+}
+
+.card::after {
+  content: "\203A";
+  flex-shrink: 0;
+  color: #c4c8cd;
+  font-size: 1.5rem;
+  line-height: 1;
+  transition: color 0.18s ease, transform 0.18s ease;
+}
+
+.card:hover::after {
+  color: var(--green-dark);
+  transform: translateX(3px);
+}
+
+.card-body { flex: 1; min-width: 0; }
+
+.card-title {
+  font-size: 1.08rem;
+  font-weight: 650;
+  letter-spacing: -0.01em;
+}
+
+.card-desc {
+  margin-top: 5px;
+  color: var(--gray);
+  font-size: 0.88rem;
+  line-height: 1.45;
+}
+
+/* Заповнюється partner-meta.js із самого звіту; порожній — не займає місця */
+.card-meta {
+  margin-top: 9px;
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--green-dark);
+}
+
+.card-meta:empty { display: none; }
+
+footer {
+  margin-top: 28px;
+  padding-top: 20px;
+  border-top: 1px solid var(--line);
+  color: #9aa0a6;
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+@media (max-width: 520px) {
+  body { padding: 40px 18px; }
+  h1 { font-size: 1.6rem; }
+  .card { padding: 20px; gap: 14px; }
+}
