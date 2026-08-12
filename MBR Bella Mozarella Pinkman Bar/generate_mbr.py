@@ -27,6 +27,8 @@ SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Bella Mozzarella Pinkman Bar.html"
 POLL_INTERVAL_S = 5
 MAX_POLL_S      = 600
+FETCH_ATTEMPTS  = 3
+RETRY_DELAY_S   = 20
 
 BRANDS_CONFIG = [
     {
@@ -375,6 +377,30 @@ def fetch_brand_data(brand: dict) -> dict:
         "month_labels_s": month_labels_s,
         "period_label": f"{month_labels[0]} — {month_labels[-1]}" if month_labels else "",
     }
+
+
+def fetch_brand_data_checked(brand: dict) -> dict:
+    """Retry the fetch and reject empty results.
+
+    A result with no locations or no orders at all means the query or the
+    cluster misbehaved, not that the brand stopped selling — accepting it would
+    publish a report full of zeros.
+    """
+    last_exc: Exception | None = None
+    for attempt in range(1, FETCH_ATTEMPTS + 1):
+        try:
+            data = fetch_brand_data(brand)
+            if not data["locations"]:
+                raise RuntimeError("запит не повернув жодної локації")
+            if not any(m.get("orders") for m in data["brand_months"]):
+                raise RuntimeError("запит не повернув замовлень ні за один місяць")
+            return data
+        except Exception as exc:
+            last_exc = exc
+            print(f"  спроба {attempt}/{FETCH_ATTEMPTS} не вдалася: {exc}")
+            if attempt < FETCH_ATTEMPTS:
+                time.sleep(RETRY_DELAY_S)
+    raise last_exc
 
 
 # ─── ANALYSIS ──────────────────────────────────────────────────────────────────
@@ -841,17 +867,23 @@ def main():
         print("ERROR: DATABRICKS_TOKEN not set"); sys.exit(1)
 
     brands_data = []
+    failures = []
     for brand in BRANDS_CONFIG:
         print(f"📊 {brand['title']}...")
         try:
-            data = fetch_brand_data(brand)
+            data = fetch_brand_data_checked(brand)
             print(f"  → {len(data['brand_months'])} months, {len(data['locations'])} locations")
             brands_data.append((brand, data))
         except Exception as exc:
             print(f"  ERROR: {exc}")
-            brands_data.append((brand, {"brand_months": [], "locations": [],
-                                        "month_keys": [], "month_labels": [],
-                                        "month_labels_s": [], "period_label": ""}))
+            failures.append(f"{brand['title']}: {exc}")
+
+    if failures:
+        print("\n❌ Не вдалося отримати дані з Databricks:")
+        for f in failures:
+            print(f"   · {f}")
+        print(f"\nЗвіт НЕ перезаписано, попередня версія збережена:\n   {OUTPUT_HTML}")
+        sys.exit(1)
 
     html = build_html(brands_data)
     OUTPUT_HTML.write_text(html, encoding="utf-8")
