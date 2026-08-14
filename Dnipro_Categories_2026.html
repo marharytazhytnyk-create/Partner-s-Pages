@@ -6,25 +6,19 @@
 <title>Дніпро — категорії страв Bolt Food</title>
 <style>
   :root{
-    --green:#34D186; --green-dark:#0d8a52; --green-soft:#eafaf1;
-    --red:#e5484d; --amber:#f5a623;
+    --green:#34D186; --green-dark:#0d8a52;
     --ink:#0e1b13; --muted:#6b7d72; --line:#e3ebe6; --bg:#f6f9f7;
-    --blue:#2f6feb;
   }
   *{box-sizing:border-box}
   body{margin:0;background:var(--bg);color:var(--ink);
        font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,Arial,sans-serif;
        font-size:14px;line-height:1.5}
-  .wrap{max-width:1100px;margin:0 auto;padding:24px 20px 64px}
+  .wrap{max-width:1000px;margin:0 auto;padding:24px 20px 48px}
   header{background:linear-gradient(135deg,#0d8a52,#34D186);color:#fff;border-radius:16px;
          padding:26px 28px;margin-bottom:20px;box-shadow:0 6px 24px rgba(13,138,82,.18)}
   header h1{margin:0 0 6px;font-size:26px;letter-spacing:-.3px}
   header p{margin:0;opacity:.92;font-size:13.5px}
-  .stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:12px;margin:18px 0 20px}
-  .stat{background:#fff;border:1px solid var(--line);border-radius:12px;padding:14px 16px}
-  .stat b{display:block;font-size:24px;line-height:1.2}
-  .stat span{color:var(--muted);font-size:12px;text-transform:uppercase;letter-spacing:.4px}
-  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px;margin-bottom:18px}
+  .panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:16px 18px}
   h2{font-size:17px;margin:0 0 4px}
   .sub{color:var(--muted);font-size:12.5px;margin:0 0 14px}
   .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
@@ -33,34 +27,22 @@
   .seg button+button{border-left:1px solid var(--line)}
   .seg button:hover{background:#f2f7f4}
   .seg button.active{background:var(--green-dark);color:#fff;font-weight:600}
-  .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:16px}
+  .toolbar{display:flex;flex-wrap:wrap;gap:12px;align-items:center;margin-bottom:18px}
   .toolbar .note{color:var(--muted);font-size:12.5px}
   .chart-row{display:flex;align-items:center;gap:10px;margin-bottom:7px}
-  .chart-cat{width:210px;text-align:right;font-size:13px;flex-shrink:0}
+  .chart-cat{width:220px;text-align:right;font-size:13px;flex-shrink:0}
   .chart-bar-wrap{flex:1;background:#eef3f0;border-radius:6px;height:22px;overflow:hidden}
   .chart-bar{height:100%;background:linear-gradient(90deg,#0d8a52,#34D186);border-radius:6px;
              transition:width .35s ease;min-width:2px}
   .chart-bar.grey{background:linear-gradient(90deg,#8b9c92,#b6c4bb)}
-  .chart-val{width:150px;font-size:12.5px;color:var(--muted);flex-shrink:0}
-  .chart-val b{color:var(--ink);font-weight:600}
-  .axis{display:flex;gap:10px;margin-top:10px;padding-top:8px;border-top:1px solid var(--line);
+  .chart-val{width:62px;font-size:13px;font-weight:600;flex-shrink:0;
+             font-variant-numeric:tabular-nums}
+  .axis{display:flex;gap:10px;margin-top:12px;padding-top:9px;border-top:1px solid var(--line);
         color:var(--muted);font-size:11.5px}
   .axis .chart-cat{color:var(--muted)}
-  table{width:100%;border-collapse:collapse;background:#fff}
-  .tablecard{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;margin-bottom:18px}
-  thead th{background:#f2f7f4;text-align:left;padding:11px 12px;font-size:12px;text-transform:uppercase;
-           letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--line);white-space:nowrap}
-  tbody td{padding:9px 12px;border-bottom:1px solid #f0f4f2}
-  tbody tr:hover{background:#fbfdfc}
-  td.num{text-align:right;font-variant-numeric:tabular-nums}
-  .callout{background:#fff8ec;border:1px solid #ffe0b2;border-radius:12px;padding:13px 16px;
-           margin-bottom:18px;font-size:13px}
-  .callout b{color:#8a5a00}
-  footer{color:var(--muted);font-size:12px;text-align:center;margin-top:26px;line-height:1.7}
-  footer a{color:var(--blue)}
   @media(max-width:760px){
-    .chart-cat{width:120px;font-size:12px}
-    .chart-val{width:92px;font-size:11.5px}
+    .chart-cat{width:130px;font-size:12px}
+    .chart-val{width:50px;font-size:12px}
   }
 </style>
 </head>
@@ -69,25 +51,15 @@
 
 <header>
   <h1>Дніпро — категорії страв Bolt Food</h1>
-  <p>Що замовляють користувачі · 1 травня – 31 липня 2026 (три останні повні місяці) · дані Databricks</p>
+  <p>Що замовляють користувачі · 1 травня – 31 липня 2026 (три останні повні місяці)</p>
 </header>
-
-<div class="stats">
-  <div class="stat"><b>116 966</b><span>Доставлених замовлень</span></div>
-  <div class="stat"><b>454 148</b><span>Позицій-страв</span></div>
-  <div class="stat"><b>3,9</b><span>Позицій на замовлення</span></div>
-  <div class="stat"><b>50%</b><span>Замовлень у McDonald&#39;s + KFC</span></div>
-</div>
-
-<div class="callout">
-  <b>Як читати:</b> ринок Дніпра сконцентрований — McDonald&#39;s і KFC разом дають половину замовлень
-  і 55% усіх позицій. Тому в зрізі «весь ринок» топ майже повністю складається з їхніх позицій.
-  Перемикач «Без McDonald&#39;s і KFC» показує, що замовляють у решти партнерів.
-</div>
 
 <div class="panel">
   <h2>Гістограма категорій страв</h2>
-  <p class="sub">Кількість замовлених позицій-страв за групами категорій (2-й рівень дерева категорій Bolt)</p>
+  <p class="sub">
+    Частка доставлених замовлень, у яких була страва з цієї категорії. Одне замовлення зазвичай
+    містить кілька категорій, тому сума відсотків перевищує 100%.
+  </p>
 
   <div class="toolbar">
     <div class="seg">
@@ -105,142 +77,107 @@
 
   <div class="axis">
     <div class="chart-cat">Категорія</div>
-    <div style="flex:1">← довжина стовпчика: кількість замовлених позицій, шт</div>
-    <div class="chart-val">Позицій · частка</div>
+    <div style="flex:1">← довжина стовпчика пропорційна частці замовлень</div>
+    <div class="chart-val">%</div>
   </div>
 </div>
-
-<div class="tablecard">
-  <table>
-    <thead>
-      <tr>
-        <th>Категорія</th>
-        <th style="text-align:right">Позицій, шт</th>
-        <th style="text-align:right">Замовлень</th>
-        <th style="text-align:right">Частка позицій</th>
-      </tr>
-    </thead>
-    <tbody id="tbody"></tbody>
-  </table>
-</div>
-
-<div class="panel">
-  <h2>Динаміка по місяцях</h2>
-  <p class="sub">Доставлені замовлення Bolt Food у Дніпрі, шт</p>
-  <div id="months"></div>
-</div>
-
-<footer>
-  Джерело: Databricks · <code>ng_delivery_spark.dim_basket_item_delivery</code> ×
-  <code>dim_provider_v2</code> · Дніпро (city_id 499) · вертикаль <code>food</code> ·
-  доставлені замовлення · позиції-страви (<code>basket_item_is_dish</code>).<br>
-  Обмеження: у 10% позицій (22% у зрізі без QSR) партнер не змапував пункт меню на дерево категорій
-  Bolt, тож реальні частки категорій дещо вищі за показані.<br>
-  Згенеровано <span id="gen"></span> · <a href="index.html">← до списку звітів</a>
-</footer>
 
 </div>
 
 <script>
 const DATA = {
   all: {
-    total: 454148,
-    note: "Усі партнери Bolt Food у Дніпрі · база 454 148 позицій-страв",
+    note: "Усі партнери Bolt Food у Дніпрі",
     groups: [
-      ["Бургери", 116114, 63288],
-      ["Гарніри та соуси", 92611, 72611],
-      ["Без категорії", 46285, 15283],
-      ["М'ясні страви", 37710, 27618],
-      ["Шаурма, врапи, донери", 25586, 17517],
-      ["Десерти", 23008, 17118],
-      ["Піца", 16170, 11202],
-      ["Безалкогольні напої", 13206, 10516],
-      ["Паста та нудли", 11591, 8505],
-      ["Суші", 11493, 6155],
-      ["Салати", 9755, 7562],
-      ["Сніданки та бранчі", 9547, 6942],
-      ["Супи", 6186, 5060],
-      ["Кава та чай", 4212, 3367],
-      ["Хліб та лаваш", 4071, 2639],
-      ["Смузі та мілкшейки", 3926, 3159],
-      ["Закуски", 3724, 2872],
-      ["Соки", 3714, 3019],
-      ["Сендвічі та хот-доги", 2359, 1758],
-      ["Рис та крупи", 2032, 1688],
-      ["Карі", 1546, 1422]
+      ["Гарніри та соуси", 62.1],
+      ["Бургери", 54.1],
+      ["М'ясні страви", 23.6],
+      ["Шаурма, врапи, донери", 15.0],
+      ["Десерти", 14.6],
+      ["Без категорії", 13.1],
+      ["Піца", 9.6],
+      ["Безалкогольні напої", 9.0],
+      ["Паста та нудли", 7.3],
+      ["Салати", 6.5],
+      ["Сніданки та бранчі", 5.9],
+      ["Суші", 5.3],
+      ["Супи", 4.3],
+      ["Кава та чай", 2.9],
+      ["Смузі та мілкшейки", 2.7],
+      ["Соки", 2.6],
+      ["Закуски", 2.5],
+      ["Хліб та лаваш", 2.3],
+      ["Сендвічі та хот-доги", 1.5],
+      ["Рис та крупи", 1.4],
+      ["Карі", 1.2]
     ],
     leaves: [
-      ["Бургери → з говядиною", 101654, 50952],
-      ["Без категорії", 46285, 15283],
-      ["Гарніри → картопля фрі", 37180, 26610],
-      ["Десерти (без уточнення)", 17482, 12703],
-      ["Гарніри → снеки", 17395, 13234],
-      ["Гарніри → нагетси", 15430, 13520],
-      ["Врапи → шаурма", 13012, 7790],
-      ["Піца (без уточнення)", 11125, 6838],
-      ["М'ясні страви (без уточнення)", 10059, 7410],
-      ["Суші → роли макі", 9369, 4615],
-      ["М'ясні страви → шашлик", 8853, 4826],
-      ["Врапи → курячий врап", 8818, 6915],
-      ["Напої → кола", 8755, 6802],
-      ["Паста та нудли (без уточнення)", 8652, 6038],
-      ["Бургери (без уточнення)", 8102, 6732],
-      ["Салати (без уточнення)", 7399, 5623],
-      ["Сніданки (без уточнення)", 6275, 4287],
-      ["М'ясні страви → курячі крила", 6268, 5098]
+      ["Бургери → з говядиною", 43.6],
+      ["Гарніри → картопля фрі", 22.8],
+      ["Без категорії", 13.1],
+      ["Гарніри → нагетси", 11.6],
+      ["Гарніри → снеки", 11.3],
+      ["Десерти (без уточнення)", 10.9],
+      ["Врапи → шаурма", 6.7],
+      ["М'ясні страви (без уточнення)", 6.3],
+      ["Врапи → курячий врап", 5.9],
+      ["Піца (без уточнення)", 5.8],
+      ["Напої → кола", 5.8],
+      ["Бургери (без уточнення)", 5.8],
+      ["Паста та нудли (без уточнення)", 5.2],
+      ["Салати (без уточнення)", 4.8],
+      ["М'ясні страви → курячі крила", 4.4],
+      ["М'ясні страви → шашлик", 4.1],
+      ["Суші → роли макі", 3.9],
+      ["Сніданки (без уточнення)", 3.7]
     ]
   },
   nonQsr: {
-    total: 202385,
-    note: "Без MCDONALD'S і KFC · база 202 385 позицій-страв",
+    note: "Без MCDONALD'S і KFC",
     groups: [
-      ["Без категорії", 44807, 14383],
-      ["М'ясні страви", 23569, 15785],
-      ["Шаурма, врапи, донери", 17357, 11021],
-      ["Піца", 16170, 11202],
-      ["Суші", 11493, 6155],
-      ["Гарніри та соуси", 11007, 8543],
-      ["Бургери", 10630, 6370],
-      ["Паста та нудли", 9047, 6332],
-      ["Салати", 8749, 6661],
-      ["Безалкогольні напої", 6817, 5190],
-      ["Десерти", 6290, 4633],
-      ["Супи", 6186, 5060],
-      ["Сніданки та бранчі", 5741, 4221],
-      ["Хліб та лаваш", 4071, 2639],
-      ["Закуски", 3724, 2872],
-      ["Соки", 2644, 2137],
-      ["Сендвічі та хот-доги", 2123, 1577],
-      ["Рис та крупи", 1644, 1345],
-      ["Кава та чай", 1221, 991]
+      ["М'ясні страви", 26.8],
+      ["Без категорії", 24.4],
+      ["Піца", 19.0],
+      ["Шаурма, врапи, донери", 18.7],
+      ["Гарніри та соуси", 14.5],
+      ["Салати", 11.3],
+      ["Бургери", 10.8],
+      ["Паста та нудли", 10.7],
+      ["Суші", 10.4],
+      ["Безалкогольні напої", 8.8],
+      ["Супи", 8.6],
+      ["Десерти", 7.9],
+      ["Сніданки та бранчі", 7.2],
+      ["Закуски", 4.9],
+      ["Хліб та лаваш", 4.5],
+      ["Соки", 3.6],
+      ["Сендвічі та хот-доги", 2.7],
+      ["Рис та крупи", 2.3],
+      ["Кава та чай", 1.7]
     ],
     leaves: [
-      ["Без категорії", 44807, 14383],
-      ["Врапи → шаурма", 12914, 7697],
-      ["Піца (без уточнення)", 11125, 6838],
-      ["Бургери → з говядиною", 9781, 5653],
-      ["Суші → роли макі", 9369, 4615],
-      ["М'ясні страви (без уточнення)", 9217, 6686],
-      ["М'ясні страви → шашлик", 8333, 4372],
-      ["Паста та нудли (без уточнення)", 6663, 4385],
-      ["Салати (без уточнення)", 6393, 4722],
-      ["Напої → кола", 5381, 4032],
-      ["Сніданки (без уточнення)", 4371, 3050],
-      ["Гарніри → картопля фрі", 3095, 2490],
-      ["Десерти (без уточнення)", 2957, 2095],
-      ["Хліб та лаваш (без уточнення)", 2871, 1740],
-      ["Закуски (без уточнення)", 2613, 1951],
-      ["Соки (без уточнення)", 2493, 2006]
+      ["Без категорії", 24.4],
+      ["Врапи → шаурма", 13.0],
+      ["Піца (без уточнення)", 11.6],
+      ["М'ясні страви (без уточнення)", 11.3],
+      ["Бургери → з говядиною", 9.6],
+      ["Салати (без уточнення)", 8.0],
+      ["Суші → роли макі", 7.8],
+      ["Паста та нудли (без уточнення)", 7.4],
+      ["М'ясні страви → шашлик", 7.4],
+      ["Напої → кола", 6.8],
+      ["Сніданки (без уточнення)", 5.2],
+      ["Гарніри → картопля фрі", 4.2],
+      ["Десерти (без уточнення)", 3.6],
+      ["Соки (без уточнення)", 3.4],
+      ["Закуски (без уточнення)", 3.3],
+      ["Хліб та лаваш (без уточнення)", 2.9]
     ]
   }
 };
 
-const MONTHS = [["Травень 2026", 42422], ["Червень 2026", 37349], ["Липень 2026", 37195]];
-
 let scope = 'all';
 let level = 'groups';
-
-const fmt = n => n.toLocaleString('uk-UA');
 
 function setScope(s){
   scope = s;
@@ -263,42 +200,19 @@ function render(){
 
   document.getElementById('scope-note').textContent = d.note;
 
-  document.getElementById('chart').innerHTML = rows.map(([label, dishes, orders]) => {
-    const share = (dishes / d.total * 100).toFixed(1);
+  document.getElementById('chart').innerHTML = rows.map(([label, pct]) => {
     const grey = label === 'Без категорії';
     return `<div class="chart-row">
       <div class="chart-cat">${label}</div>
       <div class="chart-bar-wrap">
-        <div class="chart-bar${grey ? ' grey' : ''}" style="width:${(dishes / max * 100).toFixed(2)}%"></div>
+        <div class="chart-bar${grey ? ' grey' : ''}" style="width:${(pct / max * 100).toFixed(2)}%"></div>
       </div>
-      <div class="chart-val"><b>${fmt(dishes)}</b> · ${share}%</div>
+      <div class="chart-val">${pct.toFixed(1).replace('.', ',')}%</div>
     </div>`;
   }).join('');
-
-  document.getElementById('tbody').innerHTML = rows.map(([label, dishes, orders]) =>
-    `<tr>
-      <td>${label}</td>
-      <td class="num">${fmt(dishes)}</td>
-      <td class="num">${fmt(orders)}</td>
-      <td class="num">${(dishes / d.total * 100).toFixed(1)}%</td>
-    </tr>`).join('');
-}
-
-function renderMonths(){
-  const max = Math.max(...MONTHS.map(m => m[1]));
-  document.getElementById('months').innerHTML = MONTHS.map(([label, orders]) =>
-    `<div class="chart-row">
-      <div class="chart-cat">${label}</div>
-      <div class="chart-bar-wrap">
-        <div class="chart-bar" style="width:${(orders / max * 100).toFixed(2)}%"></div>
-      </div>
-      <div class="chart-val"><b>${fmt(orders)}</b> замовлень</div>
-    </div>`).join('');
 }
 
 render();
-renderMonths();
-document.getElementById('gen').textContent = new Date().toLocaleString('uk-UA');
 </script>
 
 </body>
