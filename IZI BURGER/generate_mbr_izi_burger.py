@@ -74,16 +74,96 @@ CHART_SECTIONS: list[tuple[str, list[str]]] = [
         "avail", "accept", "refunds",
         "del_time", "acc_time", "prep_time", "wait_time",
     ]),
-    ("2a. Погані замовлення з вини закладу", ["bad_provider_count", "bad_provider_pct"]),
+    ("2a. Погані замовлення — заклад і курʼєр", [
+        "bad_provider_count", "bad_provider_pct",
+        "bad_courier_count", "bad_courier_pct",
+    ]),
     ("3. Клієнти", ["active_users", "freq", "new_users", "sessions", "imp_menu", "menu_prod", "rating"]),
     ("4. Знижки", ["discounts", "camp_bolt", "camp_merch"]),
 ]
 
 BAD_ORDERS_EXPLAIN_UA = (
-    "Погані замовлення (Bad Orders) — доставлені замовлення, з якими у клієнта виникла проблема: "
-    "затримка з вини закладу, неповний склад, холодна/неякісна їжа тощо. "
-    "Високий показник знижує рейтинг і зменшує шанс повторного замовлення."
+    "Погані замовлення (Bad Orders) — замовлення, з якими у клієнта виникла проблема: "
+    "затримка, неповний склад, холодна чи неякісна їжа тощо. "
+    "Bolt визначає для кожного такого замовлення винну сторону, тому нижче показники розділені: "
+    "<b>з вини закладу</b> (довго готували, не відповіли на замовлення, помилки в комплектації) і "
+    "<b>з вини курʼєра</b> (запізнився в заклад або до клієнта, затримався на видачі). "
+    "Високий показник знижує рейтинг і зменшує шанс повторного замовлення — "
+    "але відповідальність за ці дві групи різна."
 )
+
+BAD_ACTOR_UA = {
+    "provider": "Заклад",
+    "courier": "Курʼєр",
+    "supply": "Брак курʼєрів",
+    "bolt": "Bolt",
+    "eater": "Клієнт",
+    "unknown": "Невідомо",
+}
+
+BAD_STATE_UA = {
+    "delivered": "Доставлено",
+    "rejected": "Відхилено",
+    "failed": "Не виконано",
+    "cancelled": "Скасовано",
+}
+
+# Причини приходять як технічні коди, іноді кілька через кому.
+BAD_REASON_UA = {
+    "courier_to_provider_eta_error_seconds": "Курʼєр приїхав у заклад пізніше розрахункового часу",
+    "provider_to_eater_eta_error_seconds": "Курʼєр привіз замовлення пізніше розрахункового часу",
+    "pickup_delay_courier_fault_seconds": "Курʼєр затримався на видачі",
+    "courier_redispatch_duration_seconds": "Замовлення перепризначали іншому курʼєру",
+    "courier_dropoff_delay_adjusted_seconds": "Курʼєр затримався при передачі клієнту",
+    "did_not_respond": "Заклад не відповів на замовлення",
+    "missing_item_eater": "Не вистачало позиції в замовленні",
+    "wrong_item_eater": "Видали не ту позицію",
+    "received_an_entirely_wrong_order_eater": "Клієнт отримав зовсім інше замовлення",
+    "provider_preparation_overestimate_seconds": "Заклад завищив час приготування",
+    "provider_preparation_delay_seconds": "Заклад готував довше, ніж обіцяв",
+    "pickup_delay_provider_fault_seconds": "Замовлення не було готове до приїзду курʼєра",
+    "do_not_wish_to_serve_this_client": "Заклад відмовився обслуговувати клієнта",
+    "manually_failed_by_cs": "Скасовано підтримкою вручну",
+    "automatically_failed": "Скасовано автоматично",
+    "closed": "Заклад був закритий",
+    "device_issue": "Технічна проблема з планшетом закладу",
+    "items_out_of_stock": "Позицій не було в наявності",
+    "charged_twice_for_my_order_eater": "З клієнта списали двічі",
+    "bolt_assignment_delay_from_supply_starvation_seconds": "Не було вільних курʼєрів",
+    "bolt_assignment_delay_from_rejections_seconds": "Курʼєри відмовлялися від замовлення",
+    "bolt_batching_delay_seconds": "Затримка через обʼєднання замовлень",
+    "bolt_dispatch_start_delay_seconds": "Затримка старту призначення курʼєра",
+    "bolt_cooking_eta_underestimate_seconds": "Bolt занизив розрахунковий час приготування",
+    "bolt_prep_instruction_delay_seconds": "Затримка команди почати приготування",
+    "late_delivery_supply_delay_seconds": "Затримка через брак курʼєрів",
+    "unknown_delay_pickup_seconds": "Невідома затримка на видачі",
+    "unknown_delay_dropoff_seconds": "Невідома затримка при доставці",
+    "unknown_total_delay_seconds": "Невідома затримка",
+    "order_never_delivered_eater": "Замовлення не доставили",
+    "order_damaged_eater": "Замовлення пошкоджене",
+    "order_took_longer_eater": "Замовлення їхало довше, ніж очікувалось",
+    "my_order_arrived_cold": "Їжа приїхала холодною",
+    "my_order_arrived_cold_eater": "Їжа приїхала холодною",
+    "my_courier_is_late": "Курʼєр запізнювався",
+    "my_courier_is_late_eater": "Курʼєр запізнювався",
+    "my_courier_is_not_moving_eater": "Курʼєр не рухався",
+    "my_courier_cannot_find_me_eater": "Курʼєр не міг знайти клієнта",
+    "my_courier_was_rude": "Курʼєр був грубим",
+    "my_courier_was_rude_eater": "Курʼєр був грубим",
+    "unable_to_contact_the_courier_eater": "Не вдалося звʼязатися з курʼєром",
+    "courier_added_the_wrong_cash_amount_eater": "Курʼєр вказав неправильну суму готівкою",
+    "no_courier_is_assigned_to_the_order": "Курʼєра не призначили",
+    "no_courier_is_assigned_to_the_order_eater": "Курʼєра не призначили",
+    "item_had_a_spoiled_taste_or_smell_eater": "Несвіжий смак або запах страви",
+    "item_does_not_match_the_expectations_eater": "Страва не відповідала очікуванням",
+    "item_does_not_match_the_photo_eater": "Страва не відповідала фото",
+    "item_does_not_match_the_description_eater": "Страва не відповідала опису",
+    "object_detected_in_food_eater": "Сторонній предмет у їжі",
+    "food_was_overcooked_or_burnt_eater": "Страва пересмажена або підгоріла",
+    "food_was_undercooked_or_raw_eater": "Страва недосмажена",
+    "eater_contaminated_food": "Клієнт зіпсував їжу",
+    "question_about_menu_item_eater": "Питання щодо позиції меню",
+}
 
 METRIC_UK: dict[str, tuple[str, str, str]] = {
     "gross": ("Gross Sales", "Сума до знижок", "₴"),
@@ -107,9 +187,16 @@ METRIC_UK: dict[str, tuple[str, str, str]] = {
     "discounts": ("Total Discounts", "Знижки для клієнтів", "₴"),
     "camp_bolt": ("Campaigns by Bolt", "Витрати Bolt на промо", "₴"),
     "camp_merch": ("Campaigns by Merchant", "Витрати партнера на промо", "₴"),
-    "bad_provider_count": ("Погані замовлення (шт.)", "Кількість поганих замовлень з вини закладу", "шт."),
-    "bad_provider_pct": ("Погані замовлення (%)", "Відсоток поганих замовлень з вини закладу", "%"),
+    "bad_provider_count": ("Погані замовлення — заклад (шт.)", "Кількість з вини закладу", "шт."),
+    "bad_provider_pct": ("Погані замовлення — заклад (%)", "Частка від доставлених замовлень", "%"),
+    "bad_courier_count": ("Погані замовлення — курʼєр (шт.)", "Кількість з вини курʼєра", "шт."),
+    "bad_courier_pct": ("Погані замовлення — курʼєр (%)", "Частка від доставлених замовлень", "%"),
 }
+
+# Гістограми вини курʼєра показуємо іншим кольором, щоб не плутати з виною закладу.
+COURIER_BAR_COLORS = [
+    "#7a3d00", "#a35200", "#c96a0a", "#e78b2a", "#f2a95c", "#f7c68f",
+]
 
 EMPTY_MONTH = {
     "orders": 0, "gross": 0, "net": 0, "aov": 0,
@@ -117,7 +204,9 @@ EMPTY_MONTH = {
     "del_time": 0, "acc_time": 0, "prep_time": 0, "wait_time": 0,
     "new_users": 0, "sessions": 0, "imp_menu": 0, "menu_prod": 0, "rating": 0,
     "discounts": 0, "camp_bolt": 0, "camp_merch": 0, "active_users": 0, "freq": 0,
-    "bad_provider_count": 0, "bad_provider_pct": 0.0, "rating_weight": 0.0,
+    "bad_provider_count": 0, "bad_provider_pct": 0.0,
+    "bad_courier_count": 0, "bad_courier_pct": 0.0,
+    "rating_weight": 0.0,
 }
 
 
@@ -312,7 +401,12 @@ def fetch_data() -> dict:
                     WHEN f.is_bad_order = true
                      AND LOWER(COALESCE(a.bad_order_actor_at_fault, '')) = 'provider'
                     THEN 1 ELSE 0
-                END) AS bad_provider
+                END) AS bad_provider,
+                SUM(CASE
+                    WHEN f.is_bad_order = true
+                     AND LOWER(COALESCE(a.bad_order_actor_at_fault, '')) = 'courier'
+                    THEN 1 ELSE 0
+                END) AS bad_courier
             FROM ng_delivery_spark.delivery_order_order o
             INNER JOIN ng_delivery_spark.fact_order_delivery f ON f.order_id = o.id
             LEFT JOIN ng_delivery_spark.int_order_bad_order_attribution a ON a.order_id = o.id
@@ -326,6 +420,31 @@ def fetch_data() -> dict:
             print(f"  ⚠ bad_orders query failed ({e}), using zeros")
             bad_rows = []
 
+        # Порядкові деталі кожного поганого замовлення для згортаної таблиці у звіті.
+        try:
+            detail_rows = run_query(ctx, f"""
+            SELECT
+                o.provider_id,
+                o.id AS order_id,
+                DATE_FORMAT(o.created_date, 'yyyy-MM-dd') AS order_date,
+                o.state,
+                LOWER(COALESCE(a.bad_order_actor_at_fault, 'unknown')) AS actor,
+                COALESCE(a.bad_order_main_reason, '') AS reason,
+                ROUND(COALESCE(a.late_delivery_provider_delay_seconds, 0) / 60.0, 1) AS provider_delay_min,
+                ROUND(COALESCE(a.late_delivery_courier_delay_seconds, 0) / 60.0, 1) AS courier_delay_min
+            FROM ng_delivery_spark.delivery_order_order o
+            INNER JOIN ng_delivery_spark.fact_order_delivery f ON f.order_id = o.id
+            LEFT JOIN ng_delivery_spark.int_order_bad_order_attribution a ON a.order_id = o.id
+            WHERE o.provider_id IN ({pids_sql})
+              AND o.created_date >= '{global_start}'
+              AND o.created_date <= '{global_end}'
+              AND f.is_bad_order = true
+            ORDER BY o.created_date DESC, o.id DESC
+            """)
+        except Exception as e:
+            print(f"  ⚠ bad order details query failed ({e}), деталі не буде")
+            detail_rows = []
+
     finally:
         destroy_context(ctx)
 
@@ -334,14 +453,29 @@ def fetch_data() -> dict:
     for row in users_rows:
         active_map[(int(row[0]), str(row[1])[:7])] = _si(row[2])
 
-    bad_map: dict[tuple[int, str], tuple[int, float]] = {}
+    bad_map: dict[tuple[int, str], tuple[int, float, int, float]] = {}
     for row in bad_rows:
         pid = int(row[0])
         mk = str(row[1])[:7]
         delivered = _si(row[2])
-        bad_n = _si(row[3])
-        bad_pct = round(bad_n / delivered * 100, 2) if delivered else 0.0
-        bad_map[(pid, mk)] = (bad_n, bad_pct)
+        prov_n = _si(row[3])
+        cour_n = _si(row[4])
+        prov_pct = round(prov_n / delivered * 100, 2) if delivered else 0.0
+        cour_pct = round(cour_n / delivered * 100, 2) if delivered else 0.0
+        bad_map[(pid, mk)] = (prov_n, prov_pct, cour_n, cour_pct)
+
+    details_by_pid: dict[int, list[dict]] = {}
+    for row in detail_rows:
+        pid = int(row[0])
+        details_by_pid.setdefault(pid, []).append({
+            "order_id": str(row[1]),
+            "date": str(row[2]),
+            "state": str(row[3] or ""),
+            "actor": str(row[4] or "unknown"),
+            "reason": str(row[5] or ""),
+            "provider_delay_min": _sf(row[6]),
+            "courier_delay_min": _sf(row[7]),
+        })
 
     # Build per-location monthly data
     by_pid: dict[int, dict] = {p["provider_id"]: {**p, "by_month": {}} for p in providers}
@@ -356,7 +490,7 @@ def fetch_data() -> dict:
         sessions = _si(row[14])
         menu_viewed = _si(row[15])
         au = active_map.get((pid, mk), 0) or orders
-        bad_n, bad_pct = bad_map.get((pid, mk), (0, 0.0))
+        prov_n, prov_pct, cour_n, cour_pct = bad_map.get((pid, mk), (0, 0.0, 0, 0.0))
         by_pid[pid]["by_month"][mk] = {
             "orders": orders,
             "gross": round(gross, 0),
@@ -380,8 +514,10 @@ def fetch_data() -> dict:
             "rating_weight": _sf(row[21]) if len(row) > 21 else 0.0,
             "active_users": au,
             "freq": round(orders / au, 2) if au else 0,
-            "bad_provider_count": bad_n,
-            "bad_provider_pct": bad_pct,
+            "bad_provider_count": prov_n,
+            "bad_provider_pct": prov_pct,
+            "bad_courier_count": cour_n,
+            "bad_courier_pct": cour_pct,
         }
 
     locations: list[dict] = []
@@ -394,6 +530,7 @@ def fetch_data() -> dict:
             rec["label"] = label
             months_data.append(rec)
         loc["months"] = months_data
+        loc["bad_details"] = details_by_pid.get(pid, [])
         # Rolling rating
         total_w = sum(m.get("rating_weight", 0) for m in months_data)
         total_s = sum(m.get("rating", 0) * m.get("rating_weight", 0) for m in months_data if m.get("rating"))
@@ -408,11 +545,12 @@ def fetch_data() -> dict:
             m = loc["months"][i]
             for k in ("orders", "gross", "net", "new_users", "sessions",
                       "discounts", "camp_bolt", "camp_merch", "active_users",
-                      "bad_provider_count", "rating_weight"):
+                      "bad_provider_count", "bad_courier_count", "rating_weight"):
                 agg[k] += m.get(k, 0)
-        agg["bad_provider_pct"] = round(
-            agg["bad_provider_count"] / agg["orders"] * 100, 2
-        ) if agg["orders"] else 0.0
+        for actor in ("provider", "courier"):
+            agg[f"bad_{actor}_pct"] = round(
+                agg[f"bad_{actor}_count"] / agg["orders"] * 100, 2
+            ) if agg["orders"] else 0.0
         weighted_keys = [
             ("avail", "orders"), ("accept", "orders"), ("refunds", "orders"),
             ("del_time", "orders"), ("acc_time", "orders"), ("prep_time", "orders"),
@@ -442,9 +580,16 @@ def fetch_data() -> dict:
         for loc in locations)
     brand_rolling_rating = round(total_rs_all / total_rw_all, 2) if total_rw_all else 0.0
 
+    brand_details = [
+        {**d, "loc_name": loc["name"]}
+        for loc in locations for d in loc["bad_details"]
+    ]
+    brand_details.sort(key=lambda d: (d["date"], d["order_id"]), reverse=True)
+
     return {
         "locations": locations,
         "brand_months": brand_months,
+        "brand_details": brand_details,
         "brand_rolling_rating": brand_rolling_rating,
         "month_keys": month_keys,
         "month_labels": month_labels_list,
@@ -457,7 +602,8 @@ def fetch_data() -> dict:
 # ─── HTML ───────────────────────────────────────────────────────────────────────
 
 def _fmt(val: float, key: str) -> str:
-    if key in ("avail", "accept", "refunds", "imp_menu", "menu_prod", "bad_provider_pct"):
+    if key in ("avail", "accept", "refunds", "imp_menu", "menu_prod",
+               "bad_provider_pct", "bad_courier_pct"):
         return f"{val:.1f}%"
     if key in ("rating", "freq"):
         return f"{val:.2f}"
@@ -470,10 +616,11 @@ def _histogram(key: str, months: list[dict], chart_id: str) -> str:
     title, desc, unit = METRIC_UK[key]
     vals = [float(m.get(key, 0)) for m in months]
     max_v = max(vals) if vals and max(vals) > 0 else 1.0
+    palette = COURIER_BAR_COLORS if key.startswith("bad_courier") else MONTH_BAR_COLORS
     bars = ""
     for i, (m, val) in enumerate(zip(months, vals)):
         h = max(4, round(val / max_v * 100))
-        color = MONTH_BAR_COLORS[i % len(MONTH_BAR_COLORS)]
+        color = palette[i % len(palette)]
         bars += f"""
         <div class="bar-col">
           <div class="bar-val">{_fmt(val, key)}</div>
@@ -486,6 +633,91 @@ def _histogram(key: str, months: list[dict], chart_id: str) -> str:
       <p class="metric-desc">{desc}</p>
       <p class="unit">Одиниця: {unit} · {N_MONTHS} місяців</p>
       <div class="bars-scroll"><div class="bars">{bars}</div></div>
+    </div>"""
+
+
+def _reason_ua(raw: str) -> str:
+    """Код (або кілька кодів через кому) → людський текст без повторів."""
+    seen: list[str] = []
+    for code in (c.strip() for c in raw.split(",")):
+        if not code:
+            continue
+        text = BAD_REASON_UA.get(code) or code.replace("_seconds", "").replace("_eater", "").replace("_", " ")
+        if text not in seen:
+            seen.append(text)
+    return " · ".join(seen) or "Причину не вказано"
+
+
+def _month_ua(date_str: str) -> str:
+    try:
+        d = datetime.date.fromisoformat(date_str)
+    except ValueError:
+        return date_str
+    return month_label(d)
+
+
+def _details_block(details: list[dict], block_id: str, show_loc: bool) -> str:
+    """Згортана таблиця поганих замовлень із фільтром за винною стороною."""
+    if not details:
+        return f"""
+    <div class="details-wrap">
+      <p class="details-empty">За цей період поганих замовлень не зафіксовано.</p>
+    </div>"""
+
+    counts = {"provider": 0, "courier": 0}
+    for d in details:
+        if d["actor"] in counts:
+            counts[d["actor"]] += 1
+    other = len(details) - counts["provider"] - counts["courier"]
+
+    rows = ""
+    for d in details:
+        actor = d["actor"]
+        actor_cls = actor if actor in ("provider", "courier") else "other"
+        group = actor_cls
+        delay = ""
+        if actor == "provider" and d["provider_delay_min"] > 0:
+            delay = f"{d['provider_delay_min']:.0f} хв затримки закладу"
+        elif actor == "courier" and d["courier_delay_min"] > 0:
+            delay = f"{d['courier_delay_min']:.0f} хв затримки курʼєра"
+        loc_cell = f"<td class=\"dt-loc\">{d.get('loc_name','')}</td>" if show_loc else ""
+        rows += f"""
+        <tr data-group="{group}">
+          <td class="dt-date">{d['date']}<span class="dt-month">{_month_ua(d['date'])}</span></td>
+          {loc_cell}
+          <td class="dt-id">{d['order_id']}</td>
+          <td><span class="actor-badge actor-{actor_cls}">{BAD_ACTOR_UA.get(actor, actor)}</span></td>
+          <td class="dt-reason">{_reason_ua(d['reason'])}{f'<span class="dt-delay">{delay}</span>' if delay else ''}</td>
+          <td class="dt-state">{BAD_STATE_UA.get(d['state'], d['state'])}</td>
+        </tr>"""
+
+    loc_head = "<th>Локація</th>" if show_loc else ""
+    return f"""
+    <div class="details-wrap" id="{block_id}">
+      <button type="button" class="details-btn" data-details-id="{block_id}" aria-expanded="false">
+        <span class="details-btn-txt">Показати деталі по замовленнях</span>
+        <span class="details-count">{len(details)}</span>
+      </button>
+      <div class="details-body" hidden>
+        <div class="details-filters">
+          <button type="button" class="chip is-active" data-filter="all">Усі <b>{len(details)}</b></button>
+          <button type="button" class="chip" data-filter="provider">Заклад <b>{counts['provider']}</b></button>
+          <button type="button" class="chip" data-filter="courier">Курʼєр <b>{counts['courier']}</b></button>
+          <button type="button" class="chip" data-filter="other">Інші сторони <b>{other}</b></button>
+        </div>
+        <p class="details-hint">
+          «Інші сторони» — брак курʼєрів, помилки Bolt або звернення клієнта; вони не впливають на
+          показники закладу, але корисні для повної картини.
+        </p>
+        <div class="details-scroll">
+          <table class="details-table">
+            <thead>
+              <tr><th>Дата</th>{loc_head}<th>Замовлення</th><th>Винна сторона</th><th>Причина</th><th>Статус</th></tr>
+            </thead>
+            <tbody>{rows}</tbody>
+          </table>
+        </div>
+      </div>
     </div>"""
 
 
@@ -511,7 +743,8 @@ def _location_analysis_block(loc: dict, analysis: dict) -> str:
         <span>Доступність: <b>{prev['avail']:.1f}%</b> → <b>{last['avail']:.1f}%</b></span>
         <span>Рейтинг (6 міс.): <b>{rolling_r:.2f}</b></span>
         <span>Компенсації: <b>{prev['refunds']:.1f}%</b> → <b>{last['refunds']:.1f}%</b></span>
-        <span>Погані замовлення: <b>{last['bad_provider_count']}</b> · <b>{last['bad_provider_pct']:.1f}%</b></span>
+        <span>Погані — заклад: <b>{last['bad_provider_count']}</b> · <b>{last['bad_provider_pct']:.1f}%</b></span>
+        <span>Погані — курʼєр: <b>{last['bad_courier_count']}</b> · <b>{last['bad_courier_pct']:.1f}%</b></span>
       </div>
       <h4>Що відбувається</h4>
       <ul>{issues}</ul>
@@ -557,8 +790,17 @@ def _analyze(loc: dict) -> dict:
         severity += 2
 
     if last["bad_provider_pct"] >= 10:
-        issues.append(f"Багато поганих замовлень — {last['bad_provider_pct']:.1f}% ({last['bad_provider_count']} шт.).")
+        issues.append(
+            f"Багато поганих замовлень з вини закладу — {last['bad_provider_pct']:.1f}% "
+            f"({last['bad_provider_count']} шт.).")
+        advice.append("Перегляньте деталі поганих замовлень нижче — там видно конкретну причину кожного.")
         severity += 2
+
+    if last["bad_courier_count"] > last["bad_provider_count"] and last["bad_courier_count"] >= 5:
+        issues.append(
+            f"Поганих замовлень з вини курʼєра більше, ніж з вини закладу — "
+            f"{last['bad_courier_count']} проти {last['bad_provider_count']} шт. "
+            f"Це зона відповідальності Bolt.")
 
     if last["refunds"] >= 5:
         issues.append(f"Висока частка компенсацій — {last['refunds']:.1f}%.")
@@ -581,6 +823,8 @@ def _location_block(loc: dict) -> str:
         for key in keys:
             charts += _histogram(key, loc["months"], f"c-{pid}-{key}")
         charts += "</div>"
+        if keys and keys[0].startswith("bad_"):
+            charts += _details_block(loc["bad_details"], f"details-{pid}", show_loc=False)
     return f"""
     <section class="loc-card" id="loc-{pid}">
       <div class="loc-row">
@@ -616,6 +860,8 @@ def generate_html(data: dict) -> str:
         for key in keys:
             brand_charts += _histogram(key, brand_months, f"brand-{key}")
         brand_charts += "</div>"
+        if keys and keys[0].startswith("bad_"):
+            brand_charts += _details_block(data["brand_details"], "details-brand", show_loc=True)
 
     loc_blocks = "\n".join(_location_block(loc) for loc in locations)
 
@@ -629,7 +875,7 @@ def generate_html(data: dict) -> str:
     :root {{
       --green:#34D186; --green-d:#0d8a52; --black:#0d0d0d;
       --gray-700:#4a4a4a; --gray-400:#9a9a9a; --gray-100:#f5f5f5;
-      --positive:#1aad6a; --warning:#e67e22; --danger:#c0392b;
+      --positive:#1aad6a; --warning:#e67e22; --danger:#c0392b; --courier:#c96a0a;
     }}
     *{{margin:0;padding:0;box-sizing:border-box}}
     body{{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
@@ -695,10 +941,51 @@ def generate_html(data: dict) -> str:
     .analysis-kpi{{display:flex;flex-wrap:wrap;gap:10px;font-size:11px;color:var(--gray-400);
       margin-bottom:10px;padding:8px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}}
     .analysis-kpi b{{color:var(--gray-700)}}
+    .kpi-card.kpi-courier{{border-top-color:var(--courier)}}
+    .details-wrap{{margin:4px 0 18px}}
+    .details-empty{{font-size:12px;color:var(--gray-400);background:#fff;border:1px solid #eee;
+      border-radius:10px;padding:12px 14px}}
+    .details-btn{{display:inline-flex;align-items:center;gap:10px;padding:10px 16px;border:1px solid #e2e2e2;
+      border-radius:9px;background:#fff;color:var(--gray-700);font-size:13px;font-weight:600;cursor:pointer}}
+    .details-btn:hover{{border-color:var(--green);color:var(--green-d)}}
+    .details-btn[aria-expanded="true"]{{background:var(--green-d);border-color:var(--green-d);color:#fff}}
+    .details-count{{font-size:11px;font-weight:700;padding:2px 8px;border-radius:999px;
+      background:var(--gray-100);color:var(--gray-700)}}
+    .details-btn[aria-expanded="true"] .details-count{{background:rgba(255,255,255,.22);color:#fff}}
+    .details-body{{margin-top:12px;background:#fff;border:1px solid #eee;border-radius:12px;padding:14px 16px}}
+    .details-body[hidden]{{display:none}}
+    .details-filters{{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:10px}}
+    .chip{{padding:6px 12px;border:1px solid #e2e2e2;border-radius:999px;background:#fff;
+      font-size:12px;color:var(--gray-700);cursor:pointer}}
+    .chip b{{font-weight:700;margin-left:4px}}
+    .chip:hover{{border-color:var(--green)}}
+    .chip.is-active{{background:var(--black);border-color:var(--black);color:#fff}}
+    .details-hint{{font-size:11px;color:var(--gray-400);margin-bottom:10px}}
+    .details-scroll{{overflow-x:auto;max-height:420px;overflow-y:auto;border-top:1px solid #f0f0f0}}
+    .details-table{{width:100%;border-collapse:collapse;font-size:12px}}
+    .details-table th{{position:sticky;top:0;background:#fafafa;text-align:left;padding:9px 10px;
+      font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-400);
+      border-bottom:1px solid #ececec;white-space:nowrap}}
+    .details-table td{{padding:9px 10px;border-bottom:1px solid #f4f4f4;vertical-align:top}}
+    .details-table tr:hover td{{background:#fcfcfc}}
+    .details-table tr[hidden]{{display:none}}
+    .dt-date{{white-space:nowrap;color:var(--gray-700)}}
+    .dt-month{{display:block;font-size:10px;color:var(--gray-400)}}
+    .dt-id{{font-variant-numeric:tabular-nums;color:var(--gray-400)}}
+    .dt-loc{{color:var(--gray-700)}}
+    .dt-reason{{min-width:240px}}
+    .dt-delay{{display:block;font-size:10px;color:var(--warning);margin-top:2px}}
+    .dt-state{{white-space:nowrap;color:var(--gray-400)}}
+    .actor-badge{{display:inline-block;padding:2px 9px;border-radius:999px;font-size:11px;
+      font-weight:600;white-space:nowrap}}
+    .actor-provider{{background:#e7f7ef;color:var(--green-d)}}
+    .actor-courier{{background:#fdefe0;color:#a35200}}
+    .actor-other{{background:var(--gray-100);color:var(--gray-700)}}
     .footer{{background:var(--black);color:var(--gray-400);font-size:11px;padding:22px 40px;text-align:center}}
     .footer span{{color:var(--green)}}
     @media(max-width:700px){{
       .container{{padding:16px}} .charts-grid{{grid-template-columns:1fr}} .header{{padding:16px}}
+      .details-scroll{{max-height:none}}
     }}
   </style>
 </head>
@@ -737,7 +1024,8 @@ def generate_html(data: dict) -> str:
     <div class="kpi-card"><div class="kpi-label">Acceptance</div><div class="kpi-value">{last['accept']:.1f}%</div></div>
     <div class="kpi-card"><div class="kpi-label">Active Users</div><div class="kpi-value">{last['active_users']}</div></div>
     <div class="kpi-card"><div class="kpi-label">Rating (6 міс.)</div><div class="kpi-value">{brand_rolling_rating:.2f}</div></div>
-    <div class="kpi-card"><div class="kpi-label">Погані замовлення</div><div class="kpi-value">{last['bad_provider_count']} · {last['bad_provider_pct']:.1f}%</div></div>
+    <div class="kpi-card"><div class="kpi-label">Погані — заклад</div><div class="kpi-value">{last['bad_provider_count']} · {last['bad_provider_pct']:.1f}%</div></div>
+    <div class="kpi-card kpi-courier"><div class="kpi-label">Погані — курʼєр</div><div class="kpi-value">{last['bad_courier_count']} · {last['bad_courier_pct']:.1f}%</div></div>
   </div>
   <p class="section-hint" style="margin-top:8px">{BAD_ORDERS_EXPLAIN_UA}</p>
 
@@ -766,6 +1054,30 @@ def generate_html(data: dict) -> str:
       btn.setAttribute('aria-expanded', open ? 'true' : 'false');
       btn.textContent = open ? 'Згорнути' : 'Відкрити деталі';
       if (open) document.getElementById('loc-' + pid).scrollIntoView({{behavior:'smooth',block:'start'}});
+    }});
+  }});
+
+  document.querySelectorAll('.details-btn').forEach(btn => {{
+    btn.addEventListener('click', () => {{
+      const body = btn.parentElement.querySelector('.details-body');
+      const open = body.hidden;
+      body.hidden = !open;
+      btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+      btn.querySelector('.details-btn-txt').textContent =
+        open ? 'Згорнути деталі' : 'Показати деталі по замовленнях';
+    }});
+  }});
+
+  document.querySelectorAll('.details-filters').forEach(bar => {{
+    const body = bar.closest('.details-body');
+    bar.querySelectorAll('.chip').forEach(chip => {{
+      chip.addEventListener('click', () => {{
+        const want = chip.dataset.filter;
+        bar.querySelectorAll('.chip').forEach(c => c.classList.toggle('is-active', c === chip));
+        body.querySelectorAll('tbody tr').forEach(tr => {{
+          tr.hidden = want !== 'all' && tr.dataset.group !== want;
+        }});
+      }});
     }});
   }});
 }})();
