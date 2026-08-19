@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Josper Svintus · Платне просування · Липень 2026</title>
+<style>
+  :root{
+    --green:#34D186; --green-d:#0d8a52; --black:#0d0d0d;
+    --gray-700:#4a4a4a; --gray-400:#9a9a9a; --gray-100:#f5f5f5;
+    --positive:#1aad6a; --warning:#e67e22; --danger:#c0392b; --info:#2980b9;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    font-size:14px;line-height:1.55;color:#1a1a1a;background:var(--gray-100)}
+
+  .header{background:var(--black);padding:20px 40px;display:flex;align-items:flex-start;
+    justify-content:space-between;border-bottom:4px solid var(--green);flex-wrap:wrap;gap:16px}
+  .header-left{display:flex;align-items:center;gap:14px;flex:1;min-width:240px}
+  .bolt-logo{width:44px;height:44px;background:var(--green);border-radius:10px;
+    display:flex;align-items:center;justify-content:center;font-size:22px}
+  .header-title h1{font-size:20px;font-weight:700;color:#fff}
+  .header-title p{font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1.2px;font-weight:600;margin-top:4px}
+  .header-meta{text-align:right;color:var(--gray-400);font-size:12px;line-height:1.9}
+  .header-meta strong{color:var(--green)}
+
+  .container{max-width:1320px;margin:0 auto;padding:28px 40px 48px}
+
+  .period-bar{background:#fff;border-radius:12px;padding:16px 20px;margin-bottom:22px;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid var(--green)}
+  .period-bar .plabel{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gray-400)}
+  .period-bar .pvalue{font-size:22px;font-weight:700;color:var(--black);margin-top:2px}
+  .period-bar .pnote{font-size:12px;color:var(--gray-700);margin-top:6px}
+  .period-bar .pwarn{font-size:12px;color:var(--gray-700);line-height:1.5;margin-top:12px;
+    padding:12px 14px;background:#fffaf3;border:1px solid #f3dcc0;border-left:4px solid var(--warning);
+    border-radius:8px}
+
+  .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+    color:var(--gray-700);padding-bottom:10px;border-bottom:2px solid var(--green);margin:30px 0 10px}
+  .section-hint{font-size:12px;color:var(--gray-400);margin-bottom:14px}
+
+  .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:12px;margin-bottom:8px}
+  .kpi-card{background:#fff;border-radius:12px;padding:14px 16px;border-top:3px solid var(--green);
+    box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .kpi-card.hl{border-top-color:var(--positive)}
+  .kpi-card.warn{border-top-color:var(--warning)}
+  .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray-400);margin-bottom:4px}
+  .kpi-value{font-size:20px;font-weight:700}
+  .kpi-sub{font-size:11px;color:var(--gray-400);margin-top:3px}
+  .pos{color:var(--positive)} .neg{color:var(--danger)} .warnc{color:var(--warning)}
+
+  .money-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:14px}
+  .money-card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .money-card.spend{border-left:4px solid var(--danger)}
+  .money-card.rev{border-left:4px solid var(--info)}
+  .money-card.profit{border-left:4px solid var(--positive)}
+  .money-card h3{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--gray-400);margin-bottom:8px}
+  .money-big{font-size:26px;font-weight:700;line-height:1.2}
+  .money-alt{font-size:13px;color:var(--gray-700);margin-top:2px}
+  .money-desc{font-size:12px;color:var(--gray-700);margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0}
+
+  table{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;overflow:hidden;
+    box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:13px}
+  thead th{background:var(--black);color:#fff;font-size:10px;text-transform:uppercase;letter-spacing:.5px;
+    padding:11px 10px;text-align:right;font-weight:700;white-space:nowrap}
+  thead th:first-child,thead th:nth-child(2){text-align:left}
+  tbody td{padding:11px 10px;text-align:right;border-bottom:1px solid #f2f2f2;white-space:nowrap}
+  tbody td:first-child,tbody td:nth-child(2){text-align:left;white-space:normal}
+  tbody tr:hover{background:#f9fefb}
+  tbody tr.total-row{background:var(--gray-100);font-weight:700}
+  tbody tr.total-row td{border-bottom:none}
+  .table-wrap{overflow-x:auto;border-radius:12px}
+  .rank{display:inline-flex;width:22px;height:22px;border-radius:50%;background:var(--gray-100);
+    align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--gray-700);margin-right:6px}
+  .city{display:block;font-size:11px;color:var(--gray-400);font-weight:400}
+
+  .badge{display:inline-block;padding:3px 9px;border-radius:999px;font-size:10px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.4px;white-space:nowrap}
+  .b-star{background:#e6faf2;color:var(--positive)}
+  .b-good{background:#eaf4fb;color:var(--info)}
+  .b-mid{background:#fff5e8;color:var(--warning)}
+  .b-bad{background:#fdeceb;color:var(--danger)}
+
+  .bars-card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
+  .bar-row{display:grid;grid-template-columns:200px 1fr 84px;gap:12px;align-items:center;margin-bottom:9px;font-size:12px}
+  .bar-row .bname{color:var(--gray-700);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .bar-track{background:var(--gray-100);border-radius:5px;height:20px;position:relative;overflow:hidden}
+  .bar-fill{height:100%;border-radius:5px}
+  .bar-num{font-weight:700;text-align:right}
+  .bar-ref{position:absolute;top:0;bottom:0;width:2px;background:var(--danger);opacity:.55}
+  .bars-legend{font-size:11px;color:var(--gray-400);margin-top:10px;padding-top:10px;border-top:1px solid #f0f0f0}
+
+  .loc-card{background:#fff;border-radius:12px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);
+    border:1px solid #eee;overflow:hidden}
+  .loc-head{display:flex;align-items:center;justify-content:space-between;gap:14px;padding:15px 18px;flex-wrap:wrap}
+  .loc-head-info{flex:1;min-width:200px}
+  .loc-head-info h2{font-size:15px;font-weight:700;color:var(--black)}
+  .loc-meta{font-size:11px;color:var(--gray-400);margin-top:2px}
+  .loc-roas{font-size:22px;font-weight:700;white-space:nowrap}
+  .loc-roas small{font-size:10px;color:var(--gray-400);display:block;text-transform:uppercase;font-weight:700;text-align:right}
+  .loc-body{padding:0 18px 18px}
+  .analysis-kpi{display:flex;flex-wrap:wrap;gap:12px;font-size:11px;color:var(--gray-400);
+    margin-bottom:12px;padding:9px 0;border-top:1px solid #f0f0f0;border-bottom:1px solid #f0f0f0}
+  .analysis-kpi b{color:var(--gray-700)}
+  .loc-analysis{background:var(--gray-100);border-radius:10px;padding:14px 16px;border-left:4px solid var(--gray-400)}
+  .loc-analysis.sev-ok{border-left-color:var(--positive);background:#f4fdf8}
+  .loc-analysis.sev-good{border-left-color:var(--info);background:#f6fbff}
+  .loc-analysis.sev-mid{border-left-color:var(--warning);background:#fffaf3}
+  .loc-analysis.sev-high{border-left-color:var(--danger);background:#fff8f6}
+  .loc-analysis h4{font-size:11px;text-transform:uppercase;letter-spacing:.5px;margin:10px 0 4px;color:var(--gray-700)}
+  .loc-analysis h4:first-child{margin-top:0}
+  .loc-analysis ul{margin-left:18px;font-size:13px}
+  .loc-analysis ul.advice{color:var(--green-d)}
+  .loc-analysis ul li{margin-bottom:3px}
+
+  .note-card{background:#fff;border-radius:12px;padding:18px 20px;box-shadow:0 1px 4px rgba(0,0,0,.06);
+    font-size:12.5px;color:var(--gray-700)}
+  .note-card h4{font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--gray-400);margin:14px 0 5px}
+  .note-card h4:first-child{margin-top:0}
+  .note-card ul{margin-left:18px}
+  .note-card li{margin-bottom:4px}
+  .note-card code{background:var(--gray-100);padding:1px 5px;border-radius:4px;font-size:11.5px}
+
+  .footer{background:var(--black);color:var(--gray-400);font-size:11px;padding:22px 40px;text-align:center;margin-top:36px}
+  .footer span{color:var(--green)}
+
+  @media(max-width:760px){
+    .header{padding:16px} .header-meta{text-align:left} .container{padding:16px 16px 32px}
+    .bar-row{grid-template-columns:120px 1fr 66px;font-size:11px}
+    .loc-roas{font-size:18px}
+  }
+  @media print{
+    body{background:#fff} .loc-card,.kpi-card,table,.bars-card,.money-card,.note-card{box-shadow:none;border:1px solid #e5e5e5}
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-left">
+    <div class="bolt-logo">⚡</div>
+    <div class="header-title">
+      <h1>Josper Svintus — платне просування</h1>
+      <p>Bolt Food · Ads Performance Report</p>
+    </div>
+  </div>
+  <div class="header-meta">
+    Партнер: <strong>Josper Svintuz</strong><br/>
+    Локацій у звіті: <strong>9</strong><br/>
+    Сегмент: <strong>Mid-market (AM)</strong>
+  </div>
+</div>
+
+<div class="container">
+
+  <!-- ПЕРІОД -->
+  <div class="period-bar">
+    <div class="plabel">Період вивантаження даних</div>
+    <div class="pvalue">1 – 31 липня 2026 р.</div>
+    <div class="pnote">
+      Повний календарний місяць (31 день). Дані вивантажені з Bolt Food Provider Overview
+      (файл <code>Provider overview.csv</code>) станом на 13.08.2026.
+      Усі метрики — атрибутовані до платного просування (ads-attributed), тобто враховують лише
+      замовлення, що прийшли після показу/кліку по рекламі.
+    </div>
+    <div class="pwarn">
+      <b>Увага: це період, за який зібрані дані, а не фактичні дати роботи оголошень.</b>
+      Вивантаження Provider Overview повертає лише підсумки за вибраний діапазон і не містить
+      дат старту та завершення кампаній. Тому невідомо, чи показувалися оголошення всі 31 день
+      на кожній локації, чи лише частину місяця.
+      <br/><br/>
+      Практичний наслідок: усі денні середні у звіті розраховані на 31 день і будуть заниженими,
+      якщо реклама працювала менше. Так само низький обсяг показів на окремих локаціях
+      (насамперед <b>вулиця Руставі</b> — 24 покази, і <b>вулиця Професора Толока</b> — 132)
+      може означати не малий бюджет, а короткий період показів.
+      Точні дати кампаній по кожній локації є в рекламному кабінеті Bolt Food — після їх
+      отримання цей блок буде уточнено.
+    </div>
+  </div>
+
+  <!-- ЗАГАЛЬНІ KPI -->
+  <div class="section-title">1. Загальні результати за період</div>
+  <div class="section-hint">Сумарно по всіх 9 локаціях Josper Svintuz (Вінниця + Запоріжжя).</div>
+
+  <div class="kpi-grid">
+    <div class="kpi-card hl">
+      <div class="kpi-label">ROAS (загальний)</div>
+      <div class="kpi-value pos">4,34×</div>
+      <div class="kpi-sub">на 1 ₴ реклами — 4,34 ₴ виручки</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Витрати на рекламу</div>
+      <div class="kpi-value">₴6 269,74</div>
+      <div class="kpi-sub">€121,35</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Атрибутована виручка</div>
+      <div class="kpi-value">₴27 173,16</div>
+      <div class="kpi-sub">€526,12 (NET)</div>
+    </div>
+    <div class="kpi-card hl">
+      <div class="kpi-label">Прибуток від реклами</div>
+      <div class="kpi-value pos">₴20 903,42</div>
+      <div class="kpi-sub">€404,77</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Замовлення</div>
+      <div class="kpi-value">77</div>
+      <div class="kpi-sub">CPO €1,58 (₴81,68)</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Нові клієнти</div>
+      <div class="kpi-value">42</div>
+      <div class="kpi-sub">55% замовлень · €2,89 за клієнта</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">Показів / кліків</div>
+      <div class="kpi-value">4 971 / 376</div>
+      <div class="kpi-sub">CTR 7,56% · CPC €0,32</div>
+    </div>
+    <div class="kpi-card">
+      <div class="kpi-label">CVR (клік → замовлення)</div>
+      <div class="kpi-value">20,5%</div>
+      <div class="kpi-sub">Середній чек ₴352,90</div>
+    </div>
+  </div>
+
+  <!-- ВИТРАТИ ТА ПРИБУТОК -->
+  <div class="section-title">2. Витрати партнера та прибуток</div>
+  <div class="section-hint">Розрахунок економіки платного просування за даними, зібраними
+    з 01.07.2026 по 31.07.2026.</div>
+
+  <div class="money-grid">
+    <div class="money-card spend">
+      <h3>Витрати партнера на просування</h3>
+      <div class="money-big neg">₴6 269,74</div>
+      <div class="money-alt">€121,35</div>
+      <div class="money-desc">
+        Це вся сума, яку партнер сплатив за платне просування у липні по 9 локаціях.
+        У середньому ₴696,64 на локацію. Якщо рівномірно розкласти на 31 день —
+        ₴202,25 на день, але фактична денна витрата була вищою, якщо оголошення
+        показувалися не всі дні місяця.
+      </div>
+    </div>
+    <div class="money-card rev">
+      <h3>Виручка, згенерована рекламою</h3>
+      <div class="money-big">₴27 173,16</div>
+      <div class="money-alt">€526,12 · Attributed NET Revenue</div>
+      <div class="money-desc">
+        77 замовлень із середнім чеком ₴352,90. Це виручка, яку Bolt атрибутує саме
+        до рекламних показів і кліків.
+      </div>
+    </div>
+    <div class="money-card profit">
+      <h3>Прибуток (виручка − витрати)</h3>
+      <div class="money-big pos">+₴20 903,42</div>
+      <div class="money-alt">€404,77 · рентабельність 333%</div>
+      <div class="money-desc">
+        Кожна вкладена гривня повернула 3,33 ₴ чистого приросту виручки.
+        Реклама у липні була однозначно прибутковою на рівні бренду.
+      </div>
+    </div>
+  </div>
+
+  <div class="table-wrap" style="margin-top:14px">
+    <table>
+      <thead>
+        <tr>
+          <th>Локація</th>
+          <th>Оцінка</th>
+          <th>Витрати, ₴</th>
+          <th>Виручка, ₴</th>
+          <th>Прибуток, ₴</th>
+          <th>ROAS</th>
+          <th>Замовл.</th>
+          <th>Сер. чек, ₴</th>
+          <th>Нові клієнти</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><span class="rank">1</span>вулиця Келецька<span class="city">Вінниця · ID 194993</span></td>
+          <td><span class="badge b-star">Відмінно</span></td>
+          <td>1 181,25</td><td>10 828,10</td><td class="pos">+9 646,85</td><td><b>9,17×</b></td><td>19</td><td>569,90</td><td>13</td>
+        </tr>
+        <tr>
+          <td><span class="rank">2</span>вулиця Професора Толока<span class="city">Запоріжжя · ID 195012</span></td>
+          <td><span class="badge b-star">Відмінно</span></td>
+          <td>390,76</td><td>2 582,18</td><td class="pos">+2 191,42</td><td><b>6,62×</b></td><td>5</td><td>516,44</td><td>2</td>
+        </tr>
+        <tr>
+          <td><span class="rank">3</span>вулиця Деповська<span class="city">Запоріжжя · ID 195024</span></td>
+          <td><span class="badge b-star">Відмінно</span></td>
+          <td>934,91</td><td>4 979,04</td><td class="pos">+4 044,13</td><td><b>5,33×</b></td><td>18</td><td>276,61</td><td>12</td>
+        </tr>
+        <tr>
+          <td><span class="rank">4</span>Дніпровське шосе<span class="city">Запоріжжя · ID 195007</span></td>
+          <td><span class="badge b-good">Добре</span></td>
+          <td>885,29</td><td>3 609,64</td><td class="pos">+2 724,35</td><td><b>4,08×</b></td><td>10</td><td>360,96</td><td>5</td>
+        </tr>
+        <tr>
+          <td><span class="rank">5</span>Запорізька вулиця<span class="city">Запоріжжя · ID 197909</span></td>
+          <td><span class="badge b-good">Добре</span></td>
+          <td>833,36</td><td>2 177,10</td><td class="pos">+1 343,74</td><td><b>2,61×</b></td><td>6</td><td>362,85</td><td>5</td>
+        </tr>
+        <tr>
+          <td><span class="rank">6</span>вул. Ентузіастів<span class="city">Запоріжжя · ID 922610</span></td>
+          <td><span class="badge b-good">Добре</span></td>
+          <td>490,22</td><td>1 221,80</td><td class="pos">+731,58</td><td><b>2,49×</b></td><td>13</td><td>93,98</td><td>2</td>
+        </tr>
+        <tr>
+          <td><span class="rank">7</span>вулиця Володимира Українця<span class="city">Запоріжжя · ID 195025</span></td>
+          <td><span class="badge b-mid">Слабко</span></td>
+          <td>531,86</td><td>902,00</td><td class="pos">+370,14</td><td><b>1,70×</b></td><td>3</td><td>300,67</td><td>3</td>
+        </tr>
+        <tr>
+          <td><span class="rank">8</span>проспект Соборний<span class="city">Запоріжжя · ID 195019</span></td>
+          <td><span class="badge b-bad">Збиток</span></td>
+          <td>933,86</td><td>873,30</td><td class="neg">−60,56</td><td><b>0,94×</b></td><td>3</td><td>291,10</td><td>0</td>
+        </tr>
+        <tr>
+          <td><span class="rank">9</span>вулиця Руставі<span class="city">Запоріжжя · ID 197892</span></td>
+          <td><span class="badge b-bad">Збиток</span></td>
+          <td>88,22</td><td>0,00</td><td class="neg">−88,22</td><td><b>0,00×</b></td><td>0</td><td>—</td><td>0</td>
+        </tr>
+        <tr class="total-row">
+          <td>РАЗОМ · 9 локацій</td>
+          <td>—</td>
+          <td>6 269,74</td><td>27 173,16</td><td class="pos">+20 903,42</td><td>4,34×</td><td>77</td><td>352,90</td><td>42</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- ГРАФІК ROAS -->
+  <div class="section-title">3. ROAS по локаціях</div>
+  <div class="section-hint">Червона лінія — точка беззбитковості (ROAS = 1,0). Усе, що ліворуч від неї, працює у збиток.</div>
+
+  <div class="bars-card">
+    <div class="bar-row">
+      <div class="bname">вулиця Келецька</div>
+      <div class="bar-track"><div class="bar-fill" style="width:100%;background:var(--positive)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num pos">9,17×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">вулиця Професора Толока</div>
+      <div class="bar-track"><div class="bar-fill" style="width:72.2%;background:var(--positive)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num pos">6,62×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">вулиця Деповська</div>
+      <div class="bar-track"><div class="bar-fill" style="width:58.1%;background:var(--positive)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num pos">5,33×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">Дніпровське шосе</div>
+      <div class="bar-track"><div class="bar-fill" style="width:44.5%;background:var(--info)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num">4,08×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">Запорізька вулиця</div>
+      <div class="bar-track"><div class="bar-fill" style="width:28.5%;background:var(--info)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num">2,61×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">вул. Ентузіастів</div>
+      <div class="bar-track"><div class="bar-fill" style="width:27.2%;background:var(--info)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num">2,49×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">вул. Володимира Українця</div>
+      <div class="bar-track"><div class="bar-fill" style="width:18.5%;background:var(--warning)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num warnc">1,70×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">проспект Соборний</div>
+      <div class="bar-track"><div class="bar-fill" style="width:10.3%;background:var(--danger)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num neg">0,94×</div>
+    </div>
+    <div class="bar-row">
+      <div class="bname">вулиця Руставі</div>
+      <div class="bar-track"><div class="bar-fill" style="width:0.6%;background:var(--danger)"></div><div class="bar-ref" style="left:10.9%"></div></div>
+      <div class="bar-num neg">0,00×</div>
+    </div>
+    <div class="bars-legend">
+      Середній ROAS по бренду — 4,34×. Розкид між найкращою і найгіршою локацією — майже 10×,
+      тобто бюджет розподілений неоптимально.
+    </div>
+  </div>
+
+  <!-- ДЕТАЛЬНИЙ АНАЛІЗ -->
+  <div class="section-title">4. Ефективність кожної локації — детально</div>
+  <div class="section-hint">Локації відсортовані за ROAS: від найефективнішої до збиткової.</div>
+
+  <!-- 1 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>1. Josper Svintuz вулиця Келецька <span class="badge b-star">Відмінно</span></h2>
+        <div class="loc-meta">Вінниця · Provider ID 194993 · City ID 501</div>
+      </div>
+      <div class="loc-roas pos"><small>ROAS</small>9,17×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴1 181,25 (€22,83)</b></span>
+        <span>Виручка: <b>₴10 828,10</b></span>
+        <span>Прибуток: <b>+₴9 646,85</b></span>
+        <span>Замовлень: <b>19</b></span>
+        <span>Сер. чек: <b>₴569,90</b></span>
+        <span>Показів: <b>2 599</b></span>
+        <span>Кліків: <b>178</b></span>
+        <span>CTR: <b>6,8%</b></span>
+        <span>CVR: <b>10,7%</b></span>
+        <span>CPM: <b>€8,78</b></span>
+        <span>CPC: <b>€0,13</b></span>
+        <span>CPO: <b>€1,20</b></span>
+        <span>Нових клієнтів: <b>13 (€1,76)</b></span>
+      </div>
+      <div class="loc-analysis sev-ok">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Найкраща локація бренду і абсолютний драйвер результату.</b> Дає 40% усієї атрибутованої виручки (₴10,8 тис. із ₴27,2 тис.), витрачаючи лише 19% бюджету.</li>
+          <li>Найдешевший трафік у всій мережі: CPM €8,78 — у 2,8 раза дешевше за середній по бренду (€24,41), CPC €0,13 — у 2,5 раза дешевше. Це єдина локація у Вінниці, і аукціон там значно менш конкурентний.</li>
+          <li>Найвищий середній чек — ₴569,90, на 61% вище середнього по мережі (₴352,90). Саме комбінація «дешевий клік + великий чек» дає ROAS 9,17×.</li>
+          <li>13 нових клієнтів по €1,76 — найдешевше залучення в мережі, і це 31% усіх нових клієнтів бренду.</li>
+          <li>Єдина відносно слабка метрика — CVR 10,7% (проти 20,5% по бренду): з 178 кліків лише 19 замовлень. Тобто трафіку багато, але меню/ціни конвертують не всіх.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Масштабувати бюджет: підняти щонайменше у 2–3 рази. Навіть якщо ROAS просяде до 5–6×, це все одно кращий результат, ніж у більшості інших локацій.</li>
+          <li>Попрацювати з CVR: оновити фото топ-позицій, перевірити час доставки й доступність позицій у години показу реклами.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>2. Josper Svintuz вулиця Професора Толока <span class="badge b-star">Відмінно</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 195012 · City ID 500</div>
+      </div>
+      <div class="loc-roas pos"><small>ROAS</small>6,62×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴390,76 (€7,56)</b></span>
+        <span>Виручка: <b>₴2 582,18</b></span>
+        <span>Прибуток: <b>+₴2 191,42</b></span>
+        <span>Замовлень: <b>5</b></span>
+        <span>Сер. чек: <b>₴516,44</b></span>
+        <span>Показів: <b>132</b></span>
+        <span>Кліків: <b>17</b></span>
+        <span>CTR: <b>12,9%</b></span>
+        <span>CVR: <b>29,4%</b></span>
+        <span>CPM: <b>€57,29</b></span>
+        <span>CPC: <b>€0,44</b></span>
+        <span>CPO: <b>€1,51</b></span>
+        <span>Нових клієнтів: <b>2 (€3,78)</b></span>
+      </div>
+      <div class="loc-analysis sev-ok">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Найнедооціненіша локація: найменший бюджет у мережі (₴390,76) при другому ROAS.</b> Витратила 6% бюджету, а принесла 9,5% виручки.</li>
+          <li>Дуже здорова воронка: CTR 12,9% (майже вдвічі вище середнього 7,56%) і CVR 29,4% (проти 20,5%). Тобто і оголошення релевантне, і сторінка закладу конвертує.</li>
+          <li>Другий за розміром середній чек — ₴516,44.</li>
+          <li>Головне обмеження — обсяг: лише 132 покази за період вивантаження. Локація фактично «не встигла» витратити бюджет, тому дала всього 5 замовлень. Варто перевірити дати кампанії: якщо вона працювала не весь місяць, то ефективність тут ще вища, ніж виглядає.</li>
+          <li>CPM €57,29 високий, але це типово для малих обсягів у конкурентному Запоріжжі й не є проблемою при такій конверсії.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Пріоритет №1 для перерозподілу бюджету: перекинути сюди кошти зі «проспект Соборний» і «вулиця Руставі». Потенціал зростання найвищий у мережі.</li>
+          <li>Перевірити, чому так мало показів: ліміт денного бюджету, вузький радіус доставки або обмежені години роботи.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>3. Josper Svintuz вулиця Деповська <span class="badge b-star">Відмінно</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 195024 · City ID 500</div>
+      </div>
+      <div class="loc-roas pos"><small>ROAS</small>5,33×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴934,91 (€18,11)</b></span>
+        <span>Виручка: <b>₴4 979,04</b></span>
+        <span>Прибуток: <b>+₴4 044,13</b></span>
+        <span>Замовлень: <b>18</b></span>
+        <span>Сер. чек: <b>₴276,61</b></span>
+        <span>Показів: <b>525</b></span>
+        <span>Кліків: <b>56</b></span>
+        <span>CTR: <b>10,7%</b></span>
+        <span>CVR: <b>32,1%</b></span>
+        <span>CPM: <b>€34,49</b></span>
+        <span>CPC: <b>€0,32</b></span>
+        <span>CPO: <b>€1,01</b></span>
+        <span>Нових клієнтів: <b>12 (€1,51)</b></span>
+      </div>
+      <div class="loc-analysis sev-ok">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Найкраща локація Запоріжжя за обсягом і найефективніша за вартістю замовлення:</b> CPO €1,01 — найнижчий у мережі серед локацій з відчутним обсягом.</li>
+          <li>Друге місце за виручкою (₴4 979,04) і за кількістю замовлень (18) — фактично операційне ядро мережі в Запоріжжі.</li>
+          <li>Сильна воронка: CTR 10,7% і CVR 32,1% — обидва показники суттєво вище середніх.</li>
+          <li>12 нових клієнтів по €1,51 — друга найдешевша вартість залучення. Разом із Келецькою ці дві локації дають 25 із 42 нових клієнтів (60%).</li>
+          <li>Обмежувач — низький середній чек ₴276,61 (на 22% нижче середнього). Саме через це ROAS не дотягує до рівня Келецької, хоча замовлень майже стільки ж (18 проти 19).</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Збільшити бюджет на 50–100% — воронка витримає більший обсяг.</li>
+          <li>Працювати над середнім чеком: комбо-набори, апсейл напоїв/десертів, поріг безкоштовної доставки. Зростання чека на 25% підняло б ROAS до ~6,7×.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>4. Josper Svintuz Дніпровське шосе <span class="badge b-good">Добре</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 195007 · City ID 500</div>
+      </div>
+      <div class="loc-roas"><small>ROAS</small>4,08×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴885,29 (€17,14)</b></span>
+        <span>Виручка: <b>₴3 609,64</b></span>
+        <span>Прибуток: <b>+₴2 724,35</b></span>
+        <span>Замовлень: <b>10</b></span>
+        <span>Сер. чек: <b>₴360,96</b></span>
+        <span>Показів: <b>177</b></span>
+        <span>Кліків: <b>25</b></span>
+        <span>CTR: <b>14,1%</b></span>
+        <span>CVR: <b>40,0%</b></span>
+        <span>CPM: <b>€96,82</b></span>
+        <span>CPC: <b>€0,69</b></span>
+        <span>CPO: <b>€1,71</b></span>
+        <span>Нових клієнтів: <b>5 (€3,43)</b></span>
+      </div>
+      <div class="loc-analysis sev-good">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Найкраща якість трафіку в мережі, але найдорожчі покази.</b> CTR 14,1% — найвищий, CVR 40,0% — другий найвищий. З 25 кліків 10 замовлень.</li>
+          <li>Проблема саме в закупівлі: CPM €96,82 — найдорожчий у мережі, у 4 рази вище середнього і в 11 разів дорожче за Келецьку. За ₴885 куплено лише 177 показів.</li>
+          <li>Через дорогі покази ROAS «просідає» до 4,08×, хоча за конверсійністю локація заслуговує на 7–8×.</li>
+          <li>Середній чек ₴360,96 — на рівні середнього по мережі.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Розібратися з CPM: перевірити тип кампанії й ставку. Ймовірно, локація конкурує за дорогі преміум-позиції у стрічці — варто протестувати менш агресивне розміщення.</li>
+          <li>Якщо здешевити CPM хоча б до середнього по мережі (€24), ця локація стане найприбутковішою у Запоріжжі — воронка вже готова.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>5. Josper Svintuz Запорізька вулиця <span class="badge b-good">Добре</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 197909 · City ID 500</div>
+      </div>
+      <div class="loc-roas"><small>ROAS</small>2,61×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴833,36 (€16,14)</b></span>
+        <span>Виручка: <b>₴2 177,10</b></span>
+        <span>Прибуток: <b>+₴1 343,74</b></span>
+        <span>Замовлень: <b>6</b></span>
+        <span>Сер. чек: <b>₴362,85</b></span>
+        <span>Показів: <b>578</b></span>
+        <span>Кліків: <b>36</b></span>
+        <span>CTR: <b>6,2%</b></span>
+        <span>CVR: <b>16,7%</b></span>
+        <span>CPM: <b>€27,92</b></span>
+        <span>CPC: <b>€0,45</b></span>
+        <span>CPO: <b>€2,69</b></span>
+        <span>Нових клієнтів: <b>5 (€3,23)</b></span>
+      </div>
+      <div class="loc-analysis sev-good">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Прибуткова, але помітно слабша за середній рівень бренду</b> (2,61× проти 4,34×). П'ятий бюджет у мережі при шостому місці за виручкою.</li>
+          <li>Обсяг показів непоганий (578, третє місце), але воронка «тече» з самого початку: CTR 6,2% — один із найнижчих, тобто оголошення слабо чіпляє.</li>
+          <li>CVR 16,7% також нижче середнього: 36 кліків дали лише 6 замовлень.</li>
+          <li>CPO €2,69 — у 2,7 раза дорожче за Деповську при однаковому середньому чеку (₴362,85). Тобто різниця не в чеку, а саме в конверсії.</li>
+          <li>Позитив: 5 нових клієнтів з 6 замовлень — локація майже повністю працює на залучення нової аудиторії, тобто база тут ще не наповнена.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Оновити креатив і головне фото — низький CTR майже завжди про це.</li>
+          <li>Тримати бюджет на поточному рівні, поки CTR не виросте хоча б до 9–10%; не масштабувати наперед.</li>
+          <li>Оскільки трафік майже весь новий, є сенс додати оффер для перших замовлень, щоб підняти CVR.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>6. Josper Svintuz вул. Ентузіастів <span class="badge b-good">Добре</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 922610 · City ID 500</div>
+      </div>
+      <div class="loc-roas"><small>ROAS</small>2,49×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴490,22 (€9,49)</b></span>
+        <span>Виручка: <b>₴1 221,80</b></span>
+        <span>Прибуток: <b>+₴731,58</b></span>
+        <span>Замовлень: <b>13</b></span>
+        <span>Сер. чек: <b>₴93,98</b></span>
+        <span>Показів: <b>128</b></span>
+        <span>Кліків: <b>16</b></span>
+        <span>CTR: <b>12,5%</b></span>
+        <span>CVR: <b>81,3%</b></span>
+        <span>CPM: <b>€74,12</b></span>
+        <span>CPC: <b>€0,59</b></span>
+        <span>CPO: <b>€0,73</b></span>
+        <span>Нових клієнтів: <b>2 (€4,74)</b></span>
+      </div>
+      <div class="loc-analysis sev-mid">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Найнижча вартість замовлення в мережі — CPO €0,73</b>, і найвища конверсія: CVR 81,3% (13 замовлень із 16 кліків).</li>
+          <li>Але <b>середній чек аномально низький — ₴93,98</b>, це у 3,8 раза менше за середній по мережі (₴352,90) і в 6 разів менше за Келецьку. Саме через це ROAS лише 2,49× попри найкращу конверсію.</li>
+          <li>Картина «багато дрібних замовлень» типова для точки, що продає переважно каву/напої/снеки або де діє глибока промо-знижка. Варто перевірити, чи не «з'їдає» промо всю маржу.</li>
+          <li>CVR 81,3% при 16 кліках — цифра на дуже малій вибірці, тому її не варто вважати стабільною.</li>
+          <li>CPM €74,12 — третій найдорожчий; за ₴490 куплено лише 128 показів.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Головний фокус — середній чек, а не трафік: додати комбо (напій + страва), встановити мінімальну суму замовлення або поріг безкоштовної доставки.</li>
+          <li>Перевірити активні знижки: якщо на локації діє агресивне промо, реальна маржа може бути нижчою, ніж показує ROAS.</li>
+          <li>Бюджет поки не збільшувати — спочатку виправити економіку чека.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 7 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>7. Josper Svintuz вулиця Володимира Українця <span class="badge b-mid">Слабко</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 195025 · City ID 500</div>
+      </div>
+      <div class="loc-roas warnc"><small>ROAS</small>1,70×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴531,86 (€10,30)</b></span>
+        <span>Виручка: <b>₴902,00</b></span>
+        <span>Прибуток: <b>+₴370,14</b></span>
+        <span>Замовлень: <b>3</b></span>
+        <span>Сер. чек: <b>₴300,67</b></span>
+        <span>Показів: <b>122</b></span>
+        <span>Кліків: <b>10</b></span>
+        <span>CTR: <b>8,2%</b></span>
+        <span>CVR: <b>30,0%</b></span>
+        <span>CPM: <b>€84,43</b></span>
+        <span>CPC: <b>€1,03</b></span>
+        <span>CPO: <b>€3,43</b></span>
+        <span>Нових клієнтів: <b>3 (€3,43)</b></span>
+      </div>
+      <div class="loc-analysis sev-mid">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Формально прибуткова, але фактично на межі:</b> ROAS 1,70× означає, що після врахування собівартості продуктів реклама тут, найімовірніше, вже не окупається.</li>
+          <li>Другий найдорожчий трафік у мережі: CPM €84,43 і CPC €1,03 (найдорожчий клік). За ₴531,86 отримано лише 122 покази і 10 кліків.</li>
+          <li>Конверсія при цьому нормальна — CVR 30,0%. Проблема не в закладі, а в тому, що трафік надто дорогий і його надто мало.</li>
+          <li>Усі 3 замовлення — від нових клієнтів, тобто локація ще на етапі набору бази.</li>
+          <li>Обсяг настільки малий (10 кліків за місяць), що будь-які висновки статистично слабкі.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Не збільшувати бюджет. Спочатку зменшити CPM: перевірити налаштування кампанії й ставку.</li>
+          <li>Якщо у серпні CPM не знизиться — поставити кампанію на паузу і перекинути бюджет на Професора Толока.</li>
+          <li>Перевірити операційні базові речі: зона доставки, години роботи, повнота меню з фото.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>8. Josper Svintuz проспект Соборний <span class="badge b-bad">Збиток</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 195019 · City ID 500</div>
+      </div>
+      <div class="loc-roas neg"><small>ROAS</small>0,94×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴933,86 (€18,08)</b></span>
+        <span>Виручка: <b>₴873,30</b></span>
+        <span>Прибуток: <b>−₴60,56</b></span>
+        <span>Замовлень: <b>3</b></span>
+        <span>Сер. чек: <b>₴291,10</b></span>
+        <span>Показів: <b>686</b></span>
+        <span>Кліків: <b>37</b></span>
+        <span>CTR: <b>5,4%</b></span>
+        <span>CVR: <b>8,1%</b></span>
+        <span>CPM: <b>€26,36</b></span>
+        <span>CPC: <b>€0,49</b></span>
+        <span>CPO: <b>€6,03</b></span>
+        <span>Нових клієнтів: <b>0</b></span>
+      </div>
+      <div class="loc-analysis sev-high">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Головна проблема звіту.</b> Третій за розміром бюджет у мережі (₴933,86, 15% усіх витрат) при виручці ₴873,30 — реклама не окупилась і дала збиток −₴60,56.</li>
+          <li>Трафіку було достатньо: 686 показів (2-е місце в мережі) і 37 кліків за адекватним CPM €26,36. Тобто гроші не «згоріли» на дорогих показах.</li>
+          <li>Проблема саме у конверсії: <b>CVR 8,1% — найнижчий у мережі</b> серед локацій із замовленнями. 37 кліків дали лише 3 замовлення, тобто 34 людини відкрили заклад і пішли.</li>
+          <li>CTR 5,4% також найнижчий — оголошення не зачіпляє аудиторію.</li>
+          <li><b>0 нових клієнтів</b> — єдина локація з реальним трафіком, яка не залучила жодного нового користувача. CPO €6,03 — у 8 разів дорожче за Ентузіастів.</li>
+          <li>Комбінація «багато кліків + нуль конверсії» майже завжди означає проблему на сторінці закладу: висока мінімальна сума, довгий час доставки, дорогі позиції або відсутність фото.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li><b>Терміново перевірити сторінку закладу:</b> час доставки, мінімальне замовлення, вартість доставки, наявність фото у топ-позиціях, доступність меню у години показів.</li>
+          <li>До виправлення — скоротити бюджет щонайменше вдвічі; ці кошти дадуть кращий результат на Келецькій або Професора Толока.</li>
+          <li>Порівняти з фізичним розташуванням: проспект Соборний — центральна вулиця з високою конкуренцією, тому оффер має бути сильнішим за середній.</li>
+          <li>Додати промо для перших замовлень — нуль нових клієнтів за 686 показів це аномалія, яку треба закривати оффером.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- 9 -->
+  <div class="loc-card">
+    <div class="loc-head">
+      <div class="loc-head-info">
+        <h2>9. Josper Svintuz вулиця Руставі <span class="badge b-bad">Збиток</span></h2>
+        <div class="loc-meta">Запоріжжя · Provider ID 197892 · City ID 500</div>
+      </div>
+      <div class="loc-roas neg"><small>ROAS</small>0,00×</div>
+    </div>
+    <div class="loc-body">
+      <div class="analysis-kpi">
+        <span>Витрати: <b>₴88,22 (€1,70)</b></span>
+        <span>Виручка: <b>₴0,00</b></span>
+        <span>Прибуток: <b>−₴88,22</b></span>
+        <span>Замовлень: <b>0</b></span>
+        <span>Сер. чек: <b>—</b></span>
+        <span>Показів: <b>24</b></span>
+        <span>Кліків: <b>1</b></span>
+        <span>CTR: <b>4,2%</b></span>
+        <span>CVR: <b>0,0%</b></span>
+        <span>CPM: <b>€71,01</b></span>
+        <span>CPC: <b>€1,70</b></span>
+        <span>CPO: <b>—</b></span>
+        <span>Нових клієнтів: <b>0</b></span>
+      </div>
+      <div class="loc-analysis sev-high">
+        <h4>Що показують дані</h4>
+        <ul>
+          <li><b>Кампанія фактично не працювала.</b> 24 покази і 1 клік за період вивантаження — це рівень статистичної похибки, а не реклами.</li>
+          <li>Оскільки точні дати показів невідомі, можливі два різні сценарії: або кампанія була активна весь місяць, але майже не отримувала показів (проблема з налаштуваннями чи ставкою), або вона працювала лише день-два. Перший крок — подивитися дати в рекламному кабінеті, бо від цього залежить і діагноз, і дія.</li>
+          <li>Нуль замовлень і нуль виручки, тобто всі витрачені ₴88,22 — чистий збиток.</li>
+          <li>Сума збитку мізерна (1,4% бюджету), тому фінансового впливу немає. Але це сигнал, що кампанія або щойно запущена, або заблокована технічно.</li>
+          <li>Найнижчий CTR у мережі (4,2%) при найдорожчому кліку (€1,70) — але на одному кліку робити висновки неможливо.</li>
+        </ul>
+        <h4>Рекомендації</h4>
+        <ul class="advice">
+          <li>Перевірити технічний стан: чи активна кампанія, чи не стоїть заклад на паузі, чи не закінчився денний бюджет, чи налаштована зона доставки.</li>
+          <li>Якщо локація нова — дати повний місяць з адекватним бюджетом, щоб зібрати дані. Без обсягу оцінити ефективність неможливо.</li>
+          <li>Якщо локація працює давно — вимкнути просування, поки не з'ясується причина відсутності показів.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- ВИСНОВКИ -->
+  <div class="section-title">5. Ключові висновки та план дій</div>
+
+  <div class="note-card">
+    <h4>Загальна оцінка періоду</h4>
+    <ul>
+      <li>Платне просування у липні 2026 було <b>прибутковим на рівні бренду</b>: ₴6 269,74 витрат принесли ₴27 173,16 виручки, прибуток <b>+₴20 903,42</b>, ROAS 4,34×.</li>
+      <li><b>7 із 9 локацій</b> прибуткові, 2 — у збитку (проспект Соборний та вулиця Руставі, разом −₴148,78).</li>
+      <li>Результат сильно концентрований: <b>3 локації (Келецька, Деповська, Професора Толока) дають 67% усієї виручки</b>, витрачаючи 40% бюджету.</li>
+      <li>Реклама добре працює на залучення: <b>42 нових клієнти</b>, тобто 55% усіх атрибутованих замовлень — від нових користувачів, по €2,89 за клієнта.</li>
+    </ul>
+
+    <h4>Де втрачаються гроші</h4>
+    <ul>
+      <li><b>Неоптимальний розподіл бюджету.</b> Проспект Соборний отримав ₴933,86 (майже як Деповська), але дав у 5,7 раза меншу виручку. Найефективніша Професора Толока отримала найменший бюджет.</li>
+      <li><b>Дорогі покази у Запоріжжі.</b> CPM на Дніпровському шосе (€96,82) та Володимира Українця (€84,43) у 10 разів вищий, ніж на Келецькій (€8,78). Це прямо «зрізає» ROAS локацій із гарною конверсією.</li>
+      <li><b>Низький середній чек на вул. Ентузіастів</b> (₴93,98): найкраща конверсія в мережі не конвертується у прибуток.</li>
+    </ul>
+
+    <h4>План дій на серпень</h4>
+    <ul>
+      <li><b>Збільшити бюджет:</b> вулиця Келецька (×2–3), вулиця Професора Толока (×2–3), вулиця Деповська (+50–100%).</li>
+      <li><b>Скоротити / переглянути:</b> проспект Соборний (−50% до виправлення сторінки закладу), вулиця Володимира Українця (тримати або пауза).</li>
+      <li><b>Технічно перевірити:</b> вулиця Руставі (чому лише 24 покази), Дніпровське шосе (чому CPM €96,82).</li>
+      <li><b>Операційно виправити:</b> сторінка проспект Соборний (CVR 8,1%, 0 нових клієнтів), середній чек на вул. Ентузіастів.</li>
+      <li>Проста ре-алокація бюджету без збільшення загальної суми може підняти ROAS бренду з 4,34× приблизно до 6×.</li>
+    </ul>
+
+    <h4>Методологія та застереження</h4>
+    <ul>
+      <li><b>Період збору даних:</b> 01.07.2026 – 31.07.2026 (повний календарний місяць).</li>
+      <li><b>Фактичні дати роботи оголошень — невідомі.</b> Вивантаження Provider Overview
+        містить лише підсумки за вибраний діапазон, без дат старту й завершення кампаній.
+        Тому не можна стверджувати, що реклама працювала всі 31 день на всіх 9 локаціях.
+        Це впливає на трактування денних середніх та обсягу показів, але <b>не впливає</b>
+        на ROAS, витрати, виручку й прибуток — вони розраховані з фактичних сум за період.</li>
+      <li><b>Джерело:</b> Bolt Food Provider Overview, файл <code>Provider overview.csv</code>, 9 рядків (Provider ID 194993, 195024, 195019, 195007, 197909, 195025, 922610, 195012, 197892).</li>
+      <li><b>Валюта:</b> у вивантаженні локальні суми позначені знаком «$», але фактично це <b>гривні (₴)</b> — Country Name: Ukraine. Перерахунок за курсом звіту ≈ <b>51,67 ₴/€</b> (виведено з відношення локальних сум до сум у євро).</li>
+      <li><b>«Прибуток»</b> у цьому звіті = Attributed NET Revenue мінус витрати на просування. Це <b>приріст виручки</b>, а не чистий прибуток бізнесу: собівартість продуктів, оплата праці та інші операційні витрати тут не враховані. Для оцінки реальної окупності орієнтуйтесь на ROAS ≥ 3–4× як мінімальний безпечний рівень.</li>
+      <li><b>Атрибуція:</b> усі метрики стосуються лише замовлень, які Bolt пов'язав із рекламними показами та кліками. Органічні замовлення у звіт не входять.</li>
+      <li><b>Малі вибірки:</b> для локацій із менш ніж 20 кліками (Професора Толока, Дніпровське шосе, Володимира Українця, Ентузіастів, Руставі) показники CTR/CVR статистично нестабільні — трактувати як напрямок, а не як точну цифру.</li>
+    </ul>
+  </div>
+
+</div>
+
+<div class="footer">
+  <span>Bolt Food</span> · Josper Svintus — звіт по платному просуванню · Дані за період: 01.07.2026 – 31.07.2026<br/>
+  Сформовано: <span id="gen"></span> · Джерело даних: Provider Overview (9 локацій)
+</div>
+
+<script>
+  document.getElementById('gen').textContent = new Date().toLocaleString('uk-UA');
+</script>
+
+</body>
+</html>
