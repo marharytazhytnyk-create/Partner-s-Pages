@@ -3,14 +3,13 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Маркетинговий план · MARCELLO · Вересень 2026 · Bolt Food</title>
+<title>План просування · MARCELLO · Вересень 2026 · Bolt Food</title>
 <meta name="report-period" content="31 серпня – 30 вересня 2026"/>
 <style>
 :root{
   --green:#34D186; --green-d:#0d8a52; --green-l:#e8faf1;
   --ink:#0d0d0d; --g700:#4a4a4a; --g400:#9a9a9a; --g100:#f5f6f8;
-  --pos:#1aad6a; --warn:#e08a1e; --dang:#d0342c; --tomato:#E8501E;
-  --line:#e8eaed;
+  --pos:#1aad6a; --dang:#d0342c; --tomato:#E8501E; --line:#e8eaed;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
@@ -36,29 +35,19 @@ body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-s
 h2.sec{font-size:12.5px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
   color:var(--g700);padding-bottom:9px;border-bottom:2px solid var(--green);
   margin:30px 0 14px;display:flex;align-items:center;gap:9px}
-h2.sec:first-of-type{margin-top:6px}
+h2.sec:first-of-type{margin-top:4px}
+h2.sec i{margin-left:auto;font-style:normal;font-weight:650;text-transform:none;
+  letter-spacing:0;font-size:12px;color:var(--g400)}
 .slice-art{width:21px;height:21px;flex-shrink:0}
 
-.box{padding:14px 17px;border-radius:11px;background:var(--green-l);
-  border-left:4px solid var(--green);margin:14px 0;font-size:14px}
-.box.bad{background:#fff5f4;border-left-color:var(--dang)}
-.box.cta{background:var(--ink);border-left-color:var(--tomato);color:#fff;font-size:15px}
-.box.cta b.h{color:var(--tomato)}
-.box b.h{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;
-  letter-spacing:.6px;color:var(--green-d);font-weight:800}
-.box.bad b.h{color:var(--dang)}
-
-table.t{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
-table.t td,table.t th{padding:9px 13px;text-align:left;border-bottom:1px solid var(--line)}
-table.t th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--g400);
-  font-weight:700;background:var(--g100)}
-table.t td:not(:first-child),table.t th:not(:first-child){text-align:right;
-  font-variant-numeric:tabular-nums}
-table.t tr:last-child td{border-bottom:none}
-table.t td.bad{color:var(--dang);font-weight:700}
-table.t td.good{color:var(--pos);font-weight:700}
-table.t tr.total td{font-weight:700;background:#fafbfc}
-.scroll-x{overflow-x:auto;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(198px,1fr));gap:13px}
+.kpi{background:#fff;border-radius:12px;padding:15px 17px;border-top:3px solid var(--green);
+  box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.kpi-l{font-size:10px;font-weight:800;text-transform:uppercase;color:var(--g400);
+  letter-spacing:.5px;margin-bottom:5px}
+.kpi-v{font-size:23px;font-weight:700;line-height:1.15}
+.kpi-n{font-size:12px;color:var(--g700);margin-top:4px}
+.kpi.t{border-top-color:var(--tomato)}
 
 .cal{display:grid;grid-template-columns:repeat(auto-fit,minmax(198px,1fr));gap:13px;
   align-items:start}
@@ -80,9 +69,25 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
 .chk li.bolt::before{background:var(--green);border-color:var(--green)}
 .week.ev .chk li.bolt::before{background:var(--tomato);border-color:var(--tomato)}
 
+table.t{width:100%;border-collapse:collapse;background:#fff;font-size:14px}
+table.t td,table.t th{padding:9px 13px;text-align:left;border-bottom:1px solid var(--line)}
+table.t th{font-size:10px;text-transform:uppercase;letter-spacing:.5px;color:var(--g400);
+  font-weight:700;background:var(--g100)}
+table.t td:not(:first-child),table.t th:not(:first-child){text-align:right;
+  font-variant-numeric:tabular-nums}
+table.t tr:last-child td{border-bottom:none}
+table.t td.bad{color:var(--dang);font-weight:700}
+table.t td.good{color:var(--pos);font-weight:700}
+.scroll-x{overflow-x:auto;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+
+.box{padding:14px 17px;border-radius:11px;background:var(--ink);
+  border-left:4px solid var(--tomato);margin:14px 0;font-size:15px;color:#fff}
+.box b.h{display:block;margin-bottom:4px;font-size:11px;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--tomato);font-weight:800}
+
 .more{display:block;background:#fff;border-radius:11px;padding:14px 17px;
   border-left:4px solid var(--g400);text-decoration:none;color:inherit;
-  box-shadow:0 1px 4px rgba(0,0,0,.05);margin-top:16px;font-size:13.5px}
+  box-shadow:0 1px 4px rgba(0,0,0,.05);margin-top:14px;font-size:13.5px}
 .more:hover{border-left-color:var(--green)}
 .more b{display:block;color:var(--green-d);margin-bottom:2px}
 
@@ -93,6 +98,7 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
 @media(max-width:760px){
   .wrap{padding:16px}.hdr{padding:18px 16px}
   .hdr-m{text-align:left}.pizza-art{width:145px;height:145px;right:-38px;top:-32px}
+  h2.sec i{display:none}
 }
 </style>
 </head>
@@ -136,14 +142,14 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
     <div class="hdr-m">
       <div>Період: <strong>31 серпня – 30 вересня</strong></div>
       <div>Івент Bolt Food: <strong>7–13 вересня</strong></div>
-      <div>Ваш бюджет: <strong>≈24 000 ₴</strong></div>
+      <div>Результат: <strong>4–5 жовтня</strong></div>
     </div>
   </div>
 </header>
 
 <div class="wrap">
 
-<!-- ── ПРИЧИНА ──────────────────────────────────────────────────────────── -->
+<!-- ── 1. ПРОГНОЗ ───────────────────────────────────────────────────────── -->
 <h2 class="sec">
   <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
     <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
@@ -151,27 +157,25 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
     <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
     <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
   </svg>
-  Чому падають замовлення
+  1 · Прогноз <i>вкладення і що вони дадуть</i>
 </h2>
 
-<div class="scroll-x">
-<table class="t">
-  <tr><th>Показник</th><th>Квітень 2026</th><th>Липень 2026</th></tr>
-  <tr><td>Ваші вкладення у знижки</td><td>33 592 ₴</td><td class="bad">0 ₴</td></tr>
-  <tr><td>Доставлені замовлення</td><td>388</td><td class="bad">122</td></tr>
-  <tr><td>Замовлень з акцією</td><td>85%</td><td class="bad">40%</td></tr>
-</table>
+<div class="kpis">
+  <div class="kpi t"><div class="kpi-l">Ваш бюджет за місяць</div>
+    <div class="kpi-v">≈24 000 ₴</div>
+    <div class="kpi-n">Розумні акції, знижка в івенті, безкоштовна доставка</div></div>
+  <div class="kpi"><div class="kpi-l">Докладає Bolt Food</div>
+    <div class="kpi-v">≈17 000 ₴</div>
+    <div class="kpi-n">+ рекламний банер до 30 вересня, без вашого бюджету</div></div>
+  <div class="kpi"><div class="kpi-l">Замовлення за вересень</div>
+    <div class="kpi-v">300</div>
+    <div class="kpi-n">у липні було 122 · рівень квітня, коли знижки працювали</div></div>
+  <div class="kpi"><div class="kpi-l">Gross Sales</div>
+    <div class="kpi-v">245 000 ₴</div>
+    <div class="kpi-n">у липні 99 752 ₴ · приріст ≈+145 000 ₴</div></div>
 </div>
 
-<div class="box bad">
-  <b class="h">Одне речення</b>
-  Меню, ціни, кухня та рейтинг не змінились — зникла тільки знижка,
-  а разом з нею бейдж на картці, місце у добірці «Акції» та причина натиснути.
-  Тим часом у <b>Glovo</b> ваш бренд тримає −20% і безкоштовну доставку
-  та стоїть <b>першим у категорії «Піца» Харкова</b>.
-</div>
-
-<!-- ── ПЛАН ─────────────────────────────────────────────────────────────── -->
+<!-- ── 2. КАЛЕНДАР ──────────────────────────────────────────────────────── -->
 <h2 class="sec">
   <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
     <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
@@ -179,33 +183,32 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
     <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
     <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
   </svg>
-  Що робимо — 4 кроки
+  2 · Календар <i>зелена галочка — платить Bolt Food</i>
 </h2>
 
 <div class="cal">
   <div class="week">
     <div class="wd">Пн 31 серпня – 6 вересня</div>
-    <h4>1. Розігрів</h4>
+    <h4>Розігрів</h4>
     <ul class="chk">
       <li><b>Увімкнути Розумні акції</b> на 3 локації, без дати завершення</li>
-      <li>Підтвердити менеджеру участь в івенті</li>
+      <li><b>До сб 29 серпня</b> — підтвердити менеджеру участь в івенті</li>
       <li class="opt">Sponsored Listing — за бажанням</li>
     </ul>
   </div>
   <div class="week ev">
     <div class="wd">Пн 7 – Нд 13 вересня</div>
-    <h4>2. Івент Bolt Food</h4>
+    <h4>Івент Bolt Food</h4>
     <ul class="chk">
-      <li><b>Знижка −25%, краще −30%</b> (у Glovo −20%)</li>
+      <li><b>Знижка −25%, краще −30%</b> — щоб було більше, ніж −20% у Glovo</li>
       <li class="bolt"><b>Bolt Food платить 45%</b> цієї знижки</li>
       <li>Від вас — <b>безкоштовна доставка</b> на тиждень</li>
       <li class="bolt">Від нас — <b>рекламний банер</b></li>
-      <li>Розумні акції не вимикати</li>
     </ul>
   </div>
   <div class="week">
     <div class="wd">14–21 вересня</div>
-    <h4>3. Додати рекламу</h4>
+    <h4>Додати рекламу</h4>
     <ul class="chk">
       <li><b>Увімкнути Sponsored Listing</b>, пік 18:00–22:00</li>
       <li>Розумні акції працюють далі</li>
@@ -214,24 +217,15 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
   </div>
   <div class="week">
     <div class="wd">22–30 вересня</div>
-    <h4>4. Тримати</h4>
+    <h4>Тримати</h4>
     <ul class="chk">
       <li><b>Нічого не вимикати до 30 вересня</b></li>
       <li>Більше реклами на вихідні</li>
-      <li>Замір результату і план на жовтень</li>
     </ul>
   </div>
 </div>
 
-<div class="box bad">
-  <b class="h">Чому −30%, а не −20%</b>
-  Гість тримає в телефоні два застосунки. Якщо у Bolt Food буде та сама −20%,
-  що й у Glovo, переходити немає причини. <b>−30% коштує вам лише 16,5%</b>
-  від обороту, бо 45% знижки платить Bolt Food — це дешевше, ніж зробити
-  −17% самотужки.
-</div>
-
-<!-- ── БЮДЖЕТ ───────────────────────────────────────────────────────────── -->
+<!-- ── 3. РЕЗУЛЬТАТ ─────────────────────────────────────────────────────── -->
 <h2 class="sec">
   <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
     <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
@@ -239,63 +233,38 @@ table.t tr.total td{font-weight:700;background:#fafbfc}
     <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
     <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
   </svg>
-  Скільки це коштує
+  3 · Результат <i>дивимо разом 4–5 жовтня</i>
 </h2>
 
-<div class="scroll-x">
-<table class="t">
-  <tr><th>Що</th><th>Платите ви</th><th>Платить Bolt Food</th></tr>
-  <tr><td>Розумні акції, за місяць</td><td>≈8 000 ₴</td><td>≈8 000 ₴</td></tr>
-  <tr><td>Івент 7–13.09, знижка −25%</td><td>≈11 250 ₴</td><td>≈9 200 ₴</td></tr>
-  <tr><td>Безкоштовна доставка, тиждень івенту</td><td>≈4 500 ₴</td><td>—</td></tr>
-  <tr><td>Рекламний банер до 30 вересня</td><td class="good">0 ₴</td><td>банер</td></tr>
-  <tr class="total"><td>Разом за місяць</td><td>≈24 000 ₴</td><td>≈17 000 ₴</td></tr>
-</table>
+<div class="box">
+  <b class="h">Коли і де дивитися</b>
+  Ваш звіт оновлюється автоматично <b>4 жовтня</b> — до нього додається вересень.
+  Дивимо результат <b>4–5 жовтня</b> за тим самим посиланням, нічого запитувати
+  не потрібно.
 </div>
 
-<!-- ── РЕЗУЛЬТАТ ────────────────────────────────────────────────────────── -->
-<h2 class="sec">
-  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
-    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
-    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
-    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
-    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
-  </svg>
-  Чого чекаємо
-</h2>
-
 <div class="scroll-x">
 <table class="t">
-  <tr><th>Показник</th><th>Липень 2026</th><th>Ціль вересня</th></tr>
+  <tr><th>Що перевіряємо</th><th>Липень 2026</th><th>Ціль вересня</th></tr>
   <tr><td>Доставлені замовлення</td><td class="bad">122</td><td class="good">300</td></tr>
-  <tr><td>Gross Sales</td><td class="bad">99 752 ₴</td><td class="good">245 000 ₴</td></tr>
-  <tr><td>Замовлень з акцією</td><td class="bad">40%</td><td class="good">≥ 75%</td></tr>
+  <tr><td>Замовлень за тиждень івенту 7–13.09</td><td class="bad">≈28</td>
+      <td class="good">≈100</td></tr>
+  <tr><td>Частка замовлень з акцією</td><td class="bad">40%</td><td class="good">≥ 75%</td></tr>
   <tr><td>Нові гості</td><td class="bad">53</td><td class="good">≥ 150</td></tr>
-  <tr class="total"><td>З них за тиждень івенту 7–13.09</td><td>≈28</td>
-      <td class="good">≈100 замовлень</td></tr>
 </table>
-</div>
-
-<div class="box cta">
-  <b class="h">Що зробити зараз</b>
-  До <b>суботи 29 серпня</b> — увімкнути Розумні акції на трьох локаціях
-  і підтвердити менеджеру участь в івенті 7–13 вересня.
-  Кожен день без бейджа знижки — це приблизно <b>6 втрачених замовлень</b>.
 </div>
 
 <a class="more" href="MBR%20Marcello.html">
-  <b>Потрібні деталі та цифри?</b>
+  <b>Потрібні деталі, цифри та причини?</b>
   Повний місячний звіт: динаміка за 12 місяців, розбір по трьох локаціях,
-  воронка застосунку, витрати на знижки та рекламу, порівняння з Glovo.
-  Оновлюється автоматично 4-го числа щомісяця.
+  воронка застосунку, витрати на знижки й рекламу, порівняння з Glovo.
 </a>
 
 </div>
 
 <div class="foot">
   План на <span>31 серпня – 30 вересня 2026</span> &nbsp;·&nbsp;
-  івент Bolt Food <span>7–13 вересня</span><br/>
-  дані Bolt Food за 12 місяців · відкриті дані Glovo станом на 28.08.2026<br/>
+  івент <span>7–13 вересня</span> &nbsp;·&nbsp; результат <span>4–5 жовтня</span><br/>
   <span>Bolt Food</span> &nbsp;·&nbsp; MARCELLO &nbsp;·&nbsp; Харків
   &nbsp;·&nbsp; питання — до вашого менеджера
 </div>
