@@ -1,0 +1,644 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Маркетинговий план · MARCELLO · Вересень 2026 · Bolt Food</title>
+<meta name="report-period" content="Вересень 2026"/>
+<style>
+:root{
+  --green:#34D186; --green-d:#0d8a52; --green-l:#e8faf1;
+  --ink:#0d0d0d; --g700:#4a4a4a; --g400:#9a9a9a; --g100:#f5f6f8;
+  --pos:#1aad6a; --warn:#e08a1e; --dang:#d0342c; --tomato:#E8501E;
+  --line:#e8eaed;
+}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Inter,sans-serif;
+  font-size:14px;line-height:1.6;color:#1a1a1a;background:var(--g100);
+  -webkit-font-smoothing:antialiased}
+
+.hdr{position:relative;overflow:hidden;background:var(--ink);padding:26px 40px;
+  border-bottom:4px solid var(--green)}
+.hdr-in{position:relative;z-index:2;display:flex;align-items:flex-start;
+  justify-content:space-between;gap:20px;flex-wrap:wrap;max-width:1180px;margin:0 auto}
+.hdr-l{display:flex;align-items:center;gap:14px;min-width:260px;flex:1}
+.mark{width:46px;height:46px;background:var(--green);border-radius:11px;display:flex;
+  align-items:center;justify-content:center;flex-shrink:0}
+.hdr h1{font-size:23px;font-weight:700;color:#fff;letter-spacing:-.01em}
+.hdr .sub{font-size:11px;color:var(--green);text-transform:uppercase;letter-spacing:1.2px;
+  font-weight:600;margin-top:4px}
+.hdr-m{text-align:right;color:var(--g400);font-size:12px;line-height:1.9}
+.hdr-m strong{color:var(--green)}
+.pizza-art{position:absolute;z-index:1;opacity:.16;pointer-events:none;
+  width:230px;height:230px;right:-52px;top:-58px;transform:rotate(-12deg)}
+
+.nav{background:#fff;border-bottom:1px solid var(--line);position:sticky;top:0;z-index:60;
+  box-shadow:0 2px 6px rgba(0,0,0,.05)}
+.nav-in{max-width:1180px;margin:0 auto;padding:0 40px;display:flex;gap:2px;overflow-x:auto}
+.nav a{padding:13px 15px;font-size:13px;font-weight:650;color:var(--g400);text-decoration:none;
+  border-bottom:3px solid transparent;white-space:nowrap}
+.nav a:hover{color:var(--green-d);border-bottom-color:var(--green-l)}
+
+.wrap{max-width:1180px;margin:0 auto;padding:26px 40px 56px}
+h2.sec{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
+  color:var(--g700);padding-bottom:10px;border-bottom:2px solid var(--green);
+  margin:34px 0 14px;display:flex;align-items:center;gap:9px;scroll-margin-top:70px}
+.slice-art{width:22px;height:22px;flex-shrink:0}
+p{margin-bottom:11px}
+.lead{font-size:15px;color:var(--g700);margin-bottom:18px}
+
+.kpis{display:grid;grid-template-columns:repeat(auto-fill,minmax(168px,1fr));gap:12px}
+.kpi{background:#fff;border-radius:12px;padding:14px 16px;border-top:3px solid var(--green);
+  box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.kpi-l{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--g400);
+  margin-bottom:4px;line-height:1.3;min-height:26px}
+.kpi-v{font-size:20px;font-weight:700}
+.kpi-n{font-size:11.5px;color:var(--g700);margin-top:3px}
+.kpi.t{border-top-color:var(--tomato)}
+.kpi.w{border-top-color:var(--warn)}
+
+.step{background:#fff;border-radius:14px;overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.05);
+  margin-bottom:14px}
+.step-h{display:flex;gap:13px;align-items:flex-start;padding:17px 20px;
+  background:linear-gradient(135deg,#0d0d0d,#1f2a24);color:#fff}
+.step-n{flex-shrink:0;width:30px;height:30px;border-radius:9px;background:var(--green);
+  color:var(--ink);font-weight:800;font-size:14px;display:flex;align-items:center;
+  justify-content:center}
+.step-h h3{font-size:15.5px;font-weight:700;line-height:1.35}
+.step-h p{font-size:12.5px;color:#b9c4bf;margin:3px 0 0}
+.step-b{padding:17px 20px}
+.step-b ul,.step-b ol{margin:0 0 11px 20px}
+.step-b li{margin-bottom:6px}
+.tag{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.5px;padding:3px 9px;border-radius:999px;margin-left:8px;vertical-align:middle}
+.tag.now{background:#ffe9e6;color:#a8271c}
+.tag.mid{background:#fff3df;color:#8a5a06}
+.tag.low{background:var(--green-l);color:#0b6b42}
+
+.box{padding:13px 16px;border-radius:10px;background:var(--green-l);
+  border-left:4px solid var(--green);font-size:13.5px;margin-top:12px}
+.box.bad{background:#fff5f4;border-left-color:var(--dang)}
+.box.warn{background:#fff9ef;border-left-color:var(--warn)}
+.box b.h{display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;
+  letter-spacing:.6px;color:var(--g700)}
+
+table.t{width:100%;border-collapse:collapse;font-size:13px;margin-top:10px;background:#fff}
+table.t th,table.t td{padding:9px 11px;text-align:right;border-bottom:1px solid var(--line)}
+table.t th:first-child,table.t td:first-child{text-align:left}
+table.t th{font-size:10.5px;text-transform:uppercase;letter-spacing:.5px;color:var(--g400);
+  font-weight:700;background:var(--g100)}
+table.t tr:last-child td{border-bottom:none}
+table.t td.bad{color:var(--dang);font-weight:650}
+table.t td.good{color:var(--pos);font-weight:650}
+table.t tr.total td{font-weight:700;background:#fafbfc}
+.scroll-x{overflow-x:auto;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+
+.cal{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px}
+.week{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.05);
+  border-top:3px solid var(--green)}
+.week h4{font-size:13px;font-weight:700;margin-bottom:2px}
+.week .wd{font-size:11px;color:var(--g400);text-transform:uppercase;letter-spacing:.5px;
+  font-weight:700;margin-bottom:9px}
+.week ul{margin-left:17px;font-size:13px}
+.week li{margin-bottom:5px}
+
+.foot{background:var(--ink);color:var(--g400);font-size:11.5px;padding:24px 40px;
+  text-align:center;line-height:1.8}
+.foot span{color:var(--green)}
+.chk{list-style:none;margin-left:0!important}
+.chk li{padding-left:24px;position:relative}
+.chk li::before{content:"";position:absolute;left:0;top:6px;width:13px;height:13px;
+  border:2px solid var(--green);border-radius:4px}
+
+@media(max-width:760px){
+  .wrap{padding:16px}.hdr{padding:18px 16px}.nav-in{padding:0 16px}
+  .hdr-m{text-align:left}.pizza-art{width:150px;height:150px;right:-40px;top:-34px}
+}
+</style>
+</head>
+<body>
+
+<header class="hdr">
+<svg class="pizza-art" viewBox="0 0 200 200" aria-hidden="true">
+  <defs>
+    <radialGradient id="dough" cx="45%" cy="40%">
+      <stop offset="0%" stop-color="#F7D794"/><stop offset="100%" stop-color="#E0A64B"/>
+    </radialGradient>
+    <radialGradient id="cheese" cx="45%" cy="40%">
+      <stop offset="0%" stop-color="#FFE9A8"/><stop offset="100%" stop-color="#F6C445"/>
+    </radialGradient>
+  </defs>
+  <circle cx="100" cy="100" r="94" fill="url(#dough)"/>
+  <circle cx="100" cy="100" r="78" fill="url(#cheese)"/>
+  <g fill="#C6301C">
+    <circle cx="72" cy="66" r="13"/><circle cx="130" cy="78" r="11"/>
+    <circle cx="62" cy="120" r="12"/><circle cx="108" cy="118" r="14"/>
+    <circle cx="142" cy="132" r="10"/><circle cx="96" cy="164" r="10"/>
+    <circle cx="150" cy="46" r="7"/>
+  </g>
+  <g fill="#2E7D32" opacity=".85">
+    <ellipse cx="92" cy="92" rx="9" ry="5" transform="rotate(-25 92 92)"/>
+    <ellipse cx="138" cy="104" rx="8" ry="4.5" transform="rotate(15 138 104)"/>
+    <ellipse cx="74" cy="150" rx="8" ry="4.5" transform="rotate(-10 74 150)"/>
+  </g>
+</svg>
+  <div class="hdr-in">
+    <div class="hdr-l">
+      <div class="mark">
+        <svg viewBox="0 0 24 24" width="26" height="26" aria-hidden="true">
+          <path d="M13 2L4.5 13.5H11L10 22L19.5 10.5H13V2Z" fill="#0d0d0d"/></svg>
+      </div>
+      <div>
+        <h1>Маркетинговий план · MARCELLO</h1>
+        <div class="sub">Bolt Food &nbsp;·&nbsp; Просування на платформі &nbsp;·&nbsp; Харків</div>
+      </div>
+    </div>
+    <div class="hdr-m">
+      <div>Період плану: <strong>Вересень 2026</strong></div>
+      <div>Локацій: <strong>3</strong> &nbsp;·&nbsp; База розрахунку: <strong>Липень 2026</strong></div>
+      <div>Складено: <strong>28.08.2026</strong></div>
+    </div>
+  </div>
+</header>
+
+<nav class="nav"><div class="nav-in">
+  <a href="#meta">Цілі</a>
+  <a href="#baza">Де ми зараз</a>
+  <a href="#logika">Логіка плану</a>
+  <a href="#kroky">6 кроків</a>
+  <a href="#kalendar">Календар</a>
+  <a href="#budzhet">Бюджет і результат</a>
+  <a href="#kpi">Як міряти</a>
+  <a href="#bolt">Що робить Bolt</a>
+</div></nav>
+
+<div class="wrap">
+
+<!-- ── ЦІЛІ ─────────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="meta">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Цілі на вересень
+</h2>
+
+<p class="lead">Цілі поставлені не «зі стелі» — це ваші власні показники за <b>квітень 2026</b>,
+коли ви ще інвестували у знижки. Тобто ми не вигадуємо нову планку, а повертаємось
+до результату, який ви вже показували цього року.</p>
+
+<div class="kpis">
+  <div class="kpi"><div class="kpi-l">Замовлення за місяць</div>
+    <div class="kpi-v">300 шт.</div><div class="kpi-n">з 122 у липні · ×2,5</div></div>
+  <div class="kpi"><div class="kpi-l">Gross Sales</div>
+    <div class="kpi-v">245 000 ₴</div><div class="kpi-n">з 99 752 ₴ у липні</div></div>
+  <div class="kpi t"><div class="kpi-l">Бюджет знижок партнера</div>
+    <div class="kpi-v">24 000 ₴</div><div class="kpi-n">≈10% від Gross · зараз 0 ₴</div></div>
+  <div class="kpi t"><div class="kpi-l">Замовлень з акцією</div>
+    <div class="kpi-v">≥ 75%</div><div class="kpi-n">у липні — 40%</div></div>
+  <div class="kpi w"><div class="kpi-l">Показ → меню (CTR)</div>
+    <div class="kpi-v">≥ 7%</div><div class="kpi-n">у липні — 3,9%</div></div>
+  <div class="kpi"><div class="kpi-l">Покази у застосунку</div>
+    <div class="kpi-v">45 000</div><div class="kpi-n">з 23 608 у липні</div></div>
+  <div class="kpi"><div class="kpi-l">Нові гості</div>
+    <div class="kpi-v">≥ 150</div><div class="kpi-n">у липні — 53</div></div>
+  <div class="kpi w"><div class="kpi-l">Sponsored Listing</div>
+    <div class="kpi-v">≤ 25 год</div><div class="kpi-n">на 1 замовлення · у липні 48 год</div></div>
+</div>
+
+<!-- ── ДЕ МИ ЗАРАЗ ──────────────────────────────────────────────────────── -->
+<h2 class="sec" id="baza">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Де ми зараз — коротко
+</h2>
+
+<div class="scroll-x">
+<table class="t">
+  <tr><th>Показник</th><th>Грудень 2025<br>(ваш пік)</th><th>Квітень 2026<br>(зі знижками)</th>
+      <th>Липень 2026<br>(без знижок)</th></tr>
+  <tr><td>Доставлені замовлення</td><td>502</td><td>388</td><td class="bad">122</td></tr>
+  <tr><td>Gross Sales</td><td>352 762 ₴</td><td>340 737 ₴</td><td class="bad">99 752 ₴</td></tr>
+  <tr><td>Ваші вкладення у знижки</td><td>22 589 ₴</td><td>33 592 ₴</td><td class="bad">0 ₴</td></tr>
+  <tr><td>Частка замовлень з акцією</td><td>94%</td><td>85%</td><td class="bad">40%</td></tr>
+  <tr><td>Покази у застосунку</td><td>55 838</td><td>49 739</td><td class="bad">23 608</td></tr>
+  <tr><td>Показ → меню (CTR)</td><td>8,3%</td><td>5,0%</td><td class="bad">3,9%</td></tr>
+  <tr><td>Активні гості</td><td>431</td><td>338</td><td class="bad">101</td></tr>
+  <tr><td>Нові гості</td><td>344</td><td>216</td><td class="bad">53</td></tr>
+  <tr><td>Середній чек</td><td>703 ₴</td><td>878 ₴</td><td class="good">818 ₴</td></tr>
+</table>
+</div>
+
+<div class="box bad">
+  <b class="h">Один рядок, який усе пояснює</b>
+  Ваші вкладення у знижки: <b>33 592 ₴ → 0 ₴</b>. Замовлення: <b>388 → 122</b>.
+  Меню, ціни, кухня та рейтинг за цей час не змінились — змінилась тільки наявність
+  пропозиції на вітрині.
+</div>
+
+<div class="box warn">
+  <b class="h">І контекст, який знімає виправдання «сезон / війна / криза»</b>
+  За той самий період уся доставка Харкова у Bolt Food <b>зросла на +21%</b>,
+  піцерії міста — <b>на +9%</b>, а свої вкладення у знижки вони
+  <b>наростили на +241%</b>. Гості не зникли — вони пішли до тих, хто за них боровся.
+  А у Glovo ваш власний бренд тримає <b>−10% майже на все меню, −20% на хіти
+  та безкоштовну доставку</b>.
+</div>
+
+<!-- ── ЛОГІКА ───────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="logika">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Логіка плану — чому саме такий порядок
+</h2>
+
+<p>У застосунку гість проходить три екрани, і на кожному його можна втратити:</p>
+<ol style="margin:0 0 14px 22px">
+  <li><b>Стрічка закладів</b> — вас або показують, або ні. Тут вирішує знижка
+      (вона дає бейдж і місце у добірці «Акції») та Sponsored Listing.</li>
+  <li><b>Картка у стрічці</b> — гість вирішує, натискати чи ні. Тут вирішує
+      бейдж зі знижкою, головне фото та назва.</li>
+  <li><b>Меню</b> — гість вирішує, замовляти чи ні. Тут вирішують ціни,
+      фото страв, комбо.</li>
+</ol>
+<p>Ваші дані показують: <b>третій екран у вас працює краще, ніж будь-коли</b> —
+конверсія «меню → кошик» вища, ніж на піку. Проблема повністю на першому
+та другому екранах. Тому весь бюджет вересня йде на <b>видимість і причину
+натиснути</b>, а не на переробку меню.</p>
+
+<div class="box">
+  <b class="h">Принцип №1 на вересень</b>
+  Реклама без знижки не працює — це підтверджено вашими ж цифрами: у липні
+  Sponsored Listing відпрацював 1 713 годин і привів лише 36 замовлень
+  (48 год на одне), тоді як у квітні разом зі знижкою — 19 год на одне.
+  <b>Sponsored Listing і акцію завжди вмикаємо разом.</b>
+</div>
+
+<!-- ── КРОКИ ────────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="kroky">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Шість кроків вересня
+</h2>
+
+<div class="step">
+  <div class="step-h"><div class="step-n">1</div><div>
+    <h3>Базова знижка на меню — вирівняти умови з Glovo<span class="tag now">до 3 вересня</span></h3>
+    <p>Найшвидший спосіб повернути бейдж, покази та кліки</p></div></div>
+  <div class="step-b">
+    <ul>
+      <li><b>Що робимо:</b> увімкнути <b>−10% на категорію «Піца»</b> на всіх трьох
+          локаціях — так само, як це вже зроблено у Glovo.</li>
+      <li><b>Чому саме −10%:</b> у квітні ваші вкладення у знижки становили
+          9,9% від Gross — і це дало 388 замовлень. Ми не вигадуємо новий рівень,
+          а повертаємо той, що вже працював.</li>
+      <li><b>Що отримує гість:</b> піца 30 см за 288–306 ₴ замість 320–340 ₴.</li>
+      <li><b>Що отримуєте ви:</b> жовтий бейдж «−10%» на картці, місце у добірці
+          «Акції» та вищу позицію у сортуванні стрічки.</li>
+      <li><b>Орієнтовний бюджет:</b> 14 000–16 000 ₴ за місяць.</li>
+    </ul>
+    <div class="box bad"><b class="h">Найважливіше у всьому плані</b>
+      Якщо з шести кроків ви зробите тільки цей — ефект уже буде.
+      Якщо зробите всі, крім цього — ефекту не буде.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-h"><div class="step-n">2</div><div>
+    <h3>Увімкнути Smart Promotion на всіх трьох локаціях<span class="tag now">до 5 вересня</span></h3>
+    <p>Розумні акції: Bolt сам шукає гостя і бере частину знижки на себе</p></div></div>
+  <div class="step-b">
+    <ul>
+      <li><b>Поточний стан:</b> вимкнено. На «Академіка Павлова» акція працювала
+          3 дні у лютому, на «Нескорених» — відключена. За весь рік цей інструмент
+          дав вам лише 21 замовлення, хоча міг давати десятки щомісяця.</li>
+      <li><b>Як це працює:</b> Bolt Food аналізує поведінку гостей і показує
+          персональну знижку саме тим, хто вагається або давно не замовляв.
+          Гостю, який і так купив би, знижка не показується.</li>
+      <li><b>Чому це вигідно:</b> ви платите лише за фактичне замовлення,
+          а частину знижки покриває Bolt Food. Це найдешевший інструмент
+          із усіх доступних.</li>
+      <li><b>Що зробити:</b> у Partner Portal → «Маркетинг» → «Розумні акції» →
+          увімкнути на всіх трьох локаціях і <b>не вимикати до кінця місяця</b>.</li>
+    </ul>
+    <div class="box"><b class="h">Орієнтир</b>
+      Ставте безлімітний період (без дати завершення). Головна помилка минулого
+      разу — акцію ввімкнули на кілька днів, алгоритм не встиг набрати дані
+      й показати результат.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-h"><div class="step-n">3</div><div>
+    <h3>Перезапустити Sponsored Listing правильно<span class="tag mid">з 8 вересня</span></h3>
+    <p>Ті самі гроші, але у пікові години та разом з акцією</p></div></div>
+  <div class="step-b">
+    <p>Зараз реклама працює рівномірно цілу добу і на одну локацію.
+       Через це ви оплачуєте покази вночі та в будні вдень, коли замовлень мало.</p>
+    <ul>
+      <li><b>Коли показувати:</b> сконцентрувати бюджет на
+          <b>18:00–22:00 щодня</b> та <b>12:00–22:00 у пʼятницю–неділю</b> —
+          це пікові вікна замовлень піци.</li>
+      <li><b>Де показувати:</b> розподілити між усіма трьома локаціями,
+          а не лише на «Академіка Павлова». Дві інші зараз узагалі
+          не отримують платних показів.</li>
+      <li><b>Обовʼязкова умова:</b> запускати <b>тільки після</b> того, як
+          працює крок 1. Реклама без бейджа знижки — це оплата за показ,
+          який не конвертується.</li>
+      <li><b>Цільовий показник:</b> ≤ 25 годин показів на одне замовлення
+          (у квітні було 19, у липні — 48).</li>
+    </ul>
+    <div class="scroll-x">
+    <table class="t">
+      <tr><th>Місяць</th><th>Годин реклами</th><th>Замовлень</th><th>Годин на 1 зам.</th>
+          <th>Знижки партнера</th></tr>
+      <tr><td>Березень 2026</td><td>1 700</td><td>54</td><td>32</td><td>10 105 ₴</td></tr>
+      <tr><td>Квітень 2026</td><td>2 357</td><td>127</td><td class="good">19</td>
+          <td>33 592 ₴</td></tr>
+      <tr><td>Травень 2026</td><td>744</td><td>36</td><td>21</td><td>8 194 ₴</td></tr>
+      <tr><td>Червень 2026</td><td>669</td><td>10</td><td class="bad">67</td>
+          <td class="bad">0 ₴</td></tr>
+      <tr><td>Липень 2026</td><td>1 713</td><td>36</td><td class="bad">48</td>
+          <td class="bad">0 ₴</td></tr>
+    </table>
+    </div>
+    <div class="box warn"><b class="h">Читаємо таблицю</b>
+      Найдешевше замовлення реклама приносила у квітні — саме тоді, коли
+      знижки були максимальними. У червні–липні знижок не було, і ціна
+      замовлення з реклами зросла у 2,5–3,5 раза.</div>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-h"><div class="step-n">4</div><div>
+    <h3>Комбо-набори: тримати чек, не втрачаючи на знижці<span class="tag mid">з 8 вересня</span></h3>
+    <p>Щоб знижка не «зʼїдала» маржу</p></div></div>
+  <div class="step-b">
+    <ul>
+      <li>У Glovo та на вашому сайті вже є <b>Комбо (піца + фрі + узвар + соус)</b>
+          і набір <b>«ТОП Піци за супер ціною»</b>. У Bolt Food їх варто вивести
+          у перші дві позиції меню.</li>
+      <li><b>Логіка:</b> замість знижки на одну піцу даємо вигоду на наборі.
+          Гість бачить економію, а ваш чек залишається високим —
+          зараз він і так на 16% вищий, ніж на піку (818 ₴ проти 703 ₴).</li>
+      <li><b>Що додати:</b> набір «2 піци + напій» — це прямий аналог механіки
+          «2 за ціною 1», якою Glovo рекламує заклади у своїх добірках.</li>
+      <li><b>Друга піца −50%</b> — сильна альтернатива, якщо не хочете
+          знижувати ціну на першу.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-h"><div class="step-n">5</div><div>
+    <h3>Повернути тих, хто вже у вас замовляв<span class="tag mid">з 15 вересня</span></h3>
+    <p>Найдешевші замовлення — від гостей, які вас уже знають</p></div></div>
+  <div class="step-b">
+    <ul>
+      <li><b>Ситуація:</b> у грудні у вас було 431 активних гостей, у липні — 101.
+          Тобто близько <b>330 людей уже пробували Marcello і перестали замовляти</b>.
+          Це готова база, за увагу якої не треба платити двічі.</li>
+      <li><b>Інструмент:</b> Розумні акції з таргетом на неактивних гостей
+          (крок 2 закриває це автоматично — алгоритм сам знайде тих,
+          хто давно не замовляв).</li>
+      <li><b>Підсилення:</b> точкова кампанія «−15% на перше замовлення після
+          перерви» — обговоріть з менеджером Bolt Food можливість
+          спільного фінансування.</li>
+      <li><b>Частота:</b> зараз один гість замовляє у вас 1,2 раза на місяць.
+          Мета на вересень — 1,4.</li>
+    </ul>
+  </div>
+</div>
+
+<div class="step">
+  <div class="step-h"><div class="step-n">6</div><div>
+    <h3>Вітрина: фото, назви, час роботи<span class="tag low">протягом місяця</span></h3>
+    <p>Безкоштовні кроки, які підсилюють усе решта</p></div></div>
+  <div class="step-b">
+    <ul>
+      <li><b>Головне фото</b> — крупний план піци з видимою начинкою.
+          Саме воно вирішує, чи натисне гість, коли побачить вас у стрічці.</li>
+      <li><b>Фото на кожній позиції</b> у категоріях «Піца» та «Комбо» —
+          позиції без фото замовляють значно рідше.</li>
+      <li><b>Час роботи:</b> ваш час онлайн 99,6% — це дуже добре.
+          Варто перевірити лише, чи закриті локації не раніше
+          за реальний час роботи кухні у пʼятницю–неділю.</li>
+      <li><b>Опис страв:</b> у Glovo у вас є детальні описи з вагою, складом
+          і навіть КБЖУ. Перенесіть їх у Bolt Food — це знімає сумніви гостя.</li>
+    </ul>
+    <div class="box"><b class="h">Добра новина</b>
+      Цей крок нічого не коштує, а ваш рейтинг (4,2–5,0) і 98–99% рекомендацій
+      у Glovo показують, що продукт гостям справді подобається.</div>
+  </div>
+</div>
+
+<!-- ── КАЛЕНДАР ─────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="kalendar">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Календар вересня
+</h2>
+
+<div class="cal">
+  <div class="week">
+    <h4>Запуск бази</h4>
+    <div class="wd">1–7 вересня</div>
+    <ul class="chk">
+      <li>Увімкнути −10% на категорію «Піца» — 3 локації</li>
+      <li>Увімкнути Розумні акції — 3 локації, без дати завершення</li>
+      <li>Оновити головне фото закладу</li>
+      <li>Перевірити, що бейдж знижки видно у стрічці</li>
+    </ul>
+  </div>
+  <div class="week">
+    <h4>Додати трафік</h4>
+    <div class="wd">8–14 вересня</div>
+    <ul class="chk">
+      <li>Перезапустити Sponsored Listing у пікові вікна</li>
+      <li>Розподілити рекламу на всі 3 локації</li>
+      <li>Вивести Комбо у перші позиції меню</li>
+      <li>Додати набір «2 піци + напій»</li>
+    </ul>
+  </div>
+  <div class="week">
+    <h4>Підсилити хіти</h4>
+    <div class="wd">15–21 вересня</div>
+    <ul class="chk">
+      <li>−20% на 3–5 хітів (як у «Промоакціях» Glovo)</li>
+      <li>Звірити ціни та акції Bolt Food ↔ Glovo</li>
+      <li>Кампанія на повернення неактивних гостей</li>
+      <li>Проміжний замір: CTR, покази, замовлення</li>
+    </ul>
+  </div>
+  <div class="week">
+    <h4>Вихідні та підсумки</h4>
+    <div class="wd">22–30 вересня</div>
+    <ul class="chk">
+      <li>Підняти бюджет реклами на вихідні</li>
+      <li>Додати фото до позицій без фото</li>
+      <li>Замір результату проти цілей</li>
+      <li>Скласти план на жовтень із менеджером</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ── БЮДЖЕТ ───────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="budzhet">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Бюджет і очікуваний результат
+</h2>
+
+<p class="lead">Три сценарії. Розрахунок побудований на вашій власній залежності
+між вкладеннями у знижки та замовленнями за 12 місяців — це не прогноз «взагалі»,
+а ваша історія.</p>
+
+<div class="scroll-x">
+<table class="t">
+  <tr><th>Сценарій</th><th>Знижки партнера</th><th>Sponsored Listing</th>
+      <th>Замовлень</th><th>Gross Sales</th><th>Приріст Gross</th></tr>
+  <tr><td>Липень 2026 — як є</td><td class="bad">0 ₴</td><td>1 713 год</td>
+      <td class="bad">122</td><td class="bad">99 752 ₴</td><td>—</td></tr>
+  <tr><td><b>А. Мінімальний</b><br>тільки Розумні акції</td><td>8 000 ₴</td>
+      <td>вимкнено</td><td>180</td><td>147 000 ₴</td><td class="good">+47 000 ₴</td></tr>
+  <tr class="total"><td><b>Б. Базовий</b> — рекомендуємо<br>−10% + Розумні акції + реклама</td>
+      <td>24 000 ₴</td><td>1 700 год</td><td>300</td><td>245 000 ₴</td>
+      <td class="good">+145 000 ₴</td></tr>
+  <tr><td><b>В. Активний</b><br>+ −20% на хіти та комбо</td><td>34 000 ₴</td>
+      <td>2 400 год</td><td>390</td><td>320 000 ₴</td>
+      <td class="good">+220 000 ₴</td></tr>
+</table>
+</div>
+
+<div class="box">
+  <b class="h">Звідки взялися ці цифри</b>
+  Порівнюємо два ваші власні місяці. <b>Квітень 2026:</b> знижки 33 592 ₴ →
+  388 замовлень і 340 737 ₴ Gross. <b>Липень 2026:</b> знижки 0 ₴ →
+  122 замовлення і 99 752 ₴ Gross. Різниця: <b>33 592 ₴ вкладень дали
+  +266 замовлень і +240 985 ₴ обороту</b>. Тобто кожна гривня знижки
+  повернулася приблизно <b>7 гривнями Gross Sales</b>, а одне додаткове
+  замовлення коштувало близько <b>126 ₴</b> знижки при середньому чеку 818 ₴.
+</div>
+
+<div class="box warn">
+  <b class="h">Чесне застереження</b>
+  Це не гарантія, а орієнтир на основі вашої власної статистики.
+  Точний результат залежить від сезонності, дій конкурентів і того,
+  наскільки повно виконані кроки 1–3. Найбільший ризик —
+  зробити рекламу без знижки: тоді бюджет згорить, а замовлень не додасться.
+  Саме це сталося у липні.
+</div>
+
+<!-- ── KPI ──────────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="kpi">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Як міряти успіх
+</h2>
+
+<div class="scroll-x">
+<table class="t">
+  <tr><th>Показник</th><th>Липень 2026</th><th>Ціль на вересень</th><th>Що означає</th></tr>
+  <tr><td>Доставлені замовлення</td><td>122</td><td>300</td>
+      <td>головний результат</td></tr>
+  <tr><td>Частка замовлень з акцією</td><td>40%</td><td>≥ 75%</td>
+      <td>чи справді увімкнена знижка</td></tr>
+  <tr><td>Покази у застосунку</td><td>23 608</td><td>45 000</td>
+      <td>чи вас показують гостям</td></tr>
+  <tr><td>Показ → меню (CTR)</td><td>3,9%</td><td>≥ 7%</td>
+      <td>чи є причина натиснути</td></tr>
+  <tr><td>Годин реклами на 1 замовлення</td><td>48</td><td>≤ 25</td>
+      <td>чи не горить рекламний бюджет</td></tr>
+  <tr><td>Активні гості</td><td>101</td><td>≥ 230</td>
+      <td>скільком людям ви потрібні</td></tr>
+  <tr><td>Нові гості</td><td>53</td><td>≥ 150</td>
+      <td>чи росте база на майбутнє</td></tr>
+  <tr><td>Середній чек</td><td>818 ₴</td><td>≥ 780 ₴</td>
+      <td>щоб знижка не зʼїла чек</td></tr>
+  <tr><td>Час онлайн</td><td>99,6%</td><td>≥ 98%</td>
+      <td>утримати поточний рівень</td></tr>
+  <tr><td>Рейтинг</td><td>4,2–5,0</td><td>≥ 4,5</td>
+      <td>утримати якість під навантаженням</td></tr>
+</table>
+</div>
+
+<div class="box">
+  <b class="h">Де це дивитися</b>
+  Усі показники, окрім Розумних акцій, ви бачите у своєму місячному звіті —
+  він оновлюється автоматично <b>4-го числа кожного місяця</b>.
+  Результат вересня зʼявиться у звіті <b>4 жовтня 2026</b>.
+  Проміжні цифри за тиждень — у Partner Portal або у вашого менеджера.
+</div>
+
+<!-- ── BOLT ─────────────────────────────────────────────────────────────── -->
+<h2 class="sec" id="bolt">
+  <svg class="slice-art" viewBox="0 0 64 64" aria-hidden="true">
+    <path d="M32 4 L60 54 Q32 64 4 54 Z" fill="#FFD46B"/>
+    <path d="M4 54 Q32 64 60 54 L62 59 Q32 70 2 59 Z" fill="#E0A64B"/>
+    <circle cx="32" cy="28" r="5" fill="#C6301C"/><circle cx="20" cy="44" r="4.5" fill="#C6301C"/>
+    <circle cx="44" cy="45" r="4.5" fill="#C6301C"/>
+  </svg>
+  Що робить Bolt Food зі свого боку
+</h2>
+
+<div class="step">
+  <div class="step-b" style="padding-top:18px">
+    <ul>
+      <li><b>Співфінансування знижок.</b> Навіть у липні, коли ваші вкладення були
+          нульовими, Bolt Food вклав у знижки для ваших гостей 8 043 ₴.
+          У вересні цю частину можна збільшити — обговоріть з менеджером
+          спільні кампанії.</li>
+      <li><b>Розумні акції.</b> Bolt Food бере на себе частину знижки і сам
+          знаходить гостя, якому вона потрібна.</li>
+      <li><b>Місця у добірках.</b> Заклади з активними акціями потрапляють
+          у тематичні добірки застосунку — за умови, що акція увімкнена.</li>
+      <li><b>Тематичні тижні та івенти.</b> Розкажемо про найближчі кампанії,
+          у які ви можете зайти без окремого бюджету.</li>
+      <li><b>Цей звіт.</b> Дані оновлюються автоматично щомісяця, тож ви бачите
+          ефект від кожного кроку без запитів і очікування.</li>
+    </ul>
+    <div class="box"><b class="h">Наступний крок</b>
+      Погодьте з менеджером Bolt Food пункти 1–3 до <b>3 вересня</b>,
+      щоб місяць почався вже з активними акціями. Кожен день без бейджа знижки —
+      це приблизно <b>6 втрачених замовлень</b> (300 ÷ 30 днів − поточний рівень).
+    </div>
+  </div>
+</div>
+
+</div>
+
+<div class="foot">
+  Маркетинговий план на <span>вересень 2026</span> &nbsp;·&nbsp; складений на основі
+  даних Bolt Food за 12 повних місяців та відкритих даних Glovo станом на 28.08.2026<br/>
+  <span>Bolt Food</span> &nbsp;·&nbsp; MARCELLO &nbsp;·&nbsp; Харків
+  &nbsp;·&nbsp; питання та узгодження — до вашого менеджера
+</div>
+
+</body>
+</html>
