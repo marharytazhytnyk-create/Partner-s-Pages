@@ -987,7 +987,7 @@ h3.sub{font-size:14px;font-weight:700;margin:22px 0 8px;color:var(--ink)}
   border-left:4px solid var(--green);font-size:13.5px}
 .take.bad{background:#fff5f4;border-left-color:var(--dang)}
 .take.warn{background:#fff9ef;border-left-color:var(--warn)}
-.take b{display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;
+.take > b:first-child{display:block;margin-bottom:3px;font-size:11px;text-transform:uppercase;
   letter-spacing:.6px;color:var(--g700)}
 
 /* ── Facts / tables ── */
@@ -1037,8 +1037,11 @@ table.t td.good{color:var(--pos);font-weight:650}
   padding:3px 9px;border-radius:999px;background:#fff;border:1px solid var(--line);color:var(--g700)}
 
 /* ── Glovo ── */
-.glv{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px}
+.glv{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;
+  align-items:start}
 .glv .card{border-left:4px solid #FFC244}
+.glv .card.wide{grid-column:1/-1;border-left-color:var(--green)}
+.glv .card.wide h4{color:var(--green-d)}
 .glv .card h4{margin-bottom:6px}
 .glv ul{margin-left:17px;font-size:13px}
 .glv li{margin-bottom:5px}
@@ -1374,7 +1377,8 @@ def build_glovo_html(g: dict) -> str:
             links = ", ".join(f'<a href="{u}" target="_blank" rel="noopener">джерело</a>'
                               for u in card["sources"])
             srcs = f'<div class="src">Перевірено: {links}</div>'
-        cards += (f'<div class="card"><h4>{card.get("title", "")}</h4>'
+        cls = "card wide" if card.get("wide") else "card"
+        cards += (f'<div class="{cls}"><h4>{card.get("title", "")}</h4>'
                   f'<div class="desc">{card.get("desc", "")}</div>'
                   f'<ul>{items}</ul>{srcs}</div>')
     out += f'<div class="glv">{cards}</div>'
