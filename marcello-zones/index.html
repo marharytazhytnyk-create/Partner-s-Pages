@@ -20,7 +20,6 @@
   .sub{font-size:12.5px;color:var(--tx3);margin:0 0 16px;line-height:1.5}
   h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3);margin:22px 0 9px;font-weight:600}
 
-  /* пошук */
   .search{position:relative}
   .search input{width:100%;font-size:13.5px;padding:11px 12px 11px 34px;border:1px solid var(--line);border-radius:9px;outline:none;font-family:inherit;background:#fff}
   .search input:focus{border-color:#1B1F24}
@@ -35,12 +34,11 @@
   .rtitle{font-weight:600}
   .rsub{color:var(--tx3);font-size:11px;margin-top:1px}
 
-  /* локації */
-  .venue{border:1px solid var(--line);border-radius:10px;padding:0;margin-bottom:9px;overflow:hidden;transition:border-color .15s}
+  .venue{border:1px solid var(--line);border-radius:10px;margin-bottom:9px;overflow:hidden;transition:border-color .15s}
   .venue.on{border-color:#1B1F24}
   .vhead{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer;user-select:none}
   .vhead:hover{background:#FAFBFC}
-  .dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 0 rgba(0,0,0,0)}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none}
   .venue.on .dot{box-shadow:0 0 0 3.5px rgba(0,0,0,.10)}
   .vname{font-size:13.5px;font-weight:600;flex:1}
   .vval{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--tx2)}
@@ -53,16 +51,15 @@
   .row{display:flex;gap:8px;margin:10px 0 0}
   .btn{flex:1;font-size:12px;padding:7px 4px;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer;color:var(--tx2);font-weight:500;font-family:inherit}
   .btn:hover{background:#F0F2F5}
-  .btn.on{background:#1B1F24;color:#fff;border-color:#1B1F24}
   .chk{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12px;color:var(--tx2);cursor:pointer;user-select:none}
   .chk input{accent-color:#1B1F24;margin:0}
 
-  /* перевірка точки */
   .probe{border:1px solid var(--line);border-radius:10px;padding:12px;background:#FBFCFD}
   .paddr{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.35}
-  .pcoord{font-size:11px;color:var(--tx3);font-variant-numeric:tabular-nums;margin-bottom:11px}
-  .rank{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--line)}
-  .rank:first-of-type{border-top:none}
+  .pcoord{font-size:11px;color:var(--tx3);font-variant-numeric:tabular-nums}
+  .stage{font-size:10.5px;text-transform:uppercase;letter-spacing:.6px;color:var(--tx3);font-weight:700;margin:14px 0 7px;padding-top:11px;border-top:1px solid var(--line)}
+
+  .rank{display:flex;align-items:center;gap:9px;padding:6px 0}
   .rnum{width:19px;height:19px;border-radius:50%;background:#1B1F24;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
   .rnum.off{background:var(--no)}
   .rname{flex:1;font-size:12.5px;font-weight:500}
@@ -70,6 +67,20 @@
   .tag{font-size:10.5px;padding:2px 7px;border-radius:20px;font-weight:600}
   .tag.y{background:#E3F5F3;color:#0B6F6E}
   .tag.n{background:#F0F2F5;color:#8B95A3}
+
+  /* карточка з факторами ранжування */
+  .fc{border:1px solid var(--line);border-radius:9px;margin-bottom:8px;background:#fff;overflow:hidden}
+  .fc.first{border-color:#0E9594;box-shadow:0 0 0 2px rgba(14,149,148,.10)}
+  .fch{display:flex;align-items:center;gap:8px;padding:9px 11px;background:#FAFBFC;border-bottom:1px solid var(--line)}
+  .fcname{flex:1;font-size:12.5px;font-weight:600}
+  .fcpos{font-size:11px;color:var(--tx2);font-variant-numeric:tabular-nums}
+  .fgrid{display:grid;grid-template-columns:1fr 1fr;gap:0}
+  .fgrid > div{padding:7px 11px;border-bottom:1px solid #F4F6F8;display:flex;justify-content:space-between;gap:6px;font-size:11.5px}
+  .fgrid > div:nth-child(odd){border-right:1px solid #F4F6F8}
+  .fgrid > div span{color:var(--tx3)}
+  .fgrid > div b{font-variant-numeric:tabular-nums;font-weight:600}
+  .fgrid > div b.up{color:#0B6F6E}
+  .fgrid > div b.down{color:#B4462A}
 
   table{width:100%;border-collapse:collapse;font-size:11.5px}
   th{text-align:right;font-weight:600;color:var(--tx3);padding:6px 4px;border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
@@ -79,7 +90,8 @@
   td.cov{color:var(--tx);font-weight:500}
   td.win{color:#0B6F6E;font-weight:700}
   .note{font-size:11.5px;color:var(--tx3);line-height:1.55;margin-top:10px}
-  .hint{font-size:11.5px;background:#FFF8E6;border:1px solid #F5E3B3;color:#6B5518;border-radius:8px;padding:9px 11px;line-height:1.5;margin-top:12px}
+  .hint{font-size:11.5px;background:#FFF8E6;border:1px solid #F5E3B3;color:#6B5518;border-radius:8px;padding:9px 11px;line-height:1.5;margin-top:10px}
+  .lever{font-size:11.5px;background:#EEF4FF;border:1px solid #CFDFFB;color:#1B3B73;border-radius:8px;padding:9px 11px;line-height:1.5;margin-top:8px}
   .leaflet-container{background:#EDEFF2}
   .lbl{font-size:11px;font-weight:600;color:#1B1F24;background:none;border:none;box-shadow:none;padding:0;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap}
   .lbl:before{display:none}
@@ -97,7 +109,7 @@
 <div class="app">
   <aside>
     <h1>Marcello Харків — зони покриття</h1>
-    <p class="sub">Натисніть на локацію — на мапі з'явиться її зона доставки. Радіус міряється по дорозі, тому зона не кругла: у бік центру вона витягнута, впоперек забудови підтиснута.</p>
+    <p class="sub">Введіть адресу гостя — панель покаже, які локації Marcello до неї дістають і яка з них стане у видачі вище. Натисніть на локацію на мапі, щоб побачити її зону доставки.</p>
 
     <h2>Пошук адреси в Харкові</h2>
     <div class="search">
@@ -107,6 +119,11 @@
       <div class="results" id="res"></div>
     </div>
     <p class="note">Можна вставити й координати одним рядком: <code>50.004281, 36.341324</code>. Або просто клікнути будь-де на мапі.</p>
+
+    <h2>Що буде на цій адресі</h2>
+    <div class="probe" id="probe"></div>
+    <div class="hint" id="hint"></div>
+    <div class="lever" id="lever"></div>
 
     <h2>Локації та радіус</h2>
     <div id="venues"></div>
@@ -123,15 +140,15 @@
     <label class="chk"><input type="checkbox" id="chk-border" checked> Межа міста Харків</label>
     <label class="chk"><input type="checkbox" id="chk-spots" checked> Орієнтири по місту</label>
 
-    <h2>Перевірка точки</h2>
-    <div class="probe" id="probe"></div>
-    <div class="hint" id="hint"></div>
+    <h2>Чому позиція така, а не за відстанню</h2>
+    <p class="note" style="margin-top:0">За 20–31 серпня 2026 було 222 випадки, коли гість в одній сесії бачив дві локації Marcello з різним ETA і на різних позиціях. Та локація, що мала <b>кращий ETA, ставала вище лише в 34%</b> випадків. Тобто відстань сама собою позицію не вирішує.</p>
+    <p class="note">Вирішує інше: Академіка Павлова купує Sponsored Listing і фігурує в ньому у 33% своїх показів. Її медіанна позиція — <b>4</b>, вона в топ-5 у 56% показів. Нескорених і Культури Sponsored не купують: їхні медіанні позиції — <b>29</b> і <b>34</b>, і майже в половині показів вони нижче 30-ї позиції. Тому прогноз у панелі будується на фактичній медіанній позиції кожної локації, а відстань працює як уточнення, коли позиції близькі.</p>
 
     <h2>Орієнтири по місту</h2>
     <table id="grid"></table>
     <p class="note">Числа — оцінка дороги в км від кожної локації. <b>Жирним зеленим</b> — та локація, що покаже картку першою. Сірим — точка поза радіусом.</p>
 
-    <p class="note" style="margin-top:16px">Координати трьох локацій — з бази Bolt. Координата будинку 79/42 (50.004281, 36.341324) — з Візіком. Межа міста — адміністративний кордон Харкова з OpenStreetMap (relation 3154746), спрощений до 40 м. Точки орієнтирів приблизні, вони потрібні для напрямку. Дорожня відстань — оцінка: Bolt не зберігає фактичну дорогу для власної доставки партнера, тому похибка кілька сотень метрів. Пошук адрес — Nominatim / OpenStreetMap.</p>
+    <p class="note" style="margin-top:16px">Координати трьох локацій, рейтинги, позиції у видачі, Sponsored і акції — з даних Bolt за 20–31.08.2026 (1118 / 3669 / 1023 сесії з показами). Координата будинку 79/42 (50.004281, 36.341324) — з Візіком, збігається з OpenStreetMap у межах 10 м. Межа міста — адміністративний кордон Харкова з OpenStreetMap (relation 3154746), спрощений до 40 м. Дорожня відстань — оцінка, бо для власної доставки партнера Bolt не зберігає фактичну дорогу; похибка кілька сотень метрів. Прогноз позиції — оцінка за спостережуваними даними, а не сама формула ранжування Bolt: вона закрита і враховує ще й персональну історію гостя, час доби та завантаженість кухні.</p>
   </aside>
   <div id="map"></div>
 </div>
@@ -144,10 +161,19 @@ const CENTER = [50.0045, 36.2318];           // майдан Свободи — 
 const F_MIN = 1.22, F_MAX = 1.45;            // дорога/пряма: уздовж магістралей до центру та впоперек сітки
 const KH_VIEWBOX = '36.05,50.15,36.50,49.85';
 
+/* Факти по локаціях з даних Bolt за 20–31.08.2026.
+   medRow — медіанна позиція картки у видачі; саме вона вбирає в себе і Sponsored, і рейтинг,
+   тому прогноз будуємо на ній, а не на вигаданих вагах. */
 const VENUES = [
-  {id:'n', name:'Нескорених',        addr:'вул. Нескорених, 9',    ll:[50.027382,36.33077],  r:10, color:'#E4572E', on:false},
-  {id:'p', name:'Академіка Павлова', addr:'вул. Ак. Павлова, 20Б', ll:[49.985693,36.278116], r:10, color:'#0E9594', on:false},
-  {id:'k', name:'Культури',          addr:'вул. Культури',         ll:[50.01263,36.229563],  r:10, color:'#7B61FF', on:false},
+  {id:'n', name:'Нескорених', addr:'вул. Нескорених, 9', ll:[50.027382,36.33077], r:10, color:'#E4572E', on:false,
+   rating:'4.3', medRow:29, p25:8, p75:55, top5:21.5, top10:28.0, below30:48.7,
+   sponsored:0.1, campaign:0, fee:49.60, sessions:1118},
+  {id:'p', name:'Академіка Павлова', addr:'вул. Ак. Павлова, 20Б', ll:[49.985693,36.278116], r:10, color:'#0E9594', on:false,
+   rating:'4.6', medRow:4, p25:2, p75:23, top5:56.1, top10:65.3, below30:21.6,
+   sponsored:33.3, campaign:0, fee:50.41, sessions:3669},
+  {id:'k', name:'Культури', addr:'вул. Культури', ll:[50.01263,36.229563], r:10, color:'#7B61FF', on:false,
+   rating:'4.6', medRow:34, p25:7, p75:69, top5:21.8, top10:29.1, below30:52.1,
+   sponsored:0.2, campaign:0, fee:48.79, sessions:1023},
 ];
 
 const TARGET = {name:'Просп. Тракторобудівників, 79/42', ll:[50.004281,36.341324]};
@@ -217,6 +243,12 @@ SPOTS.forEach(s=>{
     .bindTooltip(s.n,{permanent:true,direction:'right',offset:[6,0],className:'lbl',opacity:.9});
 });
 
+function venueIcon(v, active){
+  const ring = active ? `box-shadow:0 0 0 5px ${v.color}33, 0 1px 5px rgba(0,0,0,.4)` : 'box-shadow:0 1px 5px rgba(0,0,0,.4)';
+  return L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],
+    html:`<div style="width:20px;height:20px;border-radius:50%;background:${v.color};border:3px solid #fff;${ring};cursor:pointer"></div>`});
+}
+
 const layers = {};
 VENUES.forEach(v=>{
   const poly = L.polygon(reachPolygon(v),{color:v.color,weight:2,fillColor:v.color,fillOpacity:.11,interactive:false});
@@ -227,16 +259,10 @@ VENUES.forEach(v=>{
   layers[v.id]={poly,circ,mark};
 });
 
-function venueIcon(v, active){
-  const ring = active ? `box-shadow:0 0 0 5px ${v.color}33, 0 1px 5px rgba(0,0,0,.4)` : 'box-shadow:0 1px 5px rgba(0,0,0,.4)';
-  return L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],
-    html:`<div style="width:20px;height:20px;border-radius:50%;background:${v.color};border:3px solid #fff;${ring};cursor:pointer"></div>`});
-}
-
 function syncVenue(v){
   const showCirc = document.getElementById('chk-circle').checked;
-  if(v.on){ layers[v.id].poly.addTo(map); } else { map.removeLayer(layers[v.id].poly); }
-  if(v.on && showCirc){ layers[v.id].circ.addTo(map); } else { map.removeLayer(layers[v.id].circ); }
+  if(v.on) layers[v.id].poly.addTo(map); else map.removeLayer(layers[v.id].poly);
+  if(v.on && showCirc) layers[v.id].circ.addTo(map); else map.removeLayer(layers[v.id].circ);
   layers[v.id].mark.setIcon(venueIcon(v, v.on));
   document.getElementById('card-'+v.id).classList.toggle('on', v.on);
   document.getElementById('eye-'+v.id).textContent = v.on ? 'зона на мапі' : 'показати зону';
@@ -247,7 +273,6 @@ function toggleVenue(id){
   syncVenue(v);
 }
 
-/* ---------- панель локацій ---------- */
 document.getElementById('venues').innerHTML = VENUES.map(v=>`
   <div class="venue" id="card-${v.id}">
     <div class="vhead" data-toggle="${v.id}">
@@ -297,15 +322,15 @@ document.getElementById('chk-border').addEventListener('change',e=>
 document.getElementById('chk-spots').addEventListener('change',e=>
   e.target.checked ? spotLayer.addTo(map) : map.removeLayer(spotLayer));
 
-/* ---------- перевірка точки ---------- */
-let probePoint = {name:TARGET.name, ll:TARGET.ll, verified:true};
-let probeMarker = L.marker(TARGET.ll,{icon:probeIcon(),zIndexOffset:900}).addTo(map);
-let probeTip = probeMarker.bindTooltip(TARGET.name,{permanent:true,direction:'top',offset:[0,-15],className:'lbl'});
-
+/* ---------- точка перевірки ---------- */
 function probeIcon(){
   return L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],
     html:'<div style="width:24px;height:24px;border-radius:50%;background:#1B1F24;border:3px solid #FFD166;box-shadow:0 2px 8px rgba(0,0,0,.45)"></div>'});
 }
+let probePoint = {name:TARGET.name, ll:TARGET.ll};
+const probeMarker = L.marker(TARGET.ll,{icon:probeIcon(),zIndexOffset:900}).addTo(map)
+  .bindTooltip(TARGET.name,{permanent:true,direction:'top',offset:[0,-15],className:'lbl'});
+
 function setProbe(name, ll, fly){
   probePoint = {name, ll};
   probeMarker.setLatLng(ll).setTooltipContent(name);
@@ -381,7 +406,35 @@ qEl.addEventListener('keydown', e=>{
 });
 document.addEventListener('click', e=>{ if(!e.target.closest('.search')) hideRes(); });
 
-/* ---------- рендер панелі ---------- */
+/* ---------- прогноз позиції ----------
+   Ранжуємо за фактичною медіанною позицією локації у видачі. Відстань підключається
+   лише як уточнення, коли медіани близькі: емпірично краща за ETA локація ставала
+   вище лише в 34% парних показів, тож робити відстань головним фактором було б хибно. */
+function predictOrder(passing){
+  return passing.slice().sort((a,b)=>
+    Math.abs(a.v.medRow-b.v.medRow) <= 5 ? a.road-b.road : a.v.medRow-b.v.medRow);
+}
+
+function factorCard(x, idx, isFirst){
+  const v = x.v;
+  const cls = c => c ? 'up' : 'down';
+  return `<div class="fc${isFirst?' first':''}">
+    <div class="fch">
+      <span class="rnum">${idx}</span>
+      <span class="fcname" style="color:${v.color}">${v.name}</span>
+      <span class="fcpos">очікувана позиція ≈ ${v.medRow}</span>
+    </div>
+    <div class="fgrid">
+      <div><span>Відстань по дорозі</span><b>${x.road.toFixed(1)} км</b></div>
+      <div><span>Медіанна позиція</span><b class="${cls(v.medRow<=10)}">${v.medRow}</b></div>
+      <div><span>Sponsored Listing</span><b class="${cls(v.sponsored>5)}">${v.sponsored>5?v.sponsored+'% показів':'не купує'}</b></div>
+      <div><span>Рейтинг</span><b class="${cls(v.rating>='4.5')}">${v.rating}</b></div>
+      <div><span>Акція / знижка</span><b class="${cls(v.campaign>0)}">${v.campaign>0?v.campaign+'% показів':'немає'}</b></div>
+      <div><span>Потрапляє в топ-10</span><b class="${cls(v.top10>50)}">${v.top10}% показів</b></div>
+    </div>
+  </div>`;
+}
+
 function render(){
   VENUES.forEach(v=>{
     document.getElementById('val-'+v.id).textContent = v.r+' км';
@@ -389,32 +442,57 @@ function render(){
       `Реально дістає на ${(v.r/F_MAX).toFixed(1)}–${(v.r/F_MIN).toFixed(1)} км по прямій: далі вздовж магістралей до центру, ближче впоперек забудови.`;
   });
 
-  const ranked = VENUES.map(v=>({v, road:roadKm(v,probePoint.ll)})).sort((a,b)=>a.road-b.road);
-  let shown = 0;
+  const all = VENUES.map(v=>({v, road:roadKm(v,probePoint.ll)})).sort((a,b)=>a.road-b.road);
+  const passing = predictOrder(all.filter(x=>x.road <= x.v.r));
+
   document.getElementById('probe').innerHTML =
     `<div class="paddr">${probePoint.name}</div>
-     <div class="pcoord">${probePoint.ll[0].toFixed(6)}, ${probePoint.ll[1].toFixed(6)}</div>` +
-    ranked.map(r=>{
-      const ok = r.road <= r.v.r;
-      if(ok) shown++;
+     <div class="pcoord">${probePoint.ll[0].toFixed(6)}, ${probePoint.ll[1].toFixed(6)}</div>
+     <div class="stage">Крок 1 — хто дістає до адреси</div>` +
+    all.map(x=>{
+      const ok = x.road <= x.v.r;
       return `<div class="rank">
-        <span class="rnum ${ok?'':'off'}">${ok?shown:'—'}</span>
-        <span class="rname" style="color:${ok?'#1B1F24':'#8B95A3'}">${r.v.name}</span>
-        <span class="rdist">${r.road.toFixed(1)} км</span>
-        <span class="tag ${ok?'y':'n'}">${ok?'показує':'поза зоною'}</span>
+        <span class="rnum ${ok?'':'off'}">${ok?'✓':'—'}</span>
+        <span class="rname" style="color:${ok?'#1B1F24':'#8B95A3'}">${x.v.name}</span>
+        <span class="rdist">${x.road.toFixed(1)} із ${x.v.r} км</span>
+        <span class="tag ${ok?'y':'n'}">${ok?'проходить':'поза зоною'}</span>
       </div>`;
-    }).join('');
+    }).join('') +
+    (passing.length
+      ? `<div class="stage">Крок 2 — хто стане вище і чому</div>` +
+        passing.map((x,i)=>factorCard(x,i+1,i===0)).join('')
+      : `<div class="stage">Крок 2 — хто стане вище</div>
+         <p class="note" style="margin:0">Нікого: жодна локація до цієї адреси не дістає.</p>`);
 
-  const first = ranked.find(r=>r.road<=r.v.r);
-  document.getElementById('hint').innerHTML = first
-    ? `Першою карткою буде <b>${first.v.name}</b> — ${first.road.toFixed(1)} км дороги, найкоротше плече і найкращий ETA. Усього гість побачить <b>${shown} ${shown===1?'картку':'картки'}</b> Marcello. Порядок не гарантований на 100%: крім ETA, ранжування враховує рейтинг, акції та просування.`
-    : `У цій точці <b>жодна локація Marcello не показується</b>.`;
+  const first = passing[0], second = passing[1];
+  document.getElementById('hint').innerHTML = !first
+    ? `У цій точці <b>жодна локація Marcello не показується</b> — гість Marcello взагалі не побачить.`
+    : `Першою гість побачить <b>${first.v.name}</b>. ` + (
+        second
+          ? (first.v.medRow <= 10 && second.v.medRow > 20
+              ? `Не через відстань: ${second.v.name} ${second.road < first.road ? 'ближче ('+second.road.toFixed(1)+' км проти '+first.road.toFixed(1)+')' : 'теж проходить'}, але ${first.v.name} купує Sponsored Listing і тримається в топ-5, тоді як ${second.v.name} має медіанну позицію ${second.v.medRow} — гостю треба прокрутити ${second.v.medRow} закладів, щоб її побачити.`
+              : `Разом із нею проходить ${second.v.name} (позиція ≈ ${second.v.medRow}). Обидві картки будуть у видачі, ${first.v.name} вище.`)
+          : `Це єдина локація Marcello, що дістає до цієї адреси, тож конкуренції між своїми тут немає.`
+      );
+
+  /* Конкретний важіль: що зробити, щоб першою стала найближча локація */
+  const nearest = passing.length ? passing.reduce((a,b)=>a.road<b.road?a:b) : null;
+  const lever = document.getElementById('lever');
+  if(!first || !nearest || nearest.v.id === first.v.id){
+    lever.style.display = 'none';
+  }else{
+    lever.style.display = 'block';
+    const blockers = passing.filter(x => x.v.id !== nearest.v.id && x.v.medRow < nearest.v.medRow);
+    lever.innerHTML = `<b>Щоб першою стала найближча — ${nearest.v.name} (${nearest.road.toFixed(1)} км)</b>, є два шляхи. `
+      + `Перший: звузити радіус ${blockers.map(b=>`${b.v.name} нижче ${Math.floor(b.road*10)/10} км`).join(' і ')} — тоді вона просто не дістане до цієї адреси і зникне з видачі тут. `
+      + `Другий: підключити Sponsored Listing або акцію для ${nearest.v.name} — тоді вона підніметься нагору сама, без урізання зон.`;
+  }
 
   document.getElementById('grid').innerHTML =
     `<thead><tr><th>Точка</th>${VENUES.map(v=>`<th style="color:${v.color}">${v.name.split(' ')[0]}</th>`).join('')}</tr></thead><tbody>` +
     SPOTS.map(s=>{
       const d = VENUES.map(v=>({v, road:roadKm(v,s.ll)}));
-      const best = d.filter(x=>x.road<=x.v.r).sort((a,b)=>a.road-b.road)[0];
+      const best = predictOrder(d.filter(x=>x.road<=x.v.r))[0];
       return `<tr><td>${s.n}</td>` + d.map(x=>
         `<td class="${best&&best.v.id===x.v.id?'win':(x.road<=x.v.r?'cov':'')}">${x.road.toFixed(1)}</td>`
       ).join('') + '</tr>';
