@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta name="robots" content="noindex, nofollow" />
+<title>Marcello Харків — зони покриття локацій</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+<style>
+  :root{
+    --bg:#F6F7F9; --card:#fff; --line:#E3E6EA;
+    --tx:#1B1F24; --tx2:#5A6472; --tx3:#8B95A3; --no:#C2C8D0;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;color:var(--tx);background:var(--bg)}
+  .app{display:flex;height:100vh;overflow:hidden}
+  #map{flex:1;height:100%}
+  aside{width:430px;min-width:430px;height:100%;overflow-y:auto;background:var(--card);border-right:1px solid var(--line);padding:20px 20px 40px}
+  h1{font-size:19px;margin:0 0 5px;letter-spacing:-.2px}
+  .sub{font-size:12.5px;color:var(--tx3);margin:0 0 16px;line-height:1.5}
+  h2{font-size:11.5px;text-transform:uppercase;letter-spacing:.7px;color:var(--tx3);margin:22px 0 9px;font-weight:600}
+
+  /* пошук */
+  .search{position:relative}
+  .search input{width:100%;font-size:13.5px;padding:11px 12px 11px 34px;border:1px solid var(--line);border-radius:9px;outline:none;font-family:inherit;background:#fff}
+  .search input:focus{border-color:#1B1F24}
+  .search .ico{position:absolute;left:12px;top:11px;color:var(--tx3);font-size:13px;pointer-events:none}
+  .search .spin{position:absolute;right:12px;top:11px;font-size:11px;color:var(--tx3);display:none}
+  .results{position:absolute;z-index:1200;left:0;right:0;top:46px;background:#fff;border:1px solid var(--line);border-radius:9px;box-shadow:0 8px 24px rgba(0,0,0,.13);overflow:hidden;display:none}
+  .results div{padding:9px 12px;font-size:12.5px;cursor:pointer;border-bottom:1px solid #F0F2F5;line-height:1.4}
+  .results div:last-child{border-bottom:none}
+  .results div:hover{background:#F0F2F5}
+  .results .muted{color:var(--tx3);cursor:default}
+  .results .muted:hover{background:#fff}
+  .rtitle{font-weight:600}
+  .rsub{color:var(--tx3);font-size:11px;margin-top:1px}
+
+  /* локації */
+  .venue{border:1px solid var(--line);border-radius:10px;padding:0;margin-bottom:9px;overflow:hidden;transition:border-color .15s}
+  .venue.on{border-color:#1B1F24}
+  .vhead{display:flex;align-items:center;gap:9px;padding:11px 12px;cursor:pointer;user-select:none}
+  .vhead:hover{background:#FAFBFC}
+  .dot{width:11px;height:11px;border-radius:50%;flex:none;box-shadow:0 0 0 0 rgba(0,0,0,0)}
+  .venue.on .dot{box-shadow:0 0 0 3.5px rgba(0,0,0,.10)}
+  .vname{font-size:13.5px;font-weight:600;flex:1}
+  .vval{font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--tx2)}
+  .eye{font-size:10.5px;font-weight:600;padding:3px 8px;border-radius:20px;background:#F0F2F5;color:var(--tx3)}
+  .venue.on .eye{background:#1B1F24;color:#fff}
+  .vbody{padding:0 12px 12px}
+  input[type=range]{width:100%;accent-color:#1B1F24;margin:0}
+  .vmeta{font-size:11.5px;color:var(--tx3);margin-top:6px;line-height:1.45}
+
+  .row{display:flex;gap:8px;margin:10px 0 0}
+  .btn{flex:1;font-size:12px;padding:7px 4px;border:1px solid var(--line);background:#fff;border-radius:7px;cursor:pointer;color:var(--tx2);font-weight:500;font-family:inherit}
+  .btn:hover{background:#F0F2F5}
+  .btn.on{background:#1B1F24;color:#fff;border-color:#1B1F24}
+  .chk{display:flex;align-items:center;gap:8px;margin-top:11px;font-size:12px;color:var(--tx2);cursor:pointer;user-select:none}
+  .chk input{accent-color:#1B1F24;margin:0}
+
+  /* перевірка точки */
+  .probe{border:1px solid var(--line);border-radius:10px;padding:12px;background:#FBFCFD}
+  .paddr{font-size:13px;font-weight:600;margin-bottom:3px;line-height:1.35}
+  .pcoord{font-size:11px;color:var(--tx3);font-variant-numeric:tabular-nums;margin-bottom:11px}
+  .rank{display:flex;align-items:center;gap:9px;padding:7px 0;border-top:1px solid var(--line)}
+  .rank:first-of-type{border-top:none}
+  .rnum{width:19px;height:19px;border-radius:50%;background:#1B1F24;color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center;flex:none}
+  .rnum.off{background:var(--no)}
+  .rname{flex:1;font-size:12.5px;font-weight:500}
+  .rdist{font-size:12px;font-variant-numeric:tabular-nums;color:var(--tx2)}
+  .tag{font-size:10.5px;padding:2px 7px;border-radius:20px;font-weight:600}
+  .tag.y{background:#E3F5F3;color:#0B6F6E}
+  .tag.n{background:#F0F2F5;color:#8B95A3}
+
+  table{width:100%;border-collapse:collapse;font-size:11.5px}
+  th{text-align:right;font-weight:600;color:var(--tx3);padding:6px 4px;border-bottom:1px solid var(--line);font-size:10.5px;text-transform:uppercase;letter-spacing:.4px}
+  th:first-child{text-align:left}
+  td{padding:6px 4px;border-bottom:1px solid #F0F2F5;text-align:right;font-variant-numeric:tabular-nums;color:var(--no)}
+  td:first-child{text-align:left;color:var(--tx2)}
+  td.cov{color:var(--tx);font-weight:500}
+  td.win{color:#0B6F6E;font-weight:700}
+  .note{font-size:11.5px;color:var(--tx3);line-height:1.55;margin-top:10px}
+  .hint{font-size:11.5px;background:#FFF8E6;border:1px solid #F5E3B3;color:#6B5518;border-radius:8px;padding:9px 11px;line-height:1.5;margin-top:12px}
+  .leaflet-container{background:#EDEFF2}
+  .lbl{font-size:11px;font-weight:600;color:#1B1F24;background:none;border:none;box-shadow:none;padding:0;text-shadow:0 0 3px #fff,0 0 3px #fff,0 0 3px #fff,0 0 3px #fff;white-space:nowrap}
+  .lbl:before{display:none}
+
+  /* На телефоні панель зверху, мапа під нею — інакше 430 px збоку не влазять. */
+  @media (max-width: 900px){
+    .app{flex-direction:column}
+    aside{width:100%;min-width:0;height:auto;max-height:52vh;border-right:none;border-bottom:1px solid var(--line);padding:16px 16px 24px;order:2}
+    #map{height:48vh;min-height:280px;order:1}
+    .lbl{font-size:10px}
+  }
+</style>
+</head>
+<body>
+<div class="app">
+  <aside>
+    <h1>Marcello Харків — зони покриття</h1>
+    <p class="sub">Натисніть на локацію — на мапі з'явиться її зона доставки. Радіус міряється по дорозі, тому зона не кругла: у бік центру вона витягнута, впоперек забудови підтиснута.</p>
+
+    <h2>Пошук адреси в Харкові</h2>
+    <div class="search">
+      <span class="ico">⌕</span>
+      <input id="q" type="text" placeholder="Напр.: Тракторобудівників 79/42" autocomplete="off" spellcheck="false">
+      <span class="spin" id="spin">шукаю…</span>
+      <div class="results" id="res"></div>
+    </div>
+    <p class="note">Можна вставити й координати одним рядком: <code>50.004281, 36.341324</code>. Або просто клікнути будь-де на мапі.</p>
+
+    <h2>Локації та радіус</h2>
+    <div id="venues"></div>
+    <div class="row">
+      <button class="btn" data-show="all">Показати всі зони</button>
+      <button class="btn" data-show="none">Приховати всі</button>
+    </div>
+    <div class="row">
+      <button class="btn" data-preset="10">10/10/10</button>
+      <button class="btn" data-preset="9">9 км</button>
+      <button class="btn" data-preset="zone">Зони 7/8/6</button>
+    </div>
+    <label class="chk"><input type="checkbox" id="chk-circle"> Домалювати номінальне коло радіуса</label>
+    <label class="chk"><input type="checkbox" id="chk-border" checked> Межа міста Харків</label>
+    <label class="chk"><input type="checkbox" id="chk-spots" checked> Орієнтири по місту</label>
+
+    <h2>Перевірка точки</h2>
+    <div class="probe" id="probe"></div>
+    <div class="hint" id="hint"></div>
+
+    <h2>Орієнтири по місту</h2>
+    <table id="grid"></table>
+    <p class="note">Числа — оцінка дороги в км від кожної локації. <b>Жирним зеленим</b> — та локація, що покаже картку першою. Сірим — точка поза радіусом.</p>
+
+    <p class="note" style="margin-top:16px">Координати трьох локацій — з бази Bolt. Координата будинку 79/42 (50.004281, 36.341324) — з Візіком. Межа міста — адміністративний кордон Харкова з OpenStreetMap (relation 3154746), спрощений до 40 м. Точки орієнтирів приблизні, вони потрібні для напрямку. Дорожня відстань — оцінка: Bolt не зберігає фактичну дорогу для власної доставки партнера, тому похибка кілька сотень метрів. Пошук адрес — Nominatim / OpenStreetMap.</p>
+  </aside>
+  <div id="map"></div>
+</div>
+
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+<script>
+const KH_BORDER = [[49.983,36.10555],[49.98175,36.11411],[49.97903,36.11399],[49.97654,36.11502],[49.97704,36.1183],[49.974,36.1188],[49.97356,36.11979],[49.97378,36.12722],[49.96621,36.12929],[49.9652,36.12889],[49.96298,36.12585],[49.9615,36.1289],[49.95891,36.12874],[49.95827,36.13464],[49.95784,36.13429],[49.95837,36.12859],[49.95678,36.12796],[49.95367,36.12873],[49.95355,36.12761],[49.95262,36.12752],[49.95197,36.13088],[49.95086,36.13192],[49.95021,36.13137],[49.94959,36.13219],[49.94757,36.13066],[49.94602,36.13154],[49.94081,36.13251],[49.94025,36.13472],[49.92572,36.12993],[49.92286,36.13019],[49.92229,36.13102],[49.92327,36.1334],[49.92417,36.13905],[49.92304,36.13966],[49.92301,36.14168],[49.92522,36.1447],[49.92432,36.14585],[49.92379,36.14842],[49.9242,36.14934],[49.92698,36.1473],[49.92875,36.14952],[49.92795,36.15734],[49.92595,36.15734],[49.92666,36.159],[49.92719,36.15854],[49.92786,36.15982],[49.92882,36.15939],[49.92943,36.16012],[49.9295,36.16201],[49.9292,36.16538],[49.92768,36.17054],[49.9255,36.17009],[49.92218,36.16576],[49.92021,36.16446],[49.92026,36.16318],[49.91757,36.1632],[49.91698,36.1651],[49.91791,36.17115],[49.92103,36.17579],[49.92049,36.17979],[49.92093,36.18454],[49.9201,36.18439],[49.92118,36.19133],[49.92016,36.19882],[49.91562,36.2041],[49.9145,36.2041],[49.91411,36.20515],[49.91225,36.20508],[49.91179,36.2127],[49.90993,36.21413],[49.90816,36.21733],[49.90716,36.21792],[49.90482,36.21569],[49.90251,36.21457],[49.90226,36.21504],[49.90084,36.21483],[49.89967,36.21245],[49.89106,36.21216],[49.89086,36.21353],[49.88887,36.21575],[49.88876,36.21822],[49.88572,36.22452],[49.88977,36.23135],[49.89037,36.23551],[49.88683,36.23764],[49.88263,36.23855],[49.87921,36.2424],[49.87962,36.24536],[49.87864,36.2457],[49.87848,36.2491],[49.88048,36.24902],[49.88062,36.24996],[49.88217,36.25049],[49.88303,36.25737],[49.8821,36.25826],[49.88321,36.26048],[49.88386,36.25877],[49.88582,36.26101],[49.88551,36.26237],[49.8864,36.26371],[49.88676,36.26783],[49.88558,36.27131],[49.88216,36.27521],[49.88185,36.27645],[49.88231,36.28276],[49.88163,36.28422],[49.88358,36.29153],[49.88208,36.29954],[49.8829,36.29981],[49.88339,36.29704],[49.8868,36.29123],[49.88665,36.29053],[49.91148,36.2779],[49.91171,36.28198],[49.91268,36.28506],[49.91224,36.28805],[49.91458,36.2888],[49.91524,36.28839],[49.91905,36.29],[49.92146,36.29478],[49.92261,36.30291],[49.92364,36.304],[49.9243,36.31019],[49.92269,36.30934],[49.92158,36.31108],[49.92138,36.31285],[49.92331,36.31357],[49.92368,36.31783],[49.92512,36.31903],[49.92511,36.32101],[49.92263,36.3241],[49.91777,36.33707],[49.92587,36.34595],[49.93031,36.35552],[49.93269,36.35757],[49.93161,36.36099],[49.92635,36.36925],[49.92615,36.37147],[49.92271,36.37176],[49.92059,36.37312],[49.91617,36.37995],[49.91572,36.38],[49.91315,36.37521],[49.90854,36.38042],[49.90886,36.38345],[49.90819,36.38479],[49.90901,36.38808],[49.90754,36.39345],[49.90588,36.39429],[49.90154,36.38754],[49.89877,36.39205],[49.9031,36.39875],[49.8982,36.40638],[49.8999,36.41043],[49.90149,36.41863],[49.89748,36.42947],[49.90216,36.43246],[49.90397,36.4325],[49.90512,36.44675],[49.90476,36.44971],[49.90637,36.45037],[49.90681,36.45291],[49.90801,36.45275],[49.90822,36.45545],[49.90911,36.45543],[49.90981,36.45408],[49.91455,36.45216],[49.91488,36.45152],[49.91812,36.45056],[49.91878,36.45124],[49.92029,36.44946],[49.92207,36.44912],[49.92562,36.45069],[49.92588,36.45249],[49.92702,36.45334],[49.93035,36.44563],[49.93249,36.43875],[49.93381,36.43664],[49.93432,36.43784],[49.93661,36.43635],[49.94154,36.43738],[49.94152,36.43659],[49.94678,36.43588],[50.00444,36.41224],[50.00975,36.40882],[50.01088,36.41078],[50.01158,36.40981],[50.01229,36.41004],[50.01264,36.40747],[50.01193,36.40724],[50.01206,36.40626],[50.02782,36.38606],[50.05134,36.36401],[50.05317,36.36488],[50.05322,36.36415],[50.05542,36.36595],[50.0566,36.36285],[50.05722,36.36335],[50.05731,36.36242],[50.05734,36.36145],[50.05562,36.36001],[50.06088,36.35443],[50.07531,36.33383],[50.07485,36.33298],[50.06457,36.34773],[50.06205,36.33865],[50.06281,36.33568],[50.06199,36.33522],[50.06053,36.3357],[50.05958,36.33281],[50.05935,36.32765],[50.05854,36.32768],[50.05364,36.31811],[50.05371,36.31524],[50.05279,36.31177],[50.05937,36.31006],[50.05914,36.30745],[50.06299,36.30374],[50.06306,36.30234],[50.06412,36.30342],[50.06644,36.30082],[50.06718,36.30071],[50.06717,36.29861],[50.06625,36.29839],[50.06606,36.29692],[50.06562,36.29697],[50.06448,36.29169],[50.06516,36.29053],[50.06754,36.28927],[50.07052,36.27749],[50.07192,36.27762],[50.07488,36.27482],[50.08003,36.27419],[50.07957,36.26869],[50.08351,36.26109],[50.0855,36.26056],[50.08698,36.26055],[50.08753,36.26299],[50.08859,36.26293],[50.09351,36.26589],[50.095,36.26576],[50.09532,36.26505],[50.09923,36.26765],[50.10052,36.27174],[50.10046,36.2735],[50.10161,36.27166],[50.10475,36.27027],[50.10464,36.26903],[50.10343,36.26791],[50.10252,36.26557],[50.10207,36.25899],[50.10106,36.25599],[50.10136,36.25452],[50.1003,36.25375],[50.09999,36.25239],[50.09919,36.25261],[50.0994,36.25083],[50.09845,36.25074],[50.09845,36.24972],[50.09505,36.2457],[50.09519,36.24507],[50.09323,36.24453],[50.09298,36.24058],[50.09183,36.23964],[50.08807,36.22142],[50.08624,36.21833],[50.08424,36.21583],[50.08379,36.21671],[50.07608,36.20633],[50.07505,36.20651],[50.07608,36.20472],[50.06863,36.19566],[50.06686,36.1995],[50.06368,36.19661],[50.06108,36.19224],[50.06023,36.18928],[50.05974,36.19004],[50.05578,36.18463],[50.05543,36.17811],[50.05469,36.17908],[50.0535,36.17888],[50.05017,36.16899],[50.04254,36.17268],[50.0423,36.17166],[50.04315,36.1713],[50.04392,36.16971],[50.04738,36.16889],[50.04728,36.16811],[50.04939,36.16772],[50.04948,36.16849],[50.05001,36.16835],[50.04611,36.15422],[50.04544,36.15406],[50.04195,36.15618],[50.03904,36.15881],[50.0355,36.16404],[50.03396,36.163],[50.03396,36.16186],[50.03307,36.1617],[50.03273,36.15797],[50.03204,36.1579],[50.03002,36.16161],[50.01747,36.16023],[50.00927,36.16575],[50.0098,36.16113],[50.0085,36.14753],[50.01118,36.13957],[50.01193,36.13931],[50.01257,36.1341],[50.01349,36.13175],[50.01284,36.13035],[50.01306,36.12919],[50.01506,36.1286],[50.01549,36.12742],[50.0165,36.12718],[50.0165,36.12449],[50.01739,36.12149],[50.01662,36.12085],[50.01056,36.12021],[50.00948,36.12074],[50.00778,36.1193],[50.00631,36.12409],[50.00412,36.12591],[50.00163,36.12406],[49.99765,36.128],[49.99159,36.1277],[49.99012,36.11023],[49.983,36.10555]];
+
+const CENTER = [50.0045, 36.2318];           // майдан Свободи — куди сходяться радіальні магістралі
+const F_MIN = 1.22, F_MAX = 1.45;            // дорога/пряма: уздовж магістралей до центру та впоперек сітки
+const KH_VIEWBOX = '36.05,50.15,36.50,49.85';
+
+const VENUES = [
+  {id:'n', name:'Нескорених',        addr:'вул. Нескорених, 9',    ll:[50.027382,36.33077],  r:10, color:'#E4572E', on:false},
+  {id:'p', name:'Академіка Павлова', addr:'вул. Ак. Павлова, 20Б', ll:[49.985693,36.278116], r:10, color:'#0E9594', on:false},
+  {id:'k', name:'Культури',          addr:'вул. Культури',         ll:[50.01263,36.229563],  r:10, color:'#7B61FF', on:false},
+];
+
+const TARGET = {name:'Просп. Тракторобудівників, 79/42', ll:[50.004281,36.341324]};
+
+const SPOTS = [
+  {n:'Пн. Салтівка',            ll:[50.0530,36.3350]},
+  {n:'602 мікрорайон',          ll:[50.0390,36.3200]},
+  {n:'Гребний канал',           ll:[50.0345,36.3510]},
+  {n:'Сх. Салтівка (Окружна)',  ll:[50.0330,36.3950]},
+  {n:'Стара Салтівка',          ll:[50.0250,36.3750]},
+  {n:'Ринок Барабашово',        ll:[50.0163,36.3033]},
+  {n:'Павлове Поле',            ll:[50.0175,36.2200]},
+  {n:'Сабурова дача',           ll:[49.9975,36.3175]},
+  {n:'Немишлянська',            ll:[49.9930,36.3400]},
+  {n:'Майдан Свободи (центр)',  ll:[50.0045,36.2318]},
+  {n:'Кінний ринок',            ll:[49.9877,36.2528]},
+  {n:'Пд. залізничний вокзал',  ll:[49.9906,36.2044]},
+  {n:'ХТЗ',                     ll:[49.9680,36.3560]},
+  {n:'Метро ім. Масельського',  ll:[49.9714,36.3697]},
+];
+
+const R = 6371;
+const rad = d => d*Math.PI/180, deg = r => r*180/Math.PI;
+
+function hav(a,b){
+  const p1=rad(a[0]), p2=rad(b[0]), dp=p2-p1, dl=rad(b[1]-a[1]);
+  const x=Math.sin(dp/2)**2+Math.cos(p1)*Math.cos(p2)*Math.sin(dl/2)**2;
+  return 2*R*Math.asin(Math.sqrt(x));
+}
+function bearing(a,b){
+  const p1=rad(a[0]), p2=rad(b[0]), dl=rad(b[1]-a[1]);
+  const y=Math.sin(dl)*Math.cos(p2);
+  const x=Math.cos(p1)*Math.sin(p2)-Math.sin(p1)*Math.cos(p2)*Math.cos(dl);
+  return (deg(Math.atan2(y,x))+360)%360;
+}
+/** Дорога довша за пряму сильніше впоперек радіальних магістралей, ніж уздовж них. */
+function factorFor(v, bTarget){
+  const bc = bearing(v.ll, CENTER);
+  const d  = rad(Math.abs(((bTarget-bc+180)%360)-180));
+  return F_MIN + (F_MAX-F_MIN)*(1-Math.cos(d))/2;
+}
+const roadKm = (v,pt) => hav(v.ll,pt)*factorFor(v,bearing(v.ll,pt));
+
+function project(ll, km, brg){
+  return [ ll[0] + (km/111.32)*Math.cos(rad(brg)),
+           ll[1] + (km/(111.32*Math.cos(rad(ll[0]))))*Math.sin(rad(brg)) ];
+}
+/** Межа зони: у кожному напрямку відкладаємо стільки прямої, скільки вміщує радіус по дорозі. */
+function reachPolygon(v){
+  const pts=[];
+  for(let b=0;b<360;b+=3) pts.push(project(v.ll, v.r/factorFor(v,b), b));
+  return pts;
+}
+
+const map = L.map('map',{zoomControl:true, attributionControl:false}).setView([50.005,36.290],11);
+L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}{r}.png',{maxZoom:19}).addTo(map);
+
+const borderLayer = L.polygon(KH_BORDER,{
+  color:'#1B1F24', weight:1.6, dashArray:'6 4', fill:false, opacity:.75, interactive:false
+}).addTo(map);
+
+const spotLayer = L.layerGroup().addTo(map);
+SPOTS.forEach(s=>{
+  L.marker(s.ll,{icon:L.divIcon({className:'',iconSize:[8,8],iconAnchor:[4,4],
+    html:'<div style="width:8px;height:8px;border-radius:50%;background:#5A6472;border:1.5px solid #fff"></div>'})})
+    .addTo(spotLayer)
+    .bindTooltip(s.n,{permanent:true,direction:'right',offset:[6,0],className:'lbl',opacity:.9});
+});
+
+const layers = {};
+VENUES.forEach(v=>{
+  const poly = L.polygon(reachPolygon(v),{color:v.color,weight:2,fillColor:v.color,fillOpacity:.11,interactive:false});
+  const circ = L.circle(v.ll,{radius:v.r*1000,color:v.color,weight:1,dashArray:'4 5',fill:false,opacity:.55,interactive:false});
+  const mark = L.marker(v.ll,{icon:venueIcon(v,false),zIndexOffset:600}).addTo(map)
+    .bindTooltip(v.name,{permanent:true,direction:'top',offset:[0,-12],className:'lbl'});
+  mark.on('click', e=>{ L.DomEvent.stopPropagation(e); toggleVenue(v.id); });
+  layers[v.id]={poly,circ,mark};
+});
+
+function venueIcon(v, active){
+  const ring = active ? `box-shadow:0 0 0 5px ${v.color}33, 0 1px 5px rgba(0,0,0,.4)` : 'box-shadow:0 1px 5px rgba(0,0,0,.4)';
+  return L.divIcon({className:'',iconSize:[20,20],iconAnchor:[10,10],
+    html:`<div style="width:20px;height:20px;border-radius:50%;background:${v.color};border:3px solid #fff;${ring};cursor:pointer"></div>`});
+}
+
+function syncVenue(v){
+  const showCirc = document.getElementById('chk-circle').checked;
+  if(v.on){ layers[v.id].poly.addTo(map); } else { map.removeLayer(layers[v.id].poly); }
+  if(v.on && showCirc){ layers[v.id].circ.addTo(map); } else { map.removeLayer(layers[v.id].circ); }
+  layers[v.id].mark.setIcon(venueIcon(v, v.on));
+  document.getElementById('card-'+v.id).classList.toggle('on', v.on);
+  document.getElementById('eye-'+v.id).textContent = v.on ? 'зона на мапі' : 'показати зону';
+}
+function toggleVenue(id){
+  const v = VENUES.find(x=>x.id===id);
+  v.on = !v.on;
+  syncVenue(v);
+}
+
+/* ---------- панель локацій ---------- */
+document.getElementById('venues').innerHTML = VENUES.map(v=>`
+  <div class="venue" id="card-${v.id}">
+    <div class="vhead" data-toggle="${v.id}">
+      <span class="dot" style="background:${v.color}"></span>
+      <span class="vname">${v.name}</span>
+      <span class="vval" id="val-${v.id}">${v.r} км</span>
+      <span class="eye" id="eye-${v.id}">показати зону</span>
+    </div>
+    <div class="vbody">
+      <input type="range" min="4" max="20" step="0.5" value="${v.r}" id="rng-${v.id}">
+      <div class="vmeta" id="meta-${v.id}"></div>
+    </div>
+  </div>`).join('');
+
+document.querySelectorAll('[data-toggle]').forEach(el=>
+  el.addEventListener('click',()=>toggleVenue(el.dataset.toggle)));
+
+VENUES.forEach(v=>{
+  document.getElementById('rng-'+v.id).addEventListener('input', ev=>{
+    v.r = parseFloat(ev.target.value);
+    layers[v.id].poly.setLatLngs(reachPolygon(v));
+    layers[v.id].circ.setRadius(v.r*1000);
+    render();
+  });
+});
+
+function setAll(vals){
+  VENUES.forEach((v,i)=>{
+    v.r = vals[i];
+    document.getElementById('rng-'+v.id).value = v.r;
+    layers[v.id].poly.setLatLngs(reachPolygon(v));
+    layers[v.id].circ.setRadius(v.r*1000);
+  });
+  render();
+}
+document.querySelectorAll('[data-preset]').forEach(b=>b.addEventListener('click',()=>{
+  const p=b.dataset.preset;
+  setAll(p==='zone' ? [7,8,6] : [+p,+p,+p]);
+}));
+document.querySelectorAll('[data-show]').forEach(b=>b.addEventListener('click',()=>{
+  const on = b.dataset.show==='all';
+  VENUES.forEach(v=>{ v.on=on; syncVenue(v); });
+}));
+document.getElementById('chk-circle').addEventListener('change',()=>VENUES.forEach(syncVenue));
+document.getElementById('chk-border').addEventListener('change',e=>
+  e.target.checked ? borderLayer.addTo(map) : map.removeLayer(borderLayer));
+document.getElementById('chk-spots').addEventListener('change',e=>
+  e.target.checked ? spotLayer.addTo(map) : map.removeLayer(spotLayer));
+
+/* ---------- перевірка точки ---------- */
+let probePoint = {name:TARGET.name, ll:TARGET.ll, verified:true};
+let probeMarker = L.marker(TARGET.ll,{icon:probeIcon(),zIndexOffset:900}).addTo(map);
+let probeTip = probeMarker.bindTooltip(TARGET.name,{permanent:true,direction:'top',offset:[0,-15],className:'lbl'});
+
+function probeIcon(){
+  return L.divIcon({className:'',iconSize:[24,24],iconAnchor:[12,12],
+    html:'<div style="width:24px;height:24px;border-radius:50%;background:#1B1F24;border:3px solid #FFD166;box-shadow:0 2px 8px rgba(0,0,0,.45)"></div>'});
+}
+function setProbe(name, ll, fly){
+  probePoint = {name, ll};
+  probeMarker.setLatLng(ll).setTooltipContent(name);
+  if(fly) map.flyTo(ll, Math.max(map.getZoom(), 13), {duration:.7});
+  render();
+}
+map.on('click', e=> setProbe('Довільна точка на мапі', [e.latlng.lat, e.latlng.lng], false));
+
+/* ---------- пошук адрес ---------- */
+const qEl = document.getElementById('q'), resEl = document.getElementById('res'), spinEl = document.getElementById('spin');
+let timer=null, lastResults=[];
+
+function showRes(html){ resEl.innerHTML=html; resEl.style.display = html ? 'block' : 'none'; }
+function hideRes(){ resEl.style.display='none'; }
+
+qEl.addEventListener('input',()=>{
+  const q = qEl.value.trim();
+  clearTimeout(timer);
+  if(q.length < 3){ hideRes(); return; }
+
+  const m = q.match(/^\s*(-?\d{1,2}[.,]\d+)\s*[,;\s]\s*(-?\d{1,3}[.,]\d+)\s*$/);
+  if(m){
+    const lat = parseFloat(m[1].replace(',','.')), lng = parseFloat(m[2].replace(',','.'));
+    showRes(`<div data-i="coord"><div class="rtitle">Перейти до координат</div><div class="rsub">${lat}, ${lng}</div></div>`);
+    resEl.querySelector('[data-i="coord"]').onclick = ()=>{
+      setProbe(`Координати ${lat.toFixed(5)}, ${lng.toFixed(5)}`, [lat,lng], true); hideRes(); };
+    return;
+  }
+  timer = setTimeout(()=>lookup(q), 420);
+});
+
+async function lookup(q){
+  spinEl.style.display='block';
+  const url = 'https://nominatim.openstreetmap.org/search'
+    + '?format=jsonv2&addressdetails=1&limit=7&countrycodes=ua&bounded=1'
+    + '&viewbox=' + KH_VIEWBOX
+    + '&accept-language=uk&q=' + encodeURIComponent(q + ', Харків');
+  try{
+    const r = await fetch(url,{headers:{'Accept':'application/json'}});
+    if(!r.ok) throw new Error(r.status);
+    lastResults = await r.json();
+    if(!lastResults.length){
+      showRes('<div class="muted">Нічого не знайшлося. Спробуйте «вулиця номер» або вставте координати.</div>');
+      return;
+    }
+    showRes(lastResults.map((x,i)=>{
+      const a = x.address || {};
+      const street = [a.road, a.house_number].filter(Boolean).join(', ');
+      const extra  = [a.suburb || a.city_district, a.city || a.town].filter(Boolean).join(' · ');
+      return `<div data-i="${i}">
+        <div class="rtitle">${street || x.name || x.display_name.split(',')[0]}</div>
+        <div class="rsub">${extra || x.display_name.split(',').slice(1,3).join(',')}</div>
+      </div>`;
+    }).join(''));
+    resEl.querySelectorAll('[data-i]').forEach(el=>{
+      el.onclick = ()=>{
+        const x = lastResults[+el.dataset.i];
+        const a = x.address || {};
+        const label = [a.road, a.house_number].filter(Boolean).join(', ') || x.display_name.split(',')[0];
+        setProbe(label, [parseFloat(x.lat), parseFloat(x.lon)], true);
+        qEl.value = label; hideRes();
+      };
+    });
+  }catch(err){
+    showRes('<div class="muted">Пошук недоступний (немає інтернету або ліміт запитів). Вставте координати вручну.</div>');
+  }finally{
+    spinEl.style.display='none';
+  }
+}
+qEl.addEventListener('keydown', e=>{
+  if(e.key==='Enter'){ const f=resEl.querySelector('[data-i]'); if(f) f.click(); }
+  if(e.key==='Escape') hideRes();
+});
+document.addEventListener('click', e=>{ if(!e.target.closest('.search')) hideRes(); });
+
+/* ---------- рендер панелі ---------- */
+function render(){
+  VENUES.forEach(v=>{
+    document.getElementById('val-'+v.id).textContent = v.r+' км';
+    document.getElementById('meta-'+v.id).textContent =
+      `Реально дістає на ${(v.r/F_MAX).toFixed(1)}–${(v.r/F_MIN).toFixed(1)} км по прямій: далі вздовж магістралей до центру, ближче впоперек забудови.`;
+  });
+
+  const ranked = VENUES.map(v=>({v, road:roadKm(v,probePoint.ll)})).sort((a,b)=>a.road-b.road);
+  let shown = 0;
+  document.getElementById('probe').innerHTML =
+    `<div class="paddr">${probePoint.name}</div>
+     <div class="pcoord">${probePoint.ll[0].toFixed(6)}, ${probePoint.ll[1].toFixed(6)}</div>` +
+    ranked.map(r=>{
+      const ok = r.road <= r.v.r;
+      if(ok) shown++;
+      return `<div class="rank">
+        <span class="rnum ${ok?'':'off'}">${ok?shown:'—'}</span>
+        <span class="rname" style="color:${ok?'#1B1F24':'#8B95A3'}">${r.v.name}</span>
+        <span class="rdist">${r.road.toFixed(1)} км</span>
+        <span class="tag ${ok?'y':'n'}">${ok?'показує':'поза зоною'}</span>
+      </div>`;
+    }).join('');
+
+  const first = ranked.find(r=>r.road<=r.v.r);
+  document.getElementById('hint').innerHTML = first
+    ? `Першою карткою буде <b>${first.v.name}</b> — ${first.road.toFixed(1)} км дороги, найкоротше плече і найкращий ETA. Усього гість побачить <b>${shown} ${shown===1?'картку':'картки'}</b> Marcello. Порядок не гарантований на 100%: крім ETA, ранжування враховує рейтинг, акції та просування.`
+    : `У цій точці <b>жодна локація Marcello не показується</b>.`;
+
+  document.getElementById('grid').innerHTML =
+    `<thead><tr><th>Точка</th>${VENUES.map(v=>`<th style="color:${v.color}">${v.name.split(' ')[0]}</th>`).join('')}</tr></thead><tbody>` +
+    SPOTS.map(s=>{
+      const d = VENUES.map(v=>({v, road:roadKm(v,s.ll)}));
+      const best = d.filter(x=>x.road<=x.v.r).sort((a,b)=>a.road-b.road)[0];
+      return `<tr><td>${s.n}</td>` + d.map(x=>
+        `<td class="${best&&best.v.id===x.v.id?'win':(x.road<=x.v.r?'cov':'')}">${x.road.toFixed(1)}</td>`
+      ).join('') + '</tr>';
+    }).join('') + '</tbody>';
+}
+
+VENUES.forEach(syncVenue);
+render();
+</script>
+</body>
+</html>
