@@ -300,6 +300,7 @@ def fetch_brand_data(brand: dict) -> dict:
     global_start, _ = month_range(y0, m0)
     _, global_end   = month_range(y1, m1)
     pids_sql = ", ".join(str(p) for p in brand["provider_ids"])
+    pids_str = ", ".join(f"'{p}'" for p in brand["provider_ids"])
     month_keys   = [month_key(y, m) for y, m in months]
     month_labels = [month_label(y, m) for y, m in months]
     month_labels_s = [month_label(y, m, short=True) for y, m in months]
@@ -361,13 +362,15 @@ def fetch_brand_data(brand: dict) -> dict:
         """)
 
         # Unique customers can't be summed across weeks, so take the monthly figure.
+        # entity_id here is a STRING holding providers, zones and countries alike, so
+        # comparing it against bare numbers makes Spark cast the whole column and fail.
         users_rows = run_query(ctx, f"""
             SELECT
                 entity_id AS provider_id,
                 DATE_FORMAT(DATE_TRUNC('month', metric_timestamp_partition), 'yyyy-MM-dd') AS mstart,
                 SUM(provider_deliveries_unique_user_count) AS active_users
             FROM {schema}.int_provider_metrics_non_additive
-            WHERE entity_id IN ({pids_sql})
+            WHERE entity_id IN ({pids_str})
               AND timeframe_name = 'month'
               AND metric_timestamp_partition >= '{global_start}'
               AND metric_timestamp_partition <  '{global_end}'
