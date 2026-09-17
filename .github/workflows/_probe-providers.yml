@@ -1,0 +1,26 @@
+name: TEMP — probe providers
+
+on:
+  workflow_dispatch:
+    inputs:
+      patterns:
+        description: 'Кома-розділені шматки назви для пошуку'
+        required: false
+        default: 'баранчик,baranchyk,baranchik,баран'
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install requests
+      - name: Probe
+        env:
+          DATABRICKS_HOST:       ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN:      ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_CLUSTER_ID: ${{ secrets.DATABRICKS_CLUSTER_ID }}
+          PATTERNS:              ${{ inputs.patterns }}
+        run: python _probe_providers.py
