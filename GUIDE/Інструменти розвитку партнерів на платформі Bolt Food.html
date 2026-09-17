@@ -56,16 +56,36 @@
   .kpi-value{font-size:18px;font-weight:700}
   .kpi-sub{font-size:12px;color:var(--gray-400);margin-top:4px}
 
-  .card-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:14px}
-  .tool{background:#fff;border-radius:14px;padding:20px 20px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06);
-    border:1px solid #eee;display:flex;flex-direction:column;gap:8px}
-  .tool .num{width:28px;height:28px;border-radius:8px;background:var(--green);color:var(--black);
-    font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center}
-  .tool h3{font-size:17px}
-  .tool .en{font-size:12px;color:var(--gray-400);font-weight:600;text-transform:uppercase;letter-spacing:.4px}
-  .tool p{color:var(--gray-700);font-size:14px}
-  .path{background:var(--gray-100);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--gray-700);margin-top:auto}
+  .tool{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);
+    border:1px solid #eee;margin-bottom:12px;overflow:hidden}
+  .tool>summary{list-style:none;cursor:pointer;padding:20px 22px;display:flex;gap:14px;align-items:flex-start}
+  .tool>summary::-webkit-details-marker{display:none}
+  .tool>summary:hover{background:#f9fefb}
+  .tool .num{flex:0 0 28px;width:28px;height:28px;border-radius:8px;background:var(--green);color:var(--black);
+    font-weight:800;font-size:13px;display:flex;align-items:center;justify-content:center;margin-top:2px}
+  .tool .sum-main{flex:1;min-width:0}
+  .tool h3{font-size:17px;margin-bottom:2px}
+  .tool .en{font-size:11px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
+  .tool .short{color:var(--gray-700);font-size:14px}
+  .tool .chev{flex:0 0 auto;color:var(--gray-400);font-size:12px;font-weight:700;text-transform:uppercase;
+    letter-spacing:.4px;display:flex;align-items:center;gap:6px;white-space:nowrap;padding-top:4px}
+  .tool .chev::after{content:"▾";font-size:14px;transition:transform .15s}
+  .tool[open]>summary{border-bottom:1px solid #f0f0f0;background:#f9fefb}
+  .tool[open] .chev::after{transform:rotate(180deg)}
+  .tool[open] .chev .lbl-open{display:none}
+  .tool .chev .lbl-close{display:none}
+  .tool[open] .chev .lbl-close{display:inline}
+  .tool-body{padding:18px 22px 22px;color:var(--gray-700)}
+  .tool-body h4{font-size:16px;color:var(--black);margin-bottom:8px}
+  .tool-body p{margin-bottom:10px}
+  .tool-body ul{margin:10px 0 0 18px}
+  .tool-body li{margin-bottom:7px}
+  .tool-body table{margin-top:14px;box-shadow:none;border:1px solid #eee}
+  .path{background:var(--gray-100);border-radius:8px;padding:8px 10px;font-size:12.5px;color:var(--gray-700);margin-top:14px}
   .path b{color:var(--black)}
+  .shot{margin-top:14px;background:var(--gray-100);border-radius:12px;padding:14px;text-align:center}
+  .shot img{max-width:100%;width:340px;border-radius:10px;display:block;margin:0 auto}
+  .shot figcaption{font-size:12px;color:var(--gray-400);margin-top:10px}
 
   .loc-card{background:#fff;border-radius:14px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);
     border:1px solid #eee;overflow:hidden}
@@ -138,12 +158,10 @@
 
 <nav class="nav">
   <a href="#overview">Огляд</a>
-  <a href="#tools">Інструменти</a>
-  <a href="#smart">Розумні акції</a>
-  <a href="#ads">Платне просування</a>
-  <a href="#discounts">Знижки</a>
-  <a href="#events">Івенти</a>
+  <a href="#tools">Що ми пропонуємо</a>
+  <a href="#combo">Як комбінувати</a>
   <a href="#start">Як запустити</a>
+  <a href="#remember">Що памʼятати</a>
 </nav>
 
 <div class="container">
@@ -166,7 +184,7 @@
   <div class="chips">
     <span class="chip">Розумні акції</span>
     <span class="chip">Платне просування</span>
-    <span class="chip">Знижки на позиції</span>
+    <span class="chip">Звичайні знижки</span>
     <span class="chip">Івенти Bolt Food</span>
   </div>
 </section>
@@ -179,18 +197,18 @@
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Хто запускає</div>
-    <div class="kpi-value">Ви</div>
-    <div class="kpi-sub">самостійно, у кілька кліків</div>
+    <div class="kpi-value">Ви або менеджер</div>
+    <div class="kpi-sub">запускаєте самостійно в порталі, а в разі чого — попросіть менеджера зробити це за вас</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Хто співфінансує</div>
-    <div class="kpi-value">Bolt Food</div>
-    <div class="kpi-sub">у Розумних акціях і частині івентів</div>
+    <div class="kpi-value">Bolt Food до 60%</div>
+    <div class="kpi-sub">у Розумних акціях. Тематичні тижні — або повністю за рахунок закладу, або зі внеском Bolt Food</div>
   </div>
   <div class="kpi-card">
     <div class="kpi-label">Де дивитеся ефект</div>
-    <div class="kpi-value">Там само</div>
-    <div class="kpi-sub">покази, замовлення, витрати в реальному часі</div>
+    <div class="kpi-value">Статистика</div>
+    <div class="kpi-sub">окремий розділ у порталі + дані в «Промоакціях»</div>
   </div>
 </div>
 
@@ -198,111 +216,101 @@
 <p class="lead">
   У розділі «Промоакції» є два блоки. Зверху — <b>Розумні акції</b>: готові пакети зі знижкою
   для різних груп гостей, де Bolt Food ділить витрати з вами. Нижче — <b>«Налаштувати інші акції»</b>:
-  платне просування в застосунку, знижки на страви та підключення до івентів платформи.
+  платне просування в застосунку, звичайні знижки та підключення до івентів платформи.
 </p>
 
-<div class="card-grid">
-  <article class="tool">
-    <div class="num">1</div>
-    <div class="en">Smart Promotions</div>
-    <h3>Розумні акції</h3>
-    <p>Знижка для конкретних груп гостей: нові, ті, хто давно не замовляв, і постійні. Bolt Food співфінансує пропозицію, щоб заклад не ніс усю вартість знижки сам.</p>
-    <div class="path">Портал → <b>Промоакції</b> → перший блок «Розумні акції»</div>
-  </article>
-  <article class="tool">
-    <div class="num">2</div>
-    <div class="en">Sponsored Listing</div>
-    <h3>Платне просування</h3>
-    <p>Заклад частіше зʼявляється в стрічці, категоріях і пошуку. Ви платите за видимість, а не за знижку. Підходить, якщо гості добре замовляють, але заклад бачать рідко.</p>
-    <div class="path">Промоакції → <b>Налаштувати інші акції</b> → «Запустити платне просування»</div>
-  </article>
-  <article class="tool">
-    <div class="num">3</div>
-    <div class="en">Item discounts</div>
-    <h3>Знижки на страви</h3>
-    <p>Звичайні акції на все меню або на вибрані позиції. Гість бачить бейдж і нову ціну в меню. Зручно тестувати глибину знижки без пакетів Розумних акцій.</p>
-    <div class="path">Промоакції → <b>Налаштувати інші акції</b> → знижки на позиції</div>
-  </article>
-  <article class="tool">
-    <div class="num">4</div>
-    <div class="en">Trade events</div>
-    <h3>Івенти платформи</h3>
-    <p>Тижневі кампанії Bolt Food: тематичні тижні, Bolt Plus, святкові акції. Заклад отримує додаткову видимість у банері. Інколи потрібно додати свою знижку.</p>
-    <div class="path">Промоакції → <b>Налаштувати інші акції</b> → доступні івенти</div>
-  </article>
-</div>
+<p class="lead" style="margin-top:-6px">Натисніть на інструмент, щоб розгорнути деталі.</p>
 
-<div class="section-title" id="smart">1. Розумні акції</div>
-<div class="loc-card">
-  <div class="loc-head">
-    <h2>Знижка для правильного гостя, а не для всіх підряд</h2>
-    <span class="badge b-star">Співфінансування Bolt</span>
-  </div>
-  <div class="loc-body">
+<details class="tool" id="smart">
+  <summary>
+    <div class="num">1</div>
+    <div class="sum-main">
+      <div class="en">Smart Promotions</div>
+      <h3>Розумні акції</h3>
+      <div class="short">Знижка для конкретних груп гостей: нові, ті, хто давно не замовляв, і постійні. Bolt Food співфінансує пропозицію до 60%, щоб заклад не ніс усю вартість знижки сам.</div>
+    </div>
+    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+  </summary>
+  <div class="tool-body">
+    <h4>Знижка для правильного гостя, а не для всіх підряд <span class="badge b-star">Співфінансування Bolt до 60%</span></h4>
     <p>
       Розумні акції самі визначають, кому показати пропозицію. Ви обираєте пакети в порталі —
       система показує знижку лише тим гостям, для яких вона розрахована. Так заклад залучає
       нових клієнтів і повертає тих, хто давно не замовляв, без «знижки на всіх».
     </p>
+    <p>
+      <b>Цей інструмент можна тримати увімкненим на постійній основі</b> — і саме так він працює найкраще:
+    </p>
+    <ul>
+      <li>Знижку бачить лише вибрана група гостей, а не всі підряд, тому акція не зʼїдає маржу на замовленнях, які ви й так отримали б.</li>
+      <li>Bolt Food бере на себе до 60% вартості знижки, тож ваша частина витрат значно менша, ніж у звичайній акції.</li>
+      <li>Склад груп оновлюється автоматично: щотижня в них потрапляють нові гості й ті, хто саме зараз почав вас забувати. Постійно ввімкнена акція ловить їх вчасно.</li>
+      <li>Заклад стабільно має бейдж зі знижкою в застосунку — це підвищує клікабельність картки навіть у гостей, які знижку не отримують.</li>
+      <li>Регулярність дає рівний потік замовлень замість піків і провалів після разових кампаній.</li>
+    </ul>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Група гостей у порталі</th>
+          <th>Хто це</th>
+          <th>Навіщо підключати</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td><b>Нові гості</b></td>
+          <td>Люди, які роблять перші замовлення на Bolt Food</td>
+          <td>Стати першим вибором і виростити постійного клієнта</td>
+        </tr>
+        <tr>
+          <td><b>Гості, які давно не замовляли</b></td>
+          <td>Користувачі без нещодавніх замовлень</td>
+          <td>Повернути аудиторію сильнішою пропозицією</td>
+        </tr>
+        <tr>
+          <td><b>Нерегулярні / залучені гості</b></td>
+          <td>Замовляють час від часу</td>
+          <td>Підняти частоту і привчити замовляти частіше</td>
+        </tr>
+        <tr>
+          <td><b>Постійні гості</b></td>
+          <td>Ті, хто вже добре знає застосунок і замовляє регулярно</td>
+          <td>Утримати й виділитися серед конкурентів</td>
+        </tr>
+        <tr>
+          <td><b>Найактивніші гості</b></td>
+          <td>Найвища частота та чек у застосунку</td>
+          <td>Закріпити лояльність серед найціннішої аудиторії</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <p style="margin-top:14px">
+      У кабінеті для кожної групи видно глибину знижки (часто на меню, інколи з безкоштовною доставкою)
+      і частку, яку бере на себе Bolt Food. Підключайте пакети окремо: можна почати з нових гостей
+      і тих, хто давно не замовляв, а далі додати постійну аудиторію.
+    </p>
     <div class="note">
       Набір пакетів і відсоток співфінансування залежать від міста та категорії прибутковості закладу.
       Якщо блоку немає в порталі — напишіть своєму менеджеру Bolt Food: інструмент підключається не в усіх містах одразу.
     </div>
+    <div class="path">Портал → <b>Промоакції</b> → перший блок «Розумні акції»</div>
   </div>
-</div>
+</details>
 
-<div class="table-wrap">
-<table>
-  <thead>
-    <tr>
-      <th>Група гостей у порталі</th>
-      <th>Хто це</th>
-      <th>Навіщо підключати</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td><b>Нові гості</b></td>
-      <td>Люди, які роблять перші замовлення на Bolt Food</td>
-      <td>Стати першим вибором і виростити постійного клієнта</td>
-    </tr>
-    <tr>
-      <td><b>Гості, які давно не замовляли</b></td>
-      <td>Користувачі без нещодавніх замовлень</td>
-      <td>Повернути аудиторію сильнішою пропозицією</td>
-    </tr>
-    <tr>
-      <td><b>Нарегулярні / залучені гості</b></td>
-      <td>Замовляють час від часу</td>
-      <td>Підняти частоту і привчити замовляти частіше</td>
-    </tr>
-    <tr>
-      <td><b>Постійні гості</b></td>
-      <td>Ті, хто вже добре знає застосунок і замовляє регулярно</td>
-      <td>Утримати й виділитися серед конкурентів</td>
-    </tr>
-    <tr>
-      <td><b>Найактивніші гості</b></td>
-      <td>Найвища частота та чек у застосунку</td>
-      <td>Закріпити лояльність серед найціннішої аудиторії</td>
-    </tr>
-  </tbody>
-</table>
-</div>
-
-<p class="lead" style="margin-top:16px">
-  У кабінеті для кожної групи видно глибину знижки (часто на меню, інколи з безкоштовною доставкою)
-  і частку, яку бере на себе Bolt Food. Підключайте пакети окремо: можна почати з нових гостей
-  і тих, хто давно не замовляв, а далі додати постійну аудиторію.
-</p>
-
-<div class="section-title" id="ads">2. Платне просування</div>
-<div class="loc-card">
-  <div class="loc-head">
-    <h2>Більше показів у стрічці, категоріях і пошуку</h2>
-    <span class="badge b-good">Оплата за видимість</span>
-  </div>
-  <div class="loc-body">
+<details class="tool" id="ads">
+  <summary>
+    <div class="num">2</div>
+    <div class="sum-main">
+      <div class="en">Sponsored Listing</div>
+      <h3>Платне просування</h3>
+      <div class="short">Заклад частіше зʼявляється в стрічці, категоріях і пошуку. Ви платите за видимість, а не за знижку. Підходить, якщо гості добре замовляють, але заклад бачать рідко.</div>
+    </div>
+    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+  </summary>
+  <div class="tool-body">
+    <h4>Більше показів у стрічці, категоріях і пошуку <span class="badge b-good">Оплата за видимість</span></h4>
     <p>
       Платне просування (спонсоровані оголошення) піднімає картку закладу вище, щоб більше гостей
       її побачили. Це не знижка: гість замовляє за звичайними цінами меню. Ви обираєте локації,
@@ -310,7 +318,8 @@
     </p>
     <ul>
       <li><b>Коли варто:</b> заклад добре конвертує перегляди в замовлення, але його мало показують порівняно з конкурентами в зоні.</li>
-      <li><b>Як оплачується:</b> сума зʼявляється в рахунку за тиждень, коли кампанія була активна. Результати (покази, кліки, замовлення) видно в розділі «Промоакції».</li>
+      <li><b>Як оплачується:</b> сума зʼявляється в рахунку за тиждень, коли кампанія була активна. Результати видно в розділі «Промоакції».</li>
+      <li><b>Документи:</b> акти та фінансовий звіт оновлюються кожні 2 тижні.</li>
       <li><b>Як поєднувати:</b> спочатку видимість, потім Розумні акції — гість частіше бачить заклад і отримує привід натиснути.</li>
     </ul>
     <div class="note">
@@ -318,40 +327,54 @@
       Якщо опції немає — уточніть у менеджера, чи інструмент уже доступний для вашого міста.
     </div>
   </div>
-</div>
+</details>
 
-<div class="section-title" id="discounts">3. Знижки на страви</div>
-<div class="loc-card">
-  <div class="loc-head">
-    <h2>Бейдж і нова ціна прямо в меню</h2>
-    <span class="badge b-mid">Ваш бюджет на знижку</span>
-  </div>
-  <div class="loc-body">
+<details class="tool" id="discounts">
+  <summary>
+    <div class="num">3</div>
+    <div class="sum-main">
+      <div class="en">Item discounts</div>
+      <h3>Звичайні знижки</h3>
+      <div class="short">Акції на все меню або на окремі позиції. Гість бачить бейдж і нову ціну в меню. Ці акції повністю за рахунок партнера.</div>
+    </div>
+    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+  </summary>
+  <div class="tool-body">
+    <h4>Бейдж і нова ціна прямо в меню <span class="badge b-mid">Повністю за рахунок закладу</span></h4>
     <p>
       Звичайні акції дають протестувати знижку без пакетів Розумних акцій: на все меню
       або на вибрані хіти. Гість бачить перекреслену ціну й бейдж на картці закладу —
-      це часто збільшує кількість переходів у меню.
+      це часто збільшує кількість переходів у меню. Такі акції фінансуються повністю закладом.
     </p>
     <ul>
-      <li><b>Знижка на вибрані позиції.</b> У редакторі меню додайте тег спеціальної пропозиції до страв
-        (крок 5–50%), потім активуйте акцію на ці позиції в «Промоакціях».</li>
+      <li><b>Знижка на окремі позиції.</b> Це знижки на окремі позиції в меню — коли не бажаєте робити знижку на все меню.</li>
       <li><b>Знижка на меню.</b> Одна глибина на широкий набір страв — коли потрібно швидко дати гостю зрозумілу пропозицію.</li>
-      <li><b>Публікація меню.</b> Після зміни тегів обовʼязково натисніть «Опублікувати», інакше гість не побачить акцію.</li>
     </ul>
     <div class="note">
-      Ці акції зручні, коли хочете самі обрати глибину й перелік страв. Якщо потрібне співфінансування Bolt Food —
-      дивіться блок Розумних акцій.
+      Ці акції зручні, коли хочете самі обрати % знижки й перелік страв, дані акції повністю за рахунок закладу.
+      Додатково при запуску таких акцій можна підсвітити пропозицію на рекламному банері в Додатку — для цього
+      погодьте завчасно пропозицію з менеджером, щоб команда завчасно могла запустити банер.
+      Приклад рекламного банера додаємо на фото.
     </div>
+    <figure class="shot">
+      <img src="img/reklamnyi-baner.png" alt="Приклад рекламного банера в застосунку Bolt Food" />
+      <figcaption>Приклад рекламного банера в застосунку Bolt Food</figcaption>
+    </figure>
   </div>
-</div>
+</details>
 
-<div class="section-title" id="events">4. Івенти Bolt Food</div>
-<div class="loc-card">
-  <div class="loc-head">
-    <h2>Додаткова полиця в застосунку на тиждень</h2>
-    <span class="badge b-good">Видимість платформи</span>
-  </div>
-  <div class="loc-body">
+<details class="tool" id="events">
+  <summary>
+    <div class="num">4</div>
+    <div class="sum-main">
+      <div class="en">Trade events</div>
+      <h3>Івенти платформи</h3>
+      <div class="short">Тижневі кампанії Bolt Food: тематичні тижні, Bolt Plus, святкові акції. Заклад отримує додаткову видимість у банері.</div>
+    </div>
+    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+  </summary>
+  <div class="tool-body">
+    <h4>Додаткова полиця в застосунку на тиждень <span class="badge b-good">Видимість платформи</span></h4>
     <p>
       Час від часу в порталі зʼявляються кампанії платформи: тематичні тижні кухні, святкові акції,
       тиждень Bolt Plus тощо. Якщо заклад підходить за умовами, ви бачите запрошення й можете
@@ -359,13 +382,16 @@
     </p>
     <ul>
       <li>Заклад потрапляє в банер / підбірку івенту — додаткові покази без окремого рекламного бюджету.</li>
-      <li>Іноді потрібно підтвердити знижку на період івенту. Якщо поле знижки недоступне, напишіть менеджеру.</li>
-      <li>Після підключення перевіряйте, що знижка справді відображається в меню гостя.</li>
+      <li>Акція може фінансуватися повністю закладом — тоді ви запускаєте її на порталі самостійно.</li>
+      <li>Ми можемо з боку Bolt Food теж вкладати в цю акцію — про розмір вкладу менеджер повідомляє
+        в телеграм-канал про тематичні тижні і підключає акцію сам зі свого боку.</li>
+      <li>Також можливе окреме підключення особистого рекламного банера.</li>
     </ul>
+    <div class="path">Промоакції → <b>Налаштувати інші акції</b> → доступні івенти</div>
   </div>
-</div>
+</details>
 
-<div class="section-title">Як комбінувати</div>
+<div class="section-title" id="combo">Як комбінувати</div>
 <div class="combo">
   <div class="box">
     <h4>Мало показів</h4>
@@ -378,10 +404,6 @@
   <div class="box">
     <h4>Стабільний обсяг</h4>
     <p>Тримайте Розумні акції на постійній основі й підключайтеся до івентів тижня.</p>
-  </div>
-  <div class="box">
-    <h4>Кілька локацій</h4>
-    <p>У верхньому лівому куті порталу оберіть заклад — акції запускаються на кожну локацію окремо.</p>
   </div>
 </div>
 
@@ -402,7 +424,7 @@
   <div class="step">
     <div>
       <h3>Відкрийте «Промоакції»</h3>
-      <p>Спочатку перегляньте блок Розумних акцій і увімкніть потрібні групи гостей. Далі — «Налаштувати інші акції»: платне просування, знижки на страви, івенти.</p>
+      <p>Спочатку перегляньте блок Розумних акцій і увімкніть потрібні групи гостей. Далі — «Налаштувати інші акції»: платне просування, звичайні знижки, івенти.</p>
     </div>
   </div>
   <div class="step">
@@ -414,20 +436,18 @@
   <div class="step">
     <div>
       <h3>Дивіться результат у тому ж розділі</h3>
-      <p>На головній і в «Промоакціях» видно витрати на акції, замовлення та ефективність. Якщо цифри не зʼявляються кілька годин після запуску — напишіть своєму менеджеру.</p>
+      <p>На головній сторінці, в розділі Статистика і в «Промоакціях» видно витрати на акції, замовлення та ефективність. Якщо цифри не зʼявляються кілька годин після запуску — будь ласка, зачекайте певний час доки оновляться, зазвичай це займає до тижня часу.</p>
     </div>
   </div>
 </div>
 
-<div class="section-title">Що варто памʼятати</div>
+<div class="section-title" id="remember">Що варто памʼятати</div>
 <div class="loc-card">
   <div class="loc-body" style="padding-top:18px">
     <ul>
       <li>Не всі інструменти доступні в кожному місті й кожному закладі. Портал показує лише те, що можна запустити зараз.</li>
       <li>Розумні акції можуть бути недоступні, якщо заклад не проходить базові умови якості (рейтинг, прийняття замовлень, онлайн). Спочатку стабілізуйте сервіс.</li>
-      <li>Знижка в порталі й знижка, яку бачить гість, мають збігатися. Після змін завжди публікуйте меню.</li>
       <li>Платне просування не замінює акцію: воно дає покази. Акція дає привід натиснути «Замовити».</li>
-      <li>Питання з доступом до кабінету: іконка «?» у правому нижньому куті порталу або <b>ukraine-food@bolt.eu</b>.</li>
     </ul>
   </div>
 </div>
