@@ -3,10 +3,9 @@ name: TEMP — probe providers
 on:
   workflow_dispatch:
     inputs:
-      patterns:
-        description: 'Кома-розділені шматки назви для пошуку'
-        required: false
-        default: 'баранчик,baranchyk,baranchik,баран'
+      sql:
+        description: 'SQL-запити, розділені ;; ({schema} підставляється)'
+        required: true
 
 jobs:
   probe:
@@ -22,5 +21,5 @@ jobs:
           DATABRICKS_HOST:       ${{ secrets.DATABRICKS_HOST }}
           DATABRICKS_TOKEN:      ${{ secrets.DATABRICKS_TOKEN }}
           DATABRICKS_CLUSTER_ID: ${{ secrets.DATABRICKS_CLUSTER_ID }}
-          PATTERNS:              ${{ inputs.patterns }}
+          SQL:                   ${{ inputs.sql }}
         run: python _probe_providers.py
