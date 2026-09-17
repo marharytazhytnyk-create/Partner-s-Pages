@@ -23,7 +23,12 @@ import requests
 # `or` rather than a getenv default: CI passes these as empty strings when the
 # repository secret is unset, and an empty host builds a scheme-less URL.
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST") or "https://bolt-incentives.cloud.databricks.com"
-CLUSTER_ID      = os.getenv("DATABRICKS_CLUSTER_ID") or "0221-081903-9ag4bh69"
+CLUSTER_ID_ENV  = os.getenv("DATABRICKS_CLUSTER_ID") or ""
+
+# Кластер 0221 вивели з експлуатації — він вимкнений і запустити його вже не можна.
+# Актуальний — Unity Catalog, де таблиці лежать у main.ng_delivery.
+CLUSTER_CANDIDATES = ["0505-112942-d3yviznw", "0221-081903-9ag4bh69"]
+SCHEMA_CANDIDATES  = ["main.ng_delivery", "ng_delivery_spark"]
 N_MONTHS        = 8
 SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Vertel.html"
@@ -31,6 +36,9 @@ POLL_INTERVAL_S = 5
 MAX_POLL_S      = 600
 CLUSTER_START_S = 900
 FETCH_ATTEMPTS  = 3
+# RESIZING — кластер працює і лише додає/знімає воркери, запити на ньому виконуються.
+USABLE_STATES   = {"RUNNING", "RESIZING"}
+PENDING_STATES  = {"PENDING", "RESTARTING"}
 RETRY_DELAY_S   = 20
 
 # Замовлень на одного активного гостя за місяць. Реальне значення — близько 1.2—1.5;
@@ -155,6 +163,10 @@ def _load_token() -> str:
 DATABRICKS_TOKEN = _load_token()
 HEADERS = {"Authorization": f"Bearer {DATABRICKS_TOKEN}", "Content-Type": "application/json"}
 
+# Обидва визначаються на старті й далі використовуються всіма запитами.
+CLUSTER = CLUSTER_ID_ENV
+SCHEMA  = ""
+
 
 # ─── DATABRICKS ────────────────────────────────────────────────────────────────
 
@@ -168,34 +180,70 @@ def _get(path, params):
     r.raise_for_status()
     return r.json()
 
-def ensure_cluster_running() -> None:
-    """A terminated cluster makes /contexts/create answer 500, so start it first."""
-    state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
-    if state == "RUNNING":
-        return
-    if state in ("TERMINATED", "TERMINATING"):
-        _post("/api/2.0/clusters/start", {"cluster_id": CLUSTER_ID})
-    deadline = time.time() + CLUSTER_START_S
-    while time.time() < deadline:
-        time.sleep(10)
-        state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
-        print(f"  cluster: {state}")
-        if state == "RUNNING":
-            return
-    raise TimeoutError("Кластер не піднявся за відведений час")
+def _cluster_state(cluster_id: str) -> str:
+    try:
+        return _get("/api/2.0/clusters/get", {"cluster_id": cluster_id}).get("state", "")
+    except Exception:
+        return ""
+
+
+def pick_cluster() -> str:
+    """Знайти кластер, на якому можна виконувати запити.
+
+    Спочатку явно заданий, далі відомі кандидати, далі будь-який доступний
+    all-purpose кластер. Права на `clusters/start` є не в усіх, тому вже
+    піднятий кластер завжди пріоритетніший за той, що треба стартувати.
+    """
+    wanted = ([CLUSTER_ID_ENV] if CLUSTER_ID_ENV else []) + CLUSTER_CANDIDATES
+
+    for cid in wanted:
+        state = _cluster_state(cid)
+        if state in USABLE_STATES:
+            print(f"  кластер: {cid} ({state})")
+            return cid
+
+    try:
+        listed = _get("/api/2.0/clusters/list", {}).get("clusters", [])
+    except Exception:
+        listed = []
+    for c in listed:
+        if c.get("state") in USABLE_STATES and c.get("cluster_source") != "JOB":
+            print(f"  кластер: {c['cluster_id']} ({c.get('cluster_name')}) — вже доступний")
+            return c["cluster_id"]
+
+    for cid in wanted:
+        state = _cluster_state(cid)
+        if not state:
+            continue
+        if state not in PENDING_STATES:
+            print(f"  кластер {cid} у стані {state}, пробуємо запустити…")
+            try:
+                _post("/api/2.0/clusters/start", {"cluster_id": cid})
+            except Exception as exc:
+                print(f"    не вдалося: {exc}")
+                continue
+        else:
+            print(f"  кластер {cid} у стані {state}, чекаємо…")
+        deadline = time.time() + CLUSTER_START_S
+        while time.time() < deadline:
+            time.sleep(15)
+            if _cluster_state(cid) in USABLE_STATES:
+                print(f"  кластер: {cid} (готовий)")
+                return cid
+    raise RuntimeError("Немає доступного кластера Databricks")
 
 
 def create_ctx() -> str:
-    return _post("/api/1.2/contexts/create", {"language": "sql", "clusterId": CLUSTER_ID})["id"]
+    return _post("/api/1.2/contexts/create", {"language": "sql", "clusterId": CLUSTER})["id"]
 
 def run_query(ctx: str, sql: str) -> list[list]:
     cmd_id = _post("/api/1.2/commands/execute",
-        {"language": "sql", "clusterId": CLUSTER_ID, "contextId": ctx, "command": sql})["id"]
+        {"language": "sql", "clusterId": CLUSTER, "contextId": ctx, "command": sql})["id"]
     deadline = time.time() + MAX_POLL_S
     while time.time() < deadline:
         time.sleep(POLL_INTERVAL_S)
         resp = _get("/api/1.2/commands/status",
-            {"clusterId": CLUSTER_ID, "contextId": ctx, "commandId": cmd_id})
+            {"clusterId": CLUSTER, "contextId": ctx, "commandId": cmd_id})
         s = resp.get("status")
         if s == "Finished":
             res = resp.get("results", {})
@@ -206,9 +254,34 @@ def run_query(ctx: str, sql: str) -> list[list]:
             raise RuntimeError(f"Query {s}")
     raise TimeoutError("Query timed out")
 
+SCHEMA_TABLES = (
+    "dim_provider_v2",
+    "fact_provider_monthly",
+    "int_provider_metrics_non_additive",
+)
+
+def pick_schema(ctx: str) -> str:
+    """Усі таблиці цього звіту мають бути в одній схемі; інакше падаємо на hive_metastore."""
+    global SCHEMA
+    if SCHEMA:
+        return SCHEMA
+    for schema in SCHEMA_CANDIDATES:
+        try:
+            for table in SCHEMA_TABLES:
+                run_query(ctx, f"SELECT 1 FROM {schema}.{table} LIMIT 1")
+            print(f"  схема: {schema}")
+            SCHEMA = schema
+            return SCHEMA
+        except Exception:
+            continue
+    raise RuntimeError(
+        "Не знайдено схему, де читаються dim_provider_v2, "
+        "fact_provider_monthly і int_provider_metrics_non_additive"
+    )
+
 def destroy_ctx(ctx: str):
     try:
-        _post("/api/1.2/contexts/destroy", {"clusterId": CLUSTER_ID, "contextId": ctx})
+        _post("/api/1.2/contexts/destroy", {"clusterId": CLUSTER, "contextId": ctx})
     except Exception:
         pass
 
@@ -231,6 +304,7 @@ def fetch_brand_data(brand: dict) -> dict:
     global_start, _ = month_range(y0, m0)
     _, global_end   = month_range(y1, m1)
     pids_sql = ", ".join(str(p) for p in brand["provider_ids"])
+    pids_str = ", ".join(f"'{p}'" for p in brand["provider_ids"])
     month_keys   = [month_key(y, m) for y, m in months]
     month_labels = [month_label(y, m) for y, m in months]
     month_labels_s = [month_label(y, m, short=True) for y, m in months]
@@ -238,10 +312,12 @@ def fetch_brand_data(brand: dict) -> dict:
     print(f"  [{brand['title']}] fetching {N_MONTHS} months {global_start} → {global_end}")
     ctx = create_ctx()
     try:
+        pick_schema(ctx)
+
         # Location names
         loc_rows = run_query(ctx, f"""
             SELECT provider_id, provider_name, city_name, zone_name
-            FROM ng_delivery_spark.dim_provider_v2
+            FROM {SCHEMA}.dim_provider_v2
             WHERE provider_id IN ({pids_sql})
             ORDER BY provider_name
         """)
@@ -280,8 +356,8 @@ def fetch_brand_data(brand: dict) -> dict:
                 SUM(f.total_campaign_discount)                                       AS discounts,
                 SUM(f.total_campaign_spend_bolt)                                     AS camp_bolt,
                 SUM(f.total_campaign_spend_provider)                                 AS camp_merch
-            FROM ng_delivery_spark.fact_provider_monthly f
-            JOIN ng_delivery_spark.dim_provider_v2 d ON f.provider_id = d.provider_id
+            FROM {SCHEMA}.fact_provider_monthly f
+            JOIN {SCHEMA}.dim_provider_v2 d ON f.provider_id = d.provider_id
             WHERE f.provider_id IN ({pids_sql})
               AND f.metric_timestamp_partition >= '{global_start}'
               AND f.metric_timestamp_partition <  '{global_end}'
@@ -290,13 +366,15 @@ def fetch_brand_data(brand: dict) -> dict:
         """)
 
         # Unique customers can't be summed across weeks, so take the monthly figure.
+        # entity_id here is a STRING holding providers, zones and countries alike, so
+        # comparing it against bare numbers makes Spark cast the whole column and fail.
         users_rows = run_query(ctx, f"""
             SELECT
                 entity_id AS provider_id,
                 DATE_FORMAT(DATE_TRUNC('month', metric_timestamp_partition), 'yyyy-MM-dd') AS mstart,
                 SUM(provider_deliveries_unique_user_count) AS active_users
-            FROM ng_delivery_spark.int_provider_metrics_non_additive
-            WHERE entity_id IN ({pids_sql})
+            FROM {SCHEMA}.int_provider_metrics_non_additive
+            WHERE entity_id IN ({pids_str})
               AND timeframe_name = 'month'
               AND metric_timestamp_partition >= '{global_start}'
               AND metric_timestamp_partition <  '{global_end}'
@@ -919,8 +997,9 @@ def main():
     if not DATABRICKS_TOKEN:
         print("ERROR: DATABRICKS_TOKEN not set"); sys.exit(1)
 
+    global CLUSTER
     print("🔌 Кластер Databricks...")
-    ensure_cluster_running()
+    CLUSTER = pick_cluster()
 
     brands_data = []
     failures = []
