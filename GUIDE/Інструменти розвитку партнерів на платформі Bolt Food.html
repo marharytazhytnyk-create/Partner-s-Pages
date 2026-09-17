@@ -42,19 +42,16 @@
   .chip{display:inline-block;padding:5px 12px;border-radius:999px;background:#e6faf2;
     color:var(--green-d);font-size:12px;font-weight:700}
 
-  .draft{background:#fff8e8;border:1px solid #f3d59a;color:#8a5a00;border-radius:12px;
-    padding:12px 16px;font-size:13px;margin-bottom:22px}
-
   .section-title{font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.8px;
     color:var(--gray-700);padding-bottom:10px;border-bottom:2px solid var(--green);margin:32px 0 14px}
   .lead{color:var(--gray-700);margin-bottom:16px}
 
   .kpi-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(180px,1fr));gap:12px;margin:14px 0 8px}
-  .kpi-card{background:#fff;border-radius:12px;padding:14px 16px;border-top:3px solid var(--green);
-    box-shadow:0 1px 4px rgba(0,0,0,.06)}
-  .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray-400);margin-bottom:4px}
-  .kpi-value{font-size:18px;font-weight:700}
-  .kpi-sub{font-size:12px;color:var(--gray-400);margin-top:4px}
+  .kpi-card{background:linear-gradient(160deg,var(--green) 0%,var(--green-d) 100%);
+    border-radius:12px;padding:16px 18px;color:#fff;box-shadow:0 2px 8px rgba(13,138,82,.22)}
+  .kpi-label{font-size:10px;font-weight:700;text-transform:uppercase;color:rgba(255,255,255,.8);margin-bottom:4px}
+  .kpi-value{font-size:18px;font-weight:700;color:#fff}
+  .kpi-sub{font-size:12px;color:rgba(255,255,255,.88);margin-top:4px}
 
   .tool{background:#fff;border-radius:14px;box-shadow:0 1px 4px rgba(0,0,0,.06);
     border:1px solid #eee;margin-bottom:12px;overflow:hidden}
@@ -67,9 +64,11 @@
   .tool h3{font-size:17px;margin-bottom:2px}
   .tool .en{font-size:11px;color:var(--gray-400);font-weight:700;text-transform:uppercase;letter-spacing:.5px;margin-bottom:6px}
   .tool .short{color:var(--gray-700);font-size:14px}
-  .tool .chev{flex:0 0 auto;color:var(--gray-400);font-size:12px;font-weight:700;text-transform:uppercase;
-    letter-spacing:.4px;display:flex;align-items:center;gap:6px;white-space:nowrap;padding-top:4px}
-  .tool .chev::after{content:"▾";font-size:14px;transition:transform .15s}
+  .tool .chev{flex:0 0 auto;background:var(--green);color:var(--black);font-size:12.5px;font-weight:800;
+    letter-spacing:.2px;display:flex;align-items:center;gap:7px;white-space:nowrap;
+    padding:9px 16px;border-radius:999px;box-shadow:0 2px 6px rgba(13,138,82,.28);transition:background .15s}
+  .tool>summary:hover .chev{background:var(--green-d);color:#fff}
+  .tool .chev::after{content:"▾";font-size:13px;transition:transform .15s}
   .tool[open]>summary{border-bottom:1px solid #f0f0f0;background:#f9fefb}
   .tool[open] .chev::after{transform:rotate(180deg)}
   .tool[open] .chev .lbl-open{display:none}
@@ -119,9 +118,17 @@
   .step p{color:var(--gray-700);font-size:14px}
 
   .combo{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px}
-  .combo .box{background:#fff;border-radius:12px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,.06)}
-  .combo h4{font-size:14px;margin-bottom:6px}
-  .combo p{font-size:13.5px;color:var(--gray-700)}
+  .combo .box{position:relative;overflow:hidden;border-radius:14px;padding:20px 18px 22px;
+    background:linear-gradient(155deg,#0d5c3c 0%,#073d27 100%);color:#fff;
+    box-shadow:0 3px 12px rgba(7,61,39,.28)}
+  .combo .box::before{content:"";position:absolute;right:-26px;bottom:-34px;width:150px;height:150px;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%2334D186' d='M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z'/></svg>") no-repeat center/contain;
+    opacity:.16;transform:rotate(-12deg);pointer-events:none}
+  .combo .box::after{content:"";position:absolute;left:-18px;top:-22px;width:80px;height:80px;
+    background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'><path fill='%2334D186' d='M13 2 4.5 13.5H11l-1 8.5 8.5-11.5H12z'/></svg>") no-repeat center/contain;
+    opacity:.09;transform:rotate(18deg);pointer-events:none}
+  .combo h4{font-size:15px;margin-bottom:6px;color:#fff;position:relative;z-index:1}
+  .combo p{font-size:13.5px;color:rgba(255,255,255,.9);position:relative;z-index:1}
 
   .footer{background:var(--black);color:var(--gray-400);font-size:11px;padding:22px 40px;text-align:center;margin-top:36px}
   .footer span{color:var(--green)}
@@ -134,7 +141,7 @@
   }
   @media print{
     body{background:#fff}
-    .nav,.draft{display:none}
+    .nav{display:none}
     .tool,.loc-card,table,.step,.hero{box-shadow:none;border:1px solid #e5e5e5}
   }
 </style>
@@ -165,13 +172,6 @@
 </nav>
 
 <div class="container">
-
-<div class="draft">
-  Чернетка для правок. Набір інструментів зібрано з розділу «Промоакції» Партнерського порталу
-  та з того, що реально підключається партнерам на платформі Bolt Food. Цифри знижок і частка
-  співфінансування в порталі можуть відрізнятися залежно від міста та закладу — орієнтуйтеся
-  на пропозицію, яку бачите у своєму кабінеті.
-</div>
 
 <section class="hero" id="overview">
   <h2>Ми даємо закладу не одну акцію, а набір інструментів росту</h2>
@@ -229,7 +229,7 @@
       <h3>Розумні акції</h3>
       <div class="short">Знижка для конкретних груп гостей: нові, ті, хто давно не замовляв, і постійні. Bolt Food співфінансує пропозицію до 60%, щоб заклад не ніс усю вартість знижки сам.</div>
     </div>
-    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+    <div class="chev"><span class="lbl-open">Детальна інформація</span><span class="lbl-close">Згорнути</span></div>
   </summary>
   <div class="tool-body">
     <h4>Знижка для правильного гостя, а не для всіх підряд <span class="badge b-star">Співфінансування Bolt до 60%</span></h4>
@@ -307,7 +307,7 @@
       <h3>Платне просування</h3>
       <div class="short">Заклад частіше зʼявляється в стрічці, категоріях і пошуку. Ви платите за видимість, а не за знижку. Підходить, якщо гості добре замовляють, але заклад бачать рідко.</div>
     </div>
-    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+    <div class="chev"><span class="lbl-open">Детальна інформація</span><span class="lbl-close">Згорнути</span></div>
   </summary>
   <div class="tool-body">
     <h4>Більше показів у стрічці, категоріях і пошуку <span class="badge b-good">Оплата за видимість</span></h4>
@@ -337,7 +337,7 @@
       <h3>Звичайні знижки</h3>
       <div class="short">Акції на все меню або на окремі позиції. Гість бачить бейдж і нову ціну в меню. Ці акції повністю за рахунок партнера.</div>
     </div>
-    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+    <div class="chev"><span class="lbl-open">Детальна інформація</span><span class="lbl-close">Згорнути</span></div>
   </summary>
   <div class="tool-body">
     <h4>Бейдж і нова ціна прямо в меню <span class="badge b-mid">Повністю за рахунок закладу</span></h4>
@@ -371,7 +371,7 @@
       <h3>Івенти платформи</h3>
       <div class="short">Тижневі кампанії Bolt Food: тематичні тижні, Bolt Plus, святкові акції. Заклад отримує додаткову видимість у банері.</div>
     </div>
-    <div class="chev"><span class="lbl-open">Детальніше</span><span class="lbl-close">Згорнути</span></div>
+    <div class="chev"><span class="lbl-open">Детальна інформація</span><span class="lbl-close">Згорнути</span></div>
   </summary>
   <div class="tool-body">
     <h4>Додаткова полиця в застосунку на тиждень <span class="badge b-good">Видимість платформи</span></h4>
@@ -456,7 +456,7 @@
 
 <div class="footer">
   Bolt Food · Інструменти розвитку партнерів на платформі · розділ «Промоакції» Партнерського порталу<br/>
-  Чернетка. Після правок цей рядок можна прибрати. <span>foodpartner.bolt.eu</span>
+  <span>foodpartner.bolt.eu</span>
 </div>
 
 </body>
