@@ -29,6 +29,7 @@ SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Bella Mozzarella Pinkman Bar.html"
 POLL_INTERVAL_S = 5
 MAX_POLL_S      = 600
+CLUSTER_START_S = 900
 FETCH_ATTEMPTS  = 3
 RETRY_DELAY_S   = 20
 
@@ -172,6 +173,23 @@ def _get(path, params):
     r = requests.get(f"{DATABRICKS_HOST}{path}", headers=HEADERS, params=params, timeout=90)
     r.raise_for_status()
     return r.json()
+
+def ensure_cluster_running() -> None:
+    """A terminated cluster makes /contexts/create answer 500, so start it first."""
+    state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
+    if state == "RUNNING":
+        return
+    if state in ("TERMINATED", "TERMINATING"):
+        _post("/api/2.0/clusters/start", {"cluster_id": CLUSTER_ID})
+    deadline = time.time() + CLUSTER_START_S
+    while time.time() < deadline:
+        time.sleep(10)
+        state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
+        print(f"  cluster: {state}")
+        if state == "RUNNING":
+            return
+    raise TimeoutError("Кластер не піднявся за відведений час")
+
 
 def create_ctx() -> str:
     return _post("/api/1.2/contexts/create", {"language": "sql", "clusterId": CLUSTER_ID})["id"]
@@ -888,6 +906,9 @@ def main():
     print(f"=== MBR Bella Mozzarella / Pinkman Bar [{today}] ===\n")
     if not DATABRICKS_TOKEN:
         print("ERROR: DATABRICKS_TOKEN not set"); sys.exit(1)
+
+    print("🔌 Кластер Databricks...")
+    ensure_cluster_running()
 
     brands_data = []
     failures = []
