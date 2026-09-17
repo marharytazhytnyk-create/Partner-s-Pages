@@ -23,13 +23,12 @@ import requests
 # `or` rather than a getenv default: CI passes these as empty strings when the
 # repository secret is unset, and an empty host builds a scheme-less URL.
 DATABRICKS_HOST = os.getenv("DATABRICKS_HOST") or "https://bolt-incentives.cloud.databricks.com"
-CLUSTER_ID      = os.getenv("DATABRICKS_CLUSTER_ID") or "0221-081903-9ag4bh69"
+WAREHOUSE_ID    = (os.getenv("DATABRICKS_WAREHOUSE_ID") or "").strip()
 N_MONTHS        = 8
 SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Bella Mozzarella Pinkman Bar.html"
 POLL_INTERVAL_S = 5
-MAX_POLL_S      = 600
-CLUSTER_START_S = 900
+MAX_POLL_S      = 900
 FETCH_ATTEMPTS  = 3
 RETRY_DELAY_S   = 20
 
@@ -161,6 +160,9 @@ def _load_token() -> str:
 DATABRICKS_TOKEN = _load_token()
 HEADERS = {"Authorization": f"Bearer {DATABRICKS_TOKEN}", "Content-Type": "application/json"}
 
+# Resolved once in main(), then reused by every query.
+WAREHOUSE = WAREHOUSE_ID
+
 
 # ─── DATABRICKS ────────────────────────────────────────────────────────────────
 
@@ -174,49 +176,61 @@ def _get(path, params):
     r.raise_for_status()
     return r.json()
 
-def ensure_cluster_running() -> None:
-    """A terminated cluster makes /contexts/create answer 500, so start it first."""
-    state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
-    if state == "RUNNING":
-        return
-    if state in ("TERMINATED", "TERMINATING"):
-        _post("/api/2.0/clusters/start", {"cluster_id": CLUSTER_ID})
-    deadline = time.time() + CLUSTER_START_S
-    while time.time() < deadline:
-        time.sleep(10)
-        state = _get("/api/2.0/clusters/get", {"cluster_id": CLUSTER_ID}).get("state")
-        print(f"  cluster: {state}")
-        if state == "RUNNING":
-            return
-    raise TimeoutError("Кластер не піднявся за відведений час")
+def resolve_warehouse() -> str:
+    """Pick a SQL warehouse to query through.
+
+    Warehouses start themselves when a statement arrives, unlike the all-purpose
+    cluster this report used before — that one needed a restart the CI token has
+    no permission to trigger. Serverless first, then whatever is already awake.
+    """
+    if WAREHOUSE_ID:
+        return WAREHOUSE_ID
+    whs = _get("/api/2.0/sql/warehouses", {}).get("warehouses", [])
+    if not whs:
+        raise RuntimeError("У воркспейсі немає доступних SQL warehouse")
+    whs.sort(key=lambda w: (
+        not w.get("enable_serverless_compute"),
+        w.get("state") != "RUNNING",
+        w.get("name", ""),
+    ))
+    wh = whs[0]
+    kind = "serverless" if wh.get("enable_serverless_compute") else "pro/classic"
+    print(f"  warehouse: {wh.get('name')} ({kind}, {wh.get('state')})")
+    return wh["id"]
 
 
-def create_ctx() -> str:
-    return _post("/api/1.2/contexts/create", {"language": "sql", "clusterId": CLUSTER_ID})["id"]
+def run_query(sql: str) -> list[list]:
+    """Execute one statement and return its rows as lists of strings."""
+    resp = _post("/api/2.0/sql/statements", {
+        "warehouse_id": WAREHOUSE,
+        "statement": sql,
+        "format": "JSON_ARRAY",
+        "disposition": "INLINE",
+        "wait_timeout": "30s",
+        "on_wait_timeout": "CONTINUE",
+    })
 
-def run_query(ctx: str, sql: str) -> list[list]:
-    cmd_id = _post("/api/1.2/commands/execute",
-        {"language": "sql", "clusterId": CLUSTER_ID, "contextId": ctx, "command": sql})["id"]
     deadline = time.time() + MAX_POLL_S
-    while time.time() < deadline:
+    while resp["status"]["state"] in ("PENDING", "RUNNING"):
+        if time.time() > deadline:
+            raise TimeoutError("Query timed out")
         time.sleep(POLL_INTERVAL_S)
-        resp = _get("/api/1.2/commands/status",
-            {"clusterId": CLUSTER_ID, "contextId": ctx, "commandId": cmd_id})
-        s = resp.get("status")
-        if s == "Finished":
-            res = resp.get("results", {})
-            if res.get("resultType") == "error":
-                raise RuntimeError(res.get("summary", "Query error"))
-            return res.get("data", [])
-        if s in ("Cancelled", "Error"):
-            raise RuntimeError(f"Query {s}")
-    raise TimeoutError("Query timed out")
+        resp = _get(f"/api/2.0/sql/statements/{resp['statement_id']}", {})
 
-def destroy_ctx(ctx: str):
-    try:
-        _post("/api/1.2/contexts/destroy", {"clusterId": CLUSTER_ID, "contextId": ctx})
-    except Exception:
-        pass
+    state = resp["status"]["state"]
+    if state != "SUCCEEDED":
+        msg = resp["status"].get("error", {}).get("message", state)
+        raise RuntimeError(f"Query {state}: {msg}")
+
+    result = resp.get("result", {})
+    rows = list(result.get("data_array") or [])
+    # Large results arrive split into chunks; INLINE gives the rest by link.
+    link = result.get("next_chunk_internal_link")
+    while link:
+        chunk = _get(link, {})
+        rows.extend(chunk.get("data_array") or [])
+        link = chunk.get("next_chunk_internal_link")
+    return rows
 
 def _sf(v, d=0.0):
     try:
@@ -242,21 +256,19 @@ def fetch_brand_data(brand: dict) -> dict:
     month_labels_s = [month_label(y, m, short=True) for y, m in months]
 
     print(f"  [{brand['title']}] fetching {N_MONTHS} months {global_start} → {global_end}")
-    ctx = create_ctx()
-    try:
-        # Location names
-        loc_rows = run_query(ctx, f"""
+    # Location names
+    loc_rows = run_query(f"""
             SELECT provider_id, provider_name, city_name, zone_name
             FROM ng_delivery_spark.dim_provider_v2
             WHERE provider_id IN ({pids_sql})
             ORDER BY provider_name
         """)
 
-        # Monthly grain: a weekly row is stamped with its Monday and lands whole in that
-        # Monday's month, so a month collected 4 or 5 entire weeks depending on where the
-        # Mondays fell — July 2026 meant 6 Jul — 2 Aug instead of 1—31 Jul. The monthly
-        # fact table gives calendar months, 1st to last day.
-        fact_rows = run_query(ctx, f"""
+    # Monthly grain: a weekly row is stamped with its Monday and lands whole in that
+    # Monday's month, so a month collected 4 or 5 entire weeks depending on where the
+    # Mondays fell — July 2026 meant 6 Jul — 2 Aug instead of 1—31 Jul. The monthly
+    # fact table gives calendar months, 1st to last day.
+    fact_rows = run_query(f"""
             SELECT
                 f.provider_id,
                 d.provider_name,
@@ -295,8 +307,8 @@ def fetch_brand_data(brand: dict) -> dict:
             ORDER BY d.provider_name, 3
         """)
 
-        # Unique customers can't be summed across weeks, so take the monthly figure.
-        users_rows = run_query(ctx, f"""
+    # Unique customers can't be summed across weeks, so take the monthly figure.
+    users_rows = run_query(f"""
             SELECT
                 entity_id AS provider_id,
                 DATE_FORMAT(DATE_TRUNC('month', metric_timestamp_partition), 'yyyy-MM-dd') AS mstart,
@@ -308,9 +320,6 @@ def fetch_brand_data(brand: dict) -> dict:
               AND metric_timestamp_partition <  '{global_end}'
             GROUP BY 1, 2
         """)
-
-    finally:
-        destroy_ctx(ctx)
 
     # Build location dict
     loc_map = {int(r[0]): {"name": str(r[1]), "city": str(r[2] or "Харків"), "zone": str(r[3] or "")}
@@ -907,8 +916,9 @@ def main():
     if not DATABRICKS_TOKEN:
         print("ERROR: DATABRICKS_TOKEN not set"); sys.exit(1)
 
-    print("🔌 Кластер Databricks...")
-    ensure_cluster_running()
+    global WAREHOUSE
+    print("🔌 Databricks SQL warehouse...")
+    WAREHOUSE = resolve_warehouse()
 
     brands_data = []
     failures = []
