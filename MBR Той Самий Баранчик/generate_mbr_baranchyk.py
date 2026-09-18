@@ -159,6 +159,16 @@ def month_range(y: int, m: int) -> tuple[str, str]:
     return start.isoformat(), end.isoformat()
 
 
+def months_between(first: tuple[int, int], last: tuple[int, int]) -> list[tuple[int, int]]:
+    """Усі місяці від first до last включно."""
+    y, m = first
+    out = []
+    while (y, m) <= last:
+        out.append((y, m))
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+    return out
+
+
 def date_uk(iso: str) -> str:
     """'2025-07-03' → '3 липня 2025'."""
     try:
@@ -321,6 +331,28 @@ def _si(v, d=0):
 
 # ─── AGGREGATION ───────────────────────────────────────────────────────────────
 
+def aggregate_period(months: list[dict]) -> dict:
+    """Згорнути кілька місяців одного ряду в один підсумок (рік, квартал тощо).
+
+    active_users та freq свідомо не рахуються: унікальних клієнтів не можна
+    додавати між місяцями — той самий гість замовляв би вдруге як новий.
+    """
+    agg = dict(EMPTY_MONTH)
+    if not months:
+        return agg
+    for k in SUM_KEYS:
+        agg[k] = sum(m.get(k, 0) for m in months)
+    for metric, wkey in WEIGHTED_KEYS:
+        total_w = sum(m.get(wkey, 0) for m in months)
+        if total_w:
+            agg[metric] = round(
+                sum(m.get(metric, 0) * m.get(wkey, 0) for m in months) / total_w, 2)
+    agg["aov"] = round(agg["gross"] / agg["orders"], 0) if agg["orders"] else 0
+    agg["active_users"] = 0
+    agg["freq"] = 0
+    return agg
+
+
 def aggregate_months(month_lists: list[list[dict]]) -> list[dict]:
     """Скласти місячні ряди кількох локацій в один.
 
@@ -346,6 +378,7 @@ def aggregate_months(month_lists: list[list[dict]]) -> list[dict]:
         agg["month_key"] = slice_i[0].get("month_key", "")
         agg["label"]     = slice_i[0].get("label", "")
         agg["label_s"]   = slice_i[0].get("label_s", "")
+        agg["label_m"]   = slice_i[0].get("label_m", "")
         out.append(agg)
     return out
 
@@ -459,6 +492,22 @@ def fetch_data() -> dict:
         pids_sql = ", ".join(str(p) for p in pids)
         pids_str = ", ".join(f"'{p}'" for p in pids)
 
+        # Річні підсумки потребують усієї історії, а не лише останніх N місяців,
+        # тому тягнемо дані від першого місяця роботи мережі й ріжемо на місячні
+        # графіки вже на нашому боці.
+        first_rows = run_query(ctx, f"""
+            SELECT MIN(metric_timestamp_partition)
+            FROM {schema}.fact_provider_monthly
+            WHERE provider_id IN ({pids_sql})
+        """)
+        history_first = months[0]
+        if first_rows and first_rows[0] and first_rows[0][0]:
+            d = datetime.date.fromisoformat(str(first_rows[0][0])[:10])
+            history_first = min((d.year, d.month), months[0])
+        history_months = months_between(history_first, months[-1])
+        history_start, _ = month_range(*history_months[0])
+        global_start = history_start
+
         # Monthly grain: a weekly row is stamped with its Monday and lands whole in that
         # Monday's month, so a month collected 4 or 5 entire weeks depending on where the
         # Mondays fell. The monthly fact table gives calendar months, 1st to last day.
@@ -515,6 +564,20 @@ def fetch_data() -> dict:
             GROUP BY 1, 2
         """)
 
+        # Комісія помісячно — для річних підсумків. У місячній fact-таблиці вона
+        # є лише в євро, тож беремо гривневу суму з рівня замовлень.
+        commission_rows = run_query(ctx, f"""
+            SELECT
+                DATE_FORMAT(DATE_TRUNC('month', order_created_date_local), 'yyyy-MM') AS mkey,
+                SUM(commission_local) AS commission
+            FROM {schema}.fact_order_delivery
+            WHERE provider_id IN ({pids_sql})
+              AND order_state = 'delivered'
+              AND order_created_date_local >= '{history_start}'
+              AND order_created_date_local <  '{global_end}'
+            GROUP BY 1
+        """)
+
         # «Цікаві цифри» — приємний бонус, а не основа звіту. Якщо ці запити
         # впадуть, решта звіту має вийти як зазвичай.
         try:
@@ -569,16 +632,21 @@ def fetch_data() -> dict:
             "active_users": active_u, "freq": freq,
         }
 
+    def build_months(pid: int, month_tuples: list[tuple[int, int]]) -> list[dict]:
+        out = []
+        for y, m in month_tuples:
+            mk = month_key(y, m)
+            rec = dict(by_pid.get(pid, {}).get(mk, EMPTY_MONTH))
+            rec["month_key"] = mk
+            rec["label"]     = month_label(y, m)
+            rec["label_s"]   = month_label(y, m, short=True)
+            rec["label_m"]   = UK_MONTHS_SHORT[m]
+            out.append(rec)
+        return out
+
     locations = []
     for pid in pids:
         info = loc_map[pid]
-        months_data = []
-        for mk, lbl, lbls in zip(month_keys, month_labels, month_labels_s):
-            rec = dict(by_pid.get(pid, {}).get(mk, EMPTY_MONTH))
-            rec["month_key"] = mk
-            rec["label"]     = lbl
-            rec["label_s"]   = lbls
-            months_data.append(rec)
         city_en = info["city"] or "—"
         locations.append({
             "provider_id": pid,
@@ -586,7 +654,8 @@ def fetch_data() -> dict:
             "city_en": city_en,
             "city": CITY_UK.get(city_en, city_en),
             "zone": info["zone"],
-            "months": months_data,
+            "months": build_months(pid, months),
+            "months_all": build_months(pid, history_months),
         })
 
     # Групування по містах: одне місто може мати кілька закладів мережі.
@@ -609,6 +678,26 @@ def fetch_data() -> dict:
 
     brand_months = aggregate_months([l["months"] for l in locations])
 
+    # Річні підсумки по всій мережі
+    commission_map = {str(r[0])[:7]: _sf(r[1]) for r in commission_rows}
+    brand_all_months = aggregate_months([l["months_all"] for l in locations])
+    years = []
+    for y in sorted({int(m["month_key"][:4]) for m in brand_all_months}, reverse=True):
+        y_months = [m for m in brand_all_months if m["month_key"].startswith(f"{y:04d}")]
+        total = aggregate_period(y_months)
+        commission = sum(commission_map.get(m["month_key"], 0) for m in y_months)
+        first_m = int(y_months[0]["month_key"][5:7])
+        last_m  = int(y_months[-1]["month_key"][5:7])
+        years.append({
+            "year": y,
+            "months": y_months,
+            "total": total,
+            "commission": round(commission, 0),
+            "net_after_commission": round(total["net"] - commission, 0),
+            "range_label": (f"{UK_MONTHS_FULL[first_m].lower()} — {UK_MONTHS_FULL[last_m].lower()}"
+                            if first_m != last_m else UK_MONTHS_FULL[first_m].lower()),
+        })
+
     # Найдорожче замовлення показуємо разом із містом, а не з ID закладу.
     if fun.get("top_order"):
         pid = fun["top_order"]["provider_id"]
@@ -620,6 +709,7 @@ def fetch_data() -> dict:
         "locations": locations,
         "cities": cities_list,
         "fun": fun,
+        "years": years,
         "brand_months": brand_months,
         "month_keys": month_keys,
         "month_labels": month_labels,
@@ -1030,6 +1120,150 @@ def build_brand_panel(data: dict) -> str:
     """
 
 
+def _kpi_block_year(year: dict) -> str:
+    """KPI року. Замість Active Users — нові клієнти: їх можна додавати між
+    місяцями, а унікальних активних гостей — ні."""
+    t = year["total"]
+    return (
+        _kpi_card("Delivered Orders", _fmt(t.get("orders"), "шт."), "", BRAND_COLOR) +
+        _kpi_card("Загальний дохід", _fmt(t.get("gross"), "₴"), "", BRAND_COLOR) +
+        _kpi_card("Після знижок", _fmt(t.get("net"), "₴"), "", BRAND_COLOR) +
+        _kpi_card("Комісія Bolt", _fmt(year.get("commission"), "₴"), "", "#c0392b") +
+        _kpi_card("Чистий дохід", _fmt(year.get("net_after_commission"), "₴"), "", "#1aad6a") +
+        _kpi_card("AOV", _fmt(t.get("aov"), "₴")) +
+        _kpi_card("Availability", _fmt(t.get("avail"), "%")) +
+        _kpi_card("Acceptance", _fmt(t.get("accept"), "%")) +
+        _kpi_card("Refund Rate", _fmt(t.get("refunds"), "%"), "", "#c0392b") +
+        _kpi_card("Rating", _fmt(t.get("rating"), "з 5"), "", "#e67e22") +
+        _kpi_card("Нові клієнти", _fmt(t.get("new_users"), "осіб")) +
+        _kpi_card("Знижки (Bolt)", _fmt(t.get("camp_bolt"), "₴")) +
+        _kpi_card("Знижки (партнер)", _fmt(t.get("camp_merch"), "₴"))
+    )
+
+
+def build_years_compare(years: list[dict]) -> str:
+    """Порівняння років. Роки різної довжини, тому головна колонка — середнє
+    за місяць: лише вона дає чесне «краще чи гірше»."""
+    if len(years) < 2:
+        return ""
+    new, old = years[0], years[1]
+    n_new, n_old = len(new["months"]), len(old["months"])
+
+    def avg(rec, key, n):
+        return rec.get(key, 0) / n if n else 0
+
+    volume_rows = ""
+    volume_metrics = [
+        ("Замовлення",        "orders",     "шт."),
+        ("Загальний дохід",   "gross",      "₴"),
+        ("Після знижок",      "net",        "₴"),
+        ("Нові клієнти",      "new_users",  "осіб"),
+        ("Знижки (Bolt)",     "camp_bolt",  "₴"),
+        ("Знижки (партнер)",  "camp_merch", "₴"),
+    ]
+    for name, key, unit in volume_metrics:
+        a_old = avg(old["total"], key, n_old)
+        a_new = avg(new["total"], key, n_new)
+        volume_rows += (
+            f'<tr><td class="city-cell">{name}</td>'
+            f'<td>{_fmt(old["total"].get(key), unit)}</td>'
+            f'<td>{_fmt(new["total"].get(key), unit)}</td>'
+            f'<td>{_fmt(a_old, unit)}</td>'
+            f'<td>{_fmt(a_new, unit)} {_pct_badge(a_old, a_new)}</td></tr>'
+        )
+    # Комісія та чистий дохід лежать поза total — додаємо окремо
+    for name, key in (("Комісія Bolt", "commission"), ("Чистий дохід", "net_after_commission")):
+        a_old = old.get(key, 0) / n_old if n_old else 0
+        a_new = new.get(key, 0) / n_new if n_new else 0
+        volume_rows += (
+            f'<tr><td class="city-cell">{name}</td>'
+            f'<td>{_fmt(old.get(key), "₴")}</td>'
+            f'<td>{_fmt(new.get(key), "₴")}</td>'
+            f'<td>{_fmt(a_old, "₴")}</td>'
+            f'<td>{_fmt(a_new, "₴")} {_pct_badge(a_old, a_new)}</td></tr>'
+        )
+
+    quality_rows = ""
+    quality_metrics = [
+        ("AOV — середній чек",   "aov",       "₴"),
+        ("Availability",         "avail",     "%"),
+        ("Acceptance",           "accept",    "%"),
+        ("Refund Rate",          "refunds",   "%"),
+        ("Rating",               "rating",    "з 5"),
+        ("Час приготування",     "prep_time", "хв"),
+        ("Час доставки",         "del_time",  "хв"),
+    ]
+    for name, key, unit in quality_metrics:
+        v_old = old["total"].get(key, 0)
+        v_new = new["total"].get(key, 0)
+        quality_rows += (
+            f'<tr><td class="city-cell">{name}</td>'
+            f'<td>{_fmt(v_old, unit)}</td>'
+            f'<td>{_fmt(v_new, unit)} {_pct_badge(v_old, v_new)}</td></tr>'
+        )
+
+    return f"""
+    <div class="section-title">Рік до року</div>
+    <div class="table-card">
+      <table class="cmp-table">
+        <thead><tr>
+          <th>Обсяги</th>
+          <th>{old['year']} — усього</th><th>{new['year']} — усього</th>
+          <th>{old['year']} — сер./міс</th><th>{new['year']} — сер./міс</th>
+        </tr></thead>
+        <tbody>{volume_rows}</tbody>
+      </table>
+    </div>
+    <div class="table-note">У {old['year']} році мережа працювала {n_old}
+       {_plural_uk(n_old, 'місяць', 'місяці', 'місяців')} на платформі, у {new['year']} —
+       {n_new}. Тому підсумки за рік напряму не порівнюються: відсоток рахується
+       від середнього за місяць.</div>
+    <div class="table-card" style="margin-top:14px">
+      <table class="cmp-table">
+        <thead><tr>
+          <th>Якість сервісу</th><th>{old['year']}</th><th>{new['year']}</th>
+        </tr></thead>
+        <tbody>{quality_rows}</tbody>
+      </table>
+    </div>
+    <div class="table-note">Показники якості — середні за рік, зважені на кількість
+       замовлень (для конверсії — на кількість сесій).</div>
+    """
+
+
+def build_years_panel(data: dict) -> str:
+    years = data.get("years") or []
+    if not years:
+        return '<p style="color:#999;padding:40px">Немає даних</p>'
+
+    blocks = ""
+    for year in years:
+        labels = [m.get("label_m", "") for m in year["months"]]
+        blocks += f"""
+        <div class="year-head">
+          <h2>{year['year']} рік</h2>
+          <span>{year['range_label']} &nbsp;·&nbsp; {len(year['months'])}
+            {_plural_uk(len(year['months']), 'місяць', 'місяці', 'місяців')} даних</span>
+        </div>
+        <div class="kpi-grid">{_kpi_block_year(year)}</div>
+        {_charts_block(year['months'], labels)}
+        """
+
+    return f"""
+    <div class="period-bar">
+      <span class="period-label">Річні підсумки:</span>
+      <span>уся мережа &nbsp;·&nbsp; {len(data['locations'])} закладів у
+        {len(data['cities'])} містах &nbsp;·&nbsp; валюта UAH (₴)</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">
+        Останній повний місяць: {data['month_labels'][-1]}</span>
+    </div>
+
+    {build_years_compare(years)}
+
+    {blocks}
+    """
+
+
 def build_city_panel(city: dict, data: dict) -> str:
     months   = city["months"]
     labels_s = data["month_labels_s"]
@@ -1094,6 +1328,12 @@ def build_html(data: dict) -> str:
     tabs   = (f'<button class="brand-tab active" id="btab_brand" onclick="switchTab(\'brand\')" '
               f'style="--bc:{BRAND_COLOR}">{BRAND_EMOJI} ВЕСЬ БРЕНД</button>')
     panels = f'<div id="bpanel_brand" style="display:block">{build_brand_panel(data)}</div>'
+
+    if data.get("years"):
+        tabs += (f'<button class="brand-tab" id="btab_years" onclick="switchTab(\'years\')" '
+                 f'style="--bc:{BRAND_COLOR}">📅 РІЧНІ ЗВІТИ</button>')
+        panels += (f'<div id="bpanel_years" style="display:none">'
+                   f'{build_years_panel(data)}</div>')
 
     for city in data["cities"]:
         tabs += (f'<button class="brand-tab" id="btab_{city["slug"]}" '
@@ -1193,6 +1433,12 @@ def build_html(data: dict) -> str:
     .item-qty{{flex-shrink:0;font-size:13px;font-weight:700;white-space:nowrap}}
     .item-qty span{{font-size:10px;font-weight:400;color:var(--gray-400)}}
     .fun-note{{font-size:11px;color:var(--gray-400);margin-top:10px}}
+
+    /* Річні звіти */
+    .year-head{{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
+      margin:34px 0 12px;padding-bottom:10px;border-bottom:2px solid {BRAND_COLOR}}}
+    .year-head h2{{font-size:26px;font-weight:800;color:{BRAND_COLOR}}}
+    .year-head span{{font-size:12px;color:var(--gray-400)}}
 
     .table-card{{background:#fff;border-radius:12px;padding:6px 6px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow-x:auto}}
     .cmp-table{{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}}
