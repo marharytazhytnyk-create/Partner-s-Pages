@@ -61,6 +61,33 @@
     .bar{width:36px;border-radius:5px 5px 0 0;min-height:4px}
     .bar-lbl{font-size:8px;color:var(--gray-400);margin-top:3px;text-align:center;line-height:1.2}
 
+    /* Цікаві цифри */
+    .fun-period{font-size:11px;color:var(--gray-400);margin:0 0 10px}
+    .fun-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:14px}
+    .fun-card{background:linear-gradient(135deg,#3b1c00 0%,#7a4416 55%,#b5651d 100%);
+      color:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.12)}
+    .fun-label{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+      color:rgba(255,255,255,.72);margin-bottom:6px}
+    .fun-value{font-size:27px;font-weight:800;line-height:1.15}
+    .fun-sub{font-size:11px;color:rgba(255,255,255,.75);margin-top:6px}
+    .fun-panel{background:#fff;border-radius:12px;padding:18px 20px;
+      box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px}
+    .fun-panel h3{font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:4px}
+    .fun-panel-lead{font-size:12px;color:var(--gray-700);margin-bottom:12px}
+    .item-row{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #f4f4f4}
+    .item-row:last-of-type{border-bottom:none}
+    .item-rank{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--gray-100);
+      color:var(--gray-700);font-size:11px;font-weight:700;display:flex;align-items:center;
+      justify-content:center}
+    .item-body{flex:1;min-width:0}
+    .item-name{font-size:13px;font-weight:600;margin-bottom:4px}
+    .item-bar{height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden}
+    .item-bar span{display:block;height:100%;border-radius:4px;
+      background:linear-gradient(90deg,#b5651d,#e29e6c)}
+    .item-qty{flex-shrink:0;font-size:13px;font-weight:700;white-space:nowrap}
+    .item-qty span{font-size:10px;font-weight:400;color:var(--gray-400)}
+    .fun-note{font-size:11px;color:var(--gray-400);margin-top:10px}
+
     .table-card{background:#fff;border-radius:12px;padding:6px 6px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow-x:auto}
     .cmp-table{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}
     .cmp-table th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:.6px;
@@ -118,7 +145,7 @@
   </div>
   <div class="header-meta">
     <div>Період: <strong>Вересень 2025 — Серпень 2026</strong></div>
-    <div>Місяців: <strong>12</strong> &nbsp;·&nbsp; Оновлено: <strong>17.09.2026 10:07</strong></div>
+    <div>Місяців: <strong>12</strong> &nbsp;·&nbsp; Оновлено: <strong>18.09.2026 15:12</strong></div>
   </div>
 </header>
 
@@ -133,6 +160,23 @@
       <span>Вересень 2025 — Серпень 2026 &nbsp;·&nbsp; валюта UAH (₴) &nbsp;·&nbsp; 6 закладів у 6 містах</span>
       <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">Останній місяць: Серпень 2026</span>
     </div>
+
+    
+    <div class="section-title">✨ Цікаві цифри — за весь час на Bolt Food</div>
+    <div class="fun-period">Період: 3 липня 2025 — 17 вересня 2026 &nbsp;·&nbsp; уся мережа, всі міста</div>
+    <div class="fun-grid"><div class="fun-card"><div class="fun-label">Замовлень за весь час</div><div class="fun-value">6 156</div><div class="fun-sub">доставлених замовлень по всій мережі</div></div><div class="fun-card"><div class="fun-label">Gross Sales за весь час</div><div class="fun-value">6 723 377 ₴</div><div class="fun-sub">до застосування знижок</div></div><div class="fun-card"><div class="fun-label">Net Sales за весь час</div><div class="fun-value">6 008 457 ₴</div><div class="fun-sub">після знижок клієнтам</div></div><div class="fun-card"><div class="fun-label">Найдорожче замовлення</div><div class="fun-value">6 193 ₴</div><div class="fun-sub">Черкаси &nbsp;·&nbsp; 16 січня 2026</div></div></div>
+    
+        <div class="fun-panel">
+          <h3>Топ-5 позицій меню за весь час</h3>
+          <p class="fun-panel-lead">Найчастіше замовляють «Хачапурі по-аджарськи» —
+             1 542 порції
+             у 6 містах.</p>
+          <div class="item-row"><div class="item-rank">1</div><div class="item-body"><div class="item-name">Хачапурі по-аджарськи</div><div class="item-bar"><span style="width:100%"></span></div></div><div class="item-qty">1 542 <span>порції</span></div></div><div class="item-row"><div class="item-rank">2</div><div class="item-body"><div class="item-name">Хінкалі свинина/яловичина</div><div class="item-bar"><span style="width:93%"></span></div></div><div class="item-qty">1 447 <span>порцій</span></div></div><div class="item-row"><div class="item-rank">3</div><div class="item-body"><div class="item-name">Окрошка з курячим шашликом</div><div class="item-bar"><span style="width:81%"></span></div></div><div class="item-qty">1 256 <span>порцій</span></div></div><div class="item-row"><div class="item-rank">4</div><div class="item-body"><div class="item-name">Шашлик зі свинячого ошийка</div><div class="item-bar"><span style="width:74%"></span></div></div><div class="item-qty">1 147 <span>порцій</span></div></div><div class="item-row"><div class="item-rank">5</div><div class="item-body"><div class="item-name">Хінкалі Чкмерулі</div><div class="item-bar"><span style="width:70%"></span></div></div><div class="item-qty">1 081 <span>порція</span></div></div>
+          <p class="fun-note">Рахуються страви з меню; напої-додатки та опції до страв
+             (як-от «з зеленню») у підрахунок не входять.</p>
+        </div>
+    <p class="fun-note">Найбільший чек — 6 193 ₴ (Черкаси, 16 січня 2026).</p>
+    
 
     <div class="section-title">Мережа загалом — останній місяць</div>
     <div class="kpi-grid"><div class="kpi-card" style="border-top-color:#B5651D"><div class="kpi-label">Delivered Orders</div><div class="kpi-value">502 шт.<span class="delta positive">▲ 16.5%</span></div></div><div class="kpi-card" style="border-top-color:#B5651D"><div class="kpi-label">Gross Sales</div><div class="kpi-value">603 051 ₴<span class="delta positive">▲ 11.2%</span></div></div><div class="kpi-card" style="border-top-color:#B5651D"><div class="kpi-label">Net Sales</div><div class="kpi-value">512 762 ₴<span class="delta positive">▲ 8.9%</span></div></div><div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">AOV</div><div class="kpi-value">1 201 ₴<span class="delta danger">▼ 4.6%</span></div></div><div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">Availability</div><div class="kpi-value">98.5%<span class="delta positive">▲ 3.8%</span></div></div><div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">Acceptance</div><div class="kpi-value">98.3%<span class="delta positive">▲ 1.1%</span></div></div><div class="kpi-card" style="border-top-color:#c0392b"><div class="kpi-label">Refund Rate</div><div class="kpi-value">1.6%<span class="delta positive">▲ 19.5%</span></div></div><div class="kpi-card" style="border-top-color:#e67e22"><div class="kpi-label">Rating</div><div class="kpi-value">4.51<span class="delta danger">▼ 4.4%</span></div></div><div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">Active Users</div><div class="kpi-value">421 осіб<span class="delta positive">▲ 11.4%</span></div></div><div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">Знижки (Bolt)</div><div class="kpi-value">90 829 ₴<span class="delta positive">▲ 27.1%</span></div></div><div class="kpi-card" style="border-top-color:var(--green)"><div class="kpi-label">Знижки (партнер)</div><div class="kpi-value">0 ₴</div></div></div>

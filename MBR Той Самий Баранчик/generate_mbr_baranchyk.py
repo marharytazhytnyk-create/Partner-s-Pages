@@ -75,6 +75,10 @@ CITY_UK = {
 UK_MONTHS_SHORT = ["","Січ","Лют","Бер","Кві","Тра","Чер","Лип","Сер","Вер","Жов","Лис","Гру"]
 UK_MONTHS_FULL  = ["","Січень","Лютий","Березень","Квітень","Травень","Червень",
                     "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"]
+UK_MONTHS_GEN   = ["","січня","лютого","березня","квітня","травня","червня",
+                    "липня","серпня","вересня","жовтня","листопада","грудня"]
+
+TOP_ITEMS_LIMIT = 5
 
 CHART_SECTIONS = [
     ("1. Продажі",                    ["gross","net","orders","aov"]),
@@ -153,6 +157,15 @@ def month_range(y: int, m: int) -> tuple[str, str]:
     start = datetime.date(y, m, 1)
     end = (datetime.date(y + 1, 1, 1) if m == 12 else datetime.date(y, m + 1, 1))
     return start.isoformat(), end.isoformat()
+
+
+def date_uk(iso: str) -> str:
+    """'2025-07-03' → '3 липня 2025'."""
+    try:
+        d = datetime.date.fromisoformat(str(iso)[:10])
+    except (TypeError, ValueError):
+        return str(iso or "")
+    return f"{d.day} {UK_MONTHS_GEN[d.month]} {d.year}"
 
 
 # ─── TOKEN ─────────────────────────────────────────────────────────────────────
@@ -339,6 +352,75 @@ def aggregate_months(month_lists: list[list[dict]]) -> list[dict]:
 
 # ─── DATA FETCH ────────────────────────────────────────────────────────────────
 
+def fetch_fun_facts(ctx, schema: str, pids_sql: str) -> dict:
+    """Підсумки за весь час роботи мережі на платформі — для розділу «Цікаві цифри».
+
+    Свідомо без обмеження за датою: на відміну від решти звіту, тут рахуємо всю
+    історію, включно з поточним незавершеним місяцем. Період підписуємо явно,
+    щоб цифри не плутали з помісячними графіками за останні N місяців.
+    """
+    facts: dict = {}
+
+    totals = run_query(ctx, f"""
+        SELECT
+            COUNT(*)                            AS orders,
+            SUM(order_gmv)                      AS gross,
+            SUM(order_gmv_after_discount)       AS net,
+            MIN(order_created_date_local)       AS first_date,
+            MAX(order_created_date_local)       AS last_date
+        FROM {schema}.fact_order_delivery
+        WHERE provider_id IN ({pids_sql})
+          AND order_state = 'delivered'
+    """)
+    if totals and totals[0]:
+        r = totals[0]
+        facts["orders"]     = _si(r[0])
+        facts["gross"]      = round(_sf(r[1]), 0)
+        facts["net"]        = round(_sf(r[2]), 0)
+        facts["first_date"] = str(r[3])[:10]
+        facts["last_date"]  = str(r[4])[:10]
+
+    # Позиції меню однакові в різних містах, тому групуємо за назвою, а не за
+    # product_id: інакше та сама страва розпалася б на шість рядків.
+    # total_order_dish_amount рахує лише страви, без додатків та опцій.
+    items = run_query(ctx, f"""
+        SELECT
+            d.menu_item_name,
+            SUM(p.total_order_dish_amount)   AS dishes,
+            COUNT(DISTINCT p.provider_id)    AS locations
+        FROM {schema}.fact_provider_product_monthly p
+        JOIN {schema}.dim_provider_product_delivery d
+          ON d.provider_id = p.provider_id AND d.product_id = p.product_id
+        WHERE p.provider_id IN ({pids_sql})
+        GROUP BY 1
+        HAVING SUM(p.total_order_dish_amount) > 0
+        ORDER BY dishes DESC
+        LIMIT {TOP_ITEMS_LIMIT}
+    """)
+    facts["top_items"] = [
+        {"name": str(r[0]), "qty": _si(r[1]), "locations": _si(r[2])} for r in items
+    ]
+
+    top_order = run_query(ctx, f"""
+        SELECT provider_id, order_created_date_local, order_gmv, order_gmv_after_discount
+        FROM {schema}.fact_order_delivery
+        WHERE provider_id IN ({pids_sql})
+          AND order_state = 'delivered'
+        ORDER BY order_gmv DESC
+        LIMIT 1
+    """)
+    if top_order and top_order[0]:
+        r = top_order[0]
+        facts["top_order"] = {
+            "provider_id": int(r[0]),
+            "date":        str(r[1])[:10],
+            "gross":       round(_sf(r[2]), 0),
+            "net":         round(_sf(r[3]), 0),
+        }
+
+    return facts
+
+
 def fetch_data() -> dict:
     months = last_n_full_months(N_MONTHS)
     y0, m0 = months[0]
@@ -422,6 +504,14 @@ def fetch_data() -> dict:
               AND metric_timestamp_partition <  '{global_end}'
             GROUP BY 1, 2
         """)
+
+        # «Цікаві цифри» — приємний бонус, а не основа звіту. Якщо ці запити
+        # впадуть, решта звіту має вийти як зазвичай.
+        try:
+            fun = fetch_fun_facts(ctx, schema, pids_sql)
+        except Exception as exc:
+            print(f"  ⚠️  не вдалося зібрати «Цікаві цифри»: {exc}")
+            fun = {}
 
     finally:
         destroy_ctx(ctx)
@@ -509,9 +599,17 @@ def fetch_data() -> dict:
 
     brand_months = aggregate_months([l["months"] for l in locations])
 
+    # Найдорожче замовлення показуємо разом із містом, а не з ID закладу.
+    if fun.get("top_order"):
+        pid = fun["top_order"]["provider_id"]
+        info = loc_map.get(pid, {})
+        city_en = info.get("city", "")
+        fun["top_order"]["city"] = CITY_UK.get(city_en, city_en or f"ID {pid}")
+
     return {
         "locations": locations,
         "cities": cities_list,
+        "fun": fun,
         "brand_months": brand_months,
         "month_keys": month_keys,
         "month_labels": month_labels,
@@ -687,6 +785,19 @@ def _sev_label(sev: int) -> str:
     return ['OK','помірно','помірно','увага','увага','критично'][min(sev, 5)]
 
 
+def _plural_uk(n, one: str, few: str, many: str) -> str:
+    """1 порція / 2 порції / 5 порцій."""
+    n = abs(int(n))
+    if 11 <= n % 100 <= 19:
+        return many
+    last = n % 10
+    if last == 1:
+        return one
+    if 2 <= last <= 4:
+        return few
+    return many
+
+
 def _trend_icon(trend: str) -> str:
     return {"up": "↑", "down": "↓", "stable": "→"}.get(trend, "→")
 
@@ -757,6 +868,93 @@ def _analysis_block(anal: dict, heading: str = "Аналіз") -> str:
 
 # ─── HTML BUILDERS ─────────────────────────────────────────────────────────────
 
+def build_fun_facts(data: dict) -> str:
+    """Розділ «Цікаві цифри»: підсумки за весь час роботи мережі на платформі."""
+    fun = data.get("fun") or {}
+    if not fun.get("orders"):
+        return ""
+
+    period = ""
+    if fun.get("first_date") and fun.get("last_date"):
+        period = f"{date_uk(fun['first_date'])} — {date_uk(fun['last_date'])}"
+
+    cards = (
+        f'<div class="fun-card">'
+        f'<div class="fun-label">Замовлень за весь час</div>'
+        f'<div class="fun-value">{_fmt(fun["orders"], "")}</div>'
+        f'<div class="fun-sub">доставлених замовлень по всій мережі</div>'
+        f'</div>'
+        f'<div class="fun-card">'
+        f'<div class="fun-label">Gross Sales за весь час</div>'
+        f'<div class="fun-value">{_fmt(fun.get("gross"), "₴")}</div>'
+        f'<div class="fun-sub">до застосування знижок</div>'
+        f'</div>'
+        f'<div class="fun-card">'
+        f'<div class="fun-label">Net Sales за весь час</div>'
+        f'<div class="fun-value">{_fmt(fun.get("net"), "₴")}</div>'
+        f'<div class="fun-sub">після знижок клієнтам</div>'
+        f'</div>'
+    )
+
+    top = fun.get("top_order")
+    if top:
+        cards += (
+            f'<div class="fun-card">'
+            f'<div class="fun-label">Найдорожче замовлення</div>'
+            f'<div class="fun-value">{_fmt(top.get("gross"), "₴")}</div>'
+            f'<div class="fun-sub">{top.get("city","")} &nbsp;·&nbsp; {date_uk(top.get("date",""))}</div>'
+            f'</div>'
+        )
+
+    items = fun.get("top_items") or []
+    items_html = ""
+    if items:
+        max_qty = max(i["qty"] for i in items) or 1
+        rows = ""
+        for idx, it in enumerate(items, 1):
+            width = max(6, int(it["qty"] / max_qty * 100))
+            rows += (
+                f'<div class="item-row">'
+                f'<div class="item-rank">{idx}</div>'
+                f'<div class="item-body">'
+                f'<div class="item-name">{it["name"]}</div>'
+                f'<div class="item-bar"><span style="width:{width}%"></span></div>'
+                f'</div>'
+                f'<div class="item-qty">{_fmt(it["qty"], "")} '
+                f'<span>{_plural_uk(it["qty"], "порція", "порції", "порцій")}</span></div>'
+                f'</div>'
+            )
+        leader = items[0]
+        items_html = f"""
+        <div class="fun-panel">
+          <h3>Топ-{len(items)} позицій меню за весь час</h3>
+          <p class="fun-panel-lead">Найчастіше замовляють «{leader['name']}» —
+             {_fmt(leader['qty'], '')} {_plural_uk(leader['qty'], 'порція', 'порції', 'порцій')}
+             у {leader['locations']} {_plural_uk(leader['locations'], 'місті', 'містах', 'містах')}.</p>
+          {rows}
+          <p class="fun-note">Рахуються страви з меню; напої-додатки та опції до страв
+             (як-от «з зеленню») у підрахунок не входять.</p>
+        </div>"""
+
+    top_note = ""
+    if top:
+        discount_note = ""
+        if top.get("net") and abs(top["net"] - top["gross"]) >= 1:
+            discount_note = (f" Зі знижкою клієнт сплатив {_fmt(top['net'], '₴')}.")
+        top_note = (
+            f'<p class="fun-note">Найбільший чек — {_fmt(top.get("gross"), "₴")} '
+            f'({top.get("city","")}, {date_uk(top.get("date",""))}).{discount_note}</p>'
+        )
+
+    return f"""
+    <div class="section-title">✨ Цікаві цифри — за весь час на Bolt Food</div>
+    <div class="fun-period">Період: {period} &nbsp;·&nbsp; уся мережа, всі міста</div>
+    <div class="fun-grid">{cards}</div>
+    {items_html}
+    {top_note}
+    """
+
+
 def build_cities_table(data: dict) -> str:
     """Порівняння міст за останній місяць — одразу видно, де мережа росте."""
     rows = ""
@@ -805,6 +1003,8 @@ def build_brand_panel(data: dict) -> str:
       <span>{data['period_label']} &nbsp;·&nbsp; валюта UAH (₴) &nbsp;·&nbsp; {len(data['locations'])} закладів у {len(data['cities'])} містах</span>
       <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">Останній місяць: {data['month_labels'][-1]}</span>
     </div>
+
+    {build_fun_facts(data)}
 
     <div class="section-title">Мережа загалом — останній місяць</div>
     <div class="kpi-grid">{_kpi_block(brand_months, BRAND_COLOR)}</div>
@@ -955,6 +1155,33 @@ def build_html(data: dict) -> str:
       text-align:center;max-width:52px;line-height:1.15}}
     .bar{{width:36px;border-radius:5px 5px 0 0;min-height:4px}}
     .bar-lbl{{font-size:8px;color:var(--gray-400);margin-top:3px;text-align:center;line-height:1.2}}
+
+    /* Цікаві цифри */
+    .fun-period{{font-size:11px;color:var(--gray-400);margin:0 0 10px}}
+    .fun-grid{{display:grid;grid-template-columns:repeat(auto-fit,minmax(215px,1fr));gap:12px;margin-bottom:14px}}
+    .fun-card{{background:linear-gradient(135deg,#3b1c00 0%,#7a4416 55%,#b5651d 100%);
+      color:#fff;border-radius:14px;padding:18px 20px;box-shadow:0 2px 10px rgba(0,0,0,.12)}}
+    .fun-label{{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.7px;
+      color:rgba(255,255,255,.72);margin-bottom:6px}}
+    .fun-value{{font-size:27px;font-weight:800;line-height:1.15}}
+    .fun-sub{{font-size:11px;color:rgba(255,255,255,.75);margin-top:6px}}
+    .fun-panel{{background:#fff;border-radius:12px;padding:18px 20px;
+      box-shadow:0 1px 4px rgba(0,0,0,.06);margin-bottom:10px}}
+    .fun-panel h3{{font-size:13px;font-weight:700;color:var(--gray-700);margin-bottom:4px}}
+    .fun-panel-lead{{font-size:12px;color:var(--gray-700);margin-bottom:12px}}
+    .item-row{{display:flex;align-items:center;gap:12px;padding:7px 0;border-bottom:1px solid #f4f4f4}}
+    .item-row:last-of-type{{border-bottom:none}}
+    .item-rank{{flex-shrink:0;width:22px;height:22px;border-radius:50%;background:var(--gray-100);
+      color:var(--gray-700);font-size:11px;font-weight:700;display:flex;align-items:center;
+      justify-content:center}}
+    .item-body{{flex:1;min-width:0}}
+    .item-name{{font-size:13px;font-weight:600;margin-bottom:4px}}
+    .item-bar{{height:7px;background:var(--gray-100);border-radius:4px;overflow:hidden}}
+    .item-bar span{{display:block;height:100%;border-radius:4px;
+      background:linear-gradient(90deg,#b5651d,#e29e6c)}}
+    .item-qty{{flex-shrink:0;font-size:13px;font-weight:700;white-space:nowrap}}
+    .item-qty span{{font-size:10px;font-weight:400;color:var(--gray-400)}}
+    .fun-note{{font-size:11px;color:var(--gray-400);margin-top:10px}}
 
     .table-card{{background:#fff;border-radius:12px;padding:6px 6px;box-shadow:0 1px 4px rgba(0,0,0,.06);overflow-x:auto}}
     .cmp-table{{width:100%;border-collapse:collapse;font-size:13px;min-width:720px}}
