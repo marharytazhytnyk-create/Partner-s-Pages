@@ -361,11 +361,14 @@ def fetch_fun_facts(ctx, schema: str, pids_sql: str) -> dict:
     """
     facts: dict = {}
 
+    # commission_local — фактично виставлена партнеру комісія Bolt у гривні.
+    # Чистий дохід = продажі після знижок мінус ця комісія.
     totals = run_query(ctx, f"""
         SELECT
             COUNT(*)                            AS orders,
             SUM(order_gmv)                      AS gross,
-            SUM(order_gmv_after_discount)       AS net,
+            SUM(order_gmv_after_discount)       AS after_discounts,
+            SUM(commission_local)               AS commission,
             MIN(order_created_date_local)       AS first_date,
             MAX(order_created_date_local)       AS last_date
         FROM {schema}.fact_order_delivery
@@ -374,11 +377,18 @@ def fetch_fun_facts(ctx, schema: str, pids_sql: str) -> dict:
     """)
     if totals and totals[0]:
         r = totals[0]
-        facts["orders"]     = _si(r[0])
-        facts["gross"]      = round(_sf(r[1]), 0)
-        facts["net"]        = round(_sf(r[2]), 0)
-        facts["first_date"] = str(r[3])[:10]
-        facts["last_date"]  = str(r[4])[:10]
+        after_discounts = _sf(r[2])
+        commission      = _sf(r[3])
+        facts["orders"]          = _si(r[0])
+        facts["gross"]           = round(_sf(r[1]), 0)
+        facts["after_discounts"] = round(after_discounts, 0)
+        facts["commission"]      = round(commission, 0)
+        facts["first_date"]      = str(r[4])[:10]
+        facts["last_date"]       = str(r[5])[:10]
+        # Без даних про комісію «чистий дохід» показував би завищену суму —
+        # краще не показувати картку взагалі, ніж ввести партнера в оману.
+        if commission > 0:
+            facts["net"] = round(after_discounts - commission, 0)
 
     # Позиції меню однакові в різних містах, тому групуємо за назвою, а не за
     # product_id: інакше та сама страва розпалася б на шість рядків.
@@ -885,16 +895,17 @@ def build_fun_facts(data: dict) -> str:
         f'<div class="fun-sub">доставлених замовлень по всій мережі</div>'
         f'</div>'
         f'<div class="fun-card">'
-        f'<div class="fun-label">Gross Sales за весь час</div>'
+        f'<div class="fun-label">Загальний дохід за весь час</div>'
         f'<div class="fun-value">{_fmt(fun.get("gross"), "₴")}</div>'
-        f'<div class="fun-sub">до застосування знижок</div>'
-        f'</div>'
-        f'<div class="fun-card">'
-        f'<div class="fun-label">Net Sales за весь час</div>'
-        f'<div class="fun-value">{_fmt(fun.get("net"), "₴")}</div>'
-        f'<div class="fun-sub">після знижок клієнтам</div>'
         f'</div>'
     )
+    if fun.get("net"):
+        cards += (
+            f'<div class="fun-card">'
+            f'<div class="fun-label">Чистий дохід за весь час</div>'
+            f'<div class="fun-value">{_fmt(fun["net"], "₴")}</div>'
+            f'</div>'
+        )
 
     top = fun.get("top_order")
     if top:
