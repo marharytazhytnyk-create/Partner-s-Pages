@@ -983,60 +983,9 @@ def build_promo_panel(promo: dict) -> str:
         _kpi_card("Sponsored Listing", _fmt(sum_sl, "шт."), "", PROMO_COLORS["sl"]) +
         _kpi_card("Smart Promo", _fmt(sum_smart, "шт."), "", PROMO_COLORS["smart"]) +
         _kpi_card("Тематичні тижні", _fmt(sum_mkt, "шт."), "", PROMO_COLORS["mkt"]) +
-        _kpi_card("Зобов'язання · Josper ЗП", _fmt(sum_obl, "шт."), "", PROMO_COLORS["obl"]) +
+        _kpi_card("Промо+бігборд", _fmt(sum_obl, "шт."), "", PROMO_COLORS["obl"]) +
         _kpi_card("Усього доставлених", _fmt(sum_tot, "шт."), "", "var(--gray-400)")
     )
-
-    # ── головна помісячна таблиця ────────────────────────────────────────────
-    rows = ""
-    for mk, lbl in zip(mkeys, labels):
-        t = promo["totals"][mk]
-        promo_sum = t["sl"] + t["smart"] + t["mkt"] + t["obl_jz"]
-        share = (promo_sum / t["total"] * 100) if t["total"] else 0
-        zero = ' class="pz"' if promo_sum == 0 else ""
-        rows += (
-            f'<tr{zero}><td>{lbl}</td>'
-            f'<td>{_fmt(t["sl"], "")}</td>'
-            f'<td>{_fmt(t["smart"], "")}</td>'
-            f'<td>{_fmt(t["mkt"], "")}</td>'
-            f'<td>{_fmt(t["obl_jz"], "")}</td>'
-            f'<td><b>{_fmt(promo_sum, "")}</b></td>'
-            f'<td>{_fmt(t["total"], "")}</td>'
-            f'<td>{share:.1f}%</td></tr>'
-        )
-    tot_promo = sum_sl + sum_smart + sum_mkt + sum_obl
-    tot_share = (tot_promo / sum_tot * 100) if sum_tot else 0
-    rows += (
-        f'<tr class="ptot"><td>Разом за {len(mkeys)} міс.</td>'
-        f'<td>{_fmt(sum_sl, "")}</td><td>{_fmt(sum_smart, "")}</td>'
-        f'<td>{_fmt(sum_mkt, "")}</td><td>{_fmt(sum_obl, "")}</td>'
-        f'<td><b>{_fmt(tot_promo, "")}</b></td><td>{_fmt(sum_tot, "")}</td>'
-        f'<td>{tot_share:.1f}%</td></tr>'
-    )
-
-    main_table = f"""
-  <div class="ptable-wrap"><table class="ptable">
-    <thead><tr>
-      <th>Місяць</th><th>Sponsored<br/>Listing</th><th>Smart<br/>Promo</th>
-      <th>Тематичні<br/>тижні</th><th>Зобов'язання<br/>Josper ЗП</th>
-      <th>Разом<br/>по акціях</th><th>Усього<br/>замовлень</th><th>Частка<br/>акційних</th>
-    </tr></thead>
-    <tbody>{rows}</tbody>
-  </table></div>
-  <div class="ptable-note">
-    <b>Sponsored Listing</b> — замовлення, атрибутовані до платного просування: гість зробив
-    замовлення після показу або кліку по спонсорованому оголошенню.
-    <b>Smart Promo</b> — замовлення за кампаніями Smart Promotion (spend objective
-    <code>sp_activation</code>, <code>sp_engagement</code>, <code>sp_reactivation</code>,
-    <code>sp_fully_funded</code>).
-    <b>Тематичні тижні</b> — кампанії зі spend objective <code>provider_campaign_marketing</code>.
-    <b>Зобов'язання</b> — <code>provider_campaign_obligations_commitments</code>, показано
-    по Josper Svintuz у Запоріжжі.
-    <br/><br/>
-    Колонка «Разом по акціях» — це сума чотирьох стовпців. Вона може містити повтори:
-    одне замовлення могло прийти через спонсороване оголошення й водночас мати знижку
-    за кампанією, тож ці типи не є взаємовиключними.
-  </div>"""
 
     # ── графіки по місяцях ───────────────────────────────────────────────────
     charts = ""
@@ -1044,7 +993,7 @@ def build_promo_panel(promo: dict) -> str:
         ("sl", "Sponsored Listing", "Замовлення, атрибутовані до платного просування"),
         ("smart", "Smart Promo", "Замовлення за кампаніями Smart Promotion"),
         ("mkt", "Тематичні тижні", "Кампанії provider_campaign_marketing"),
-        ("obl_jz", "Зобов'язання · Josper ЗП", "provider_campaign_obligations_commitments"),
+        ("obl_jz", "Промо+бігборд", "Josper Svintuz — Запоріжжя"),
     ]:
         vals = [promo["totals"][m][key] for m in mkeys]
         col  = PROMO_COLORS["obl" if key == "obl_jz" else key]
@@ -1075,7 +1024,7 @@ def build_promo_panel(promo: dict) -> str:
   <div class="ptable-wrap"><table class="ptable">
     <thead><tr>
       <th>Бренд</th><th>Sponsored Listing</th><th>Smart Promo</th>
-      <th>Тематичні тижні</th><th>Зобов'язання</th><th>Усього замовлень</th><th>Частка акційних</th>
+      <th>Тематичні тижні</th><th>Промо+бігборд</th><th>Усього замовлень</th><th>Частка акційних</th>
     </tr></thead>
     <tbody>{brows}</tbody>
   </table></div>"""
@@ -1109,11 +1058,11 @@ def build_promo_panel(promo: dict) -> str:
     fm_obl = first_month_with("obl_jz")
     if fm_obl:
         notes.append(
-            f"<li><b>Зобов'язання (Josper Svintuz — Запоріжжя).</b> "
+            f"<li><b>Промо+бігборд (Josper Svintuz — Запоріжжя).</b> "
             f"{_fmt(sum_obl, '')} замовлень, усі — {fm_obl}. В інших брендів групи "
             f"замовлень за цим spend objective за період немає.</li>")
     else:
-        notes.append("<li><b>Зобов'язання (Josper Svintuz — Запоріжжя).</b> "
+        notes.append("<li><b>Промо+бігборд (Josper Svintuz — Запоріжжя).</b> "
                      "За цей період замовлень немає.</li>")
     best = max(mkeys, key=lambda m: (promo["totals"][m]["sl"] + promo["totals"][m]["smart"]
                                      + promo["totals"][m]["mkt"] + promo["totals"][m]["obl_jz"]))
@@ -1136,11 +1085,8 @@ def build_promo_panel(promo: dict) -> str:
 <div class="section-title">Підсумок за період</div>
 <div class="kpi-grid">{kpis}</div>
 
-<div class="section-title">Замовлення по типах акцій, по місяцях</div>
-{main_table}
-
 <div class="section-title">Динаміка по місяцях</div>
-<div class="charts-grid">{charts}</div>
+<div class="charts-grid promo-charts">{charts}</div>
 
 <div class="section-title">Розподіл по брендах</div>
 {brand_table}
@@ -1212,14 +1158,26 @@ def build_html(brands_data: list[tuple[dict, dict]], promo: dict | None = None) 
     .header-meta{{text-align:right;color:var(--gray-400);font-size:12px;line-height:1.9}}
     .header-meta strong{{color:var(--green)}}
 
-    /* Brand tabs */
-    .brand-tabs{{background:#fff;padding:0 40px;display:flex;gap:4px;
-      border-bottom:2px solid #eee;position:sticky;top:0;z-index:50;box-shadow:0 2px 6px rgba(0,0,0,.06)}}
-    .brand-tab{{padding:14px 24px;border:none;background:transparent;cursor:pointer;
+    /* Brand tabs — горизонтальний бігунок, бо вкладок більше ніж влазить */
+    .tabs-wrap{{background:#fff;position:sticky;top:0;z-index:50;display:flex;align-items:stretch;
+      border-bottom:2px solid #eee;box-shadow:0 2px 6px rgba(0,0,0,.06)}}
+    .brand-tabs{{flex:1;min-width:0;display:flex;gap:4px;padding:0 8px;
+      overflow-x:auto;scroll-behavior:smooth;scrollbar-width:thin;scrollbar-color:#d5d5d5 transparent}}
+    .brand-tabs::-webkit-scrollbar{{height:6px}}
+    .brand-tabs::-webkit-scrollbar-track{{background:transparent}}
+    .brand-tabs::-webkit-scrollbar-thumb{{background:#d5d5d5;border-radius:3px}}
+    .brand-tabs::-webkit-scrollbar-thumb:hover{{background:#b5b5b5}}
+    .brand-tab{{padding:14px 20px;border:none;background:transparent;cursor:pointer;
       font-size:14px;font-weight:700;color:var(--gray-400);border-bottom:3px solid transparent;
-      transition:all .2s;white-space:nowrap}}
+      transition:color .2s,border-color .2s;white-space:nowrap;flex-shrink:0}}
     .brand-tab:hover{{color:var(--bc,var(--green-d))}}
     .brand-tab.active{{color:var(--bc,var(--green-d));border-bottom-color:var(--bc,var(--green-d))}}
+    .tabs-nav{{flex-shrink:0;width:38px;border:none;background:#fff;cursor:pointer;
+      font-size:20px;line-height:1;color:var(--gray-400);transition:color .2s,background .2s}}
+    .tabs-nav:hover{{color:var(--black);background:var(--gray-100)}}
+    .tabs-nav[hidden]{{display:none}}
+    .tabs-nav.prev{{box-shadow:6px 0 8px -6px rgba(0,0,0,.18)}}
+    .tabs-nav.next{{box-shadow:-6px 0 8px -6px rgba(0,0,0,.18)}}
 
     .container{{max-width:1320px;margin:0 auto;padding:28px 40px 48px}}
     .period-bar{{background:#fff;border-radius:12px;padding:14px 20px;margin-bottom:20px;
@@ -1275,6 +1233,9 @@ def build_html(brands_data: list[tuple[dict, dict]], promo: dict | None = None) 
     .sev-badge{{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--warning)}}
 
     /* Таблиці вкладки «Ефективність акцій» */
+    /* Графіки акцій: 8 місяців мають влазити цілком, інакше останній стовпчик ріжеться */
+    .promo-charts{{grid-template-columns:repeat(auto-fill,minmax(440px,1fr))}}
+    .promo-charts .bar-col{{min-width:40px}}
     .ptable-wrap{{overflow-x:auto;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
     .ptable{{width:100%;border-collapse:collapse;background:#fff;font-size:13px;min-width:680px}}
     .ptable thead th{{background:var(--black);color:#fff;font-size:10px;text-transform:uppercase;
@@ -1314,8 +1275,14 @@ def build_html(brands_data: list[tuple[dict, dict]], promo: dict | None = None) 
   </div>
 </header>
 
-<div class="brand-tabs">
+<div class="tabs-wrap">
+  <button class="tabs-nav prev" type="button" onclick="scrollTabs(-1)"
+          aria-label="Прокрутити вкладки ліворуч" hidden>‹</button>
+  <div class="brand-tabs" id="brandTabs">
   {brand_tabs}
+  </div>
+  <button class="tabs-nav next" type="button" onclick="scrollTabs(1)"
+          aria-label="Прокрутити вкладки праворуч" hidden>›</button>
 </div>
 
 <div class="container">
@@ -1328,11 +1295,34 @@ def build_html(brands_data: list[tuple[dict, dict]], promo: dict | None = None) 
 </div>
 
 <script>
+const tabsBox = document.getElementById('brandTabs');
+
+function scrollTabs(dir) {{
+  tabsBox.scrollBy({{left: dir * Math.max(200, tabsBox.clientWidth * 0.7), behavior: 'smooth'}});
+}}
+
+function syncTabsNav() {{
+  const overflow = tabsBox.scrollWidth - tabsBox.clientWidth;
+  const prev = document.querySelector('.tabs-nav.prev');
+  const next = document.querySelector('.tabs-nav.next');
+  if (overflow < 4) {{
+    prev.hidden = true; next.hidden = true; return;
+  }}
+  prev.hidden = tabsBox.scrollLeft <= 2;
+  next.hidden = tabsBox.scrollLeft >= overflow - 2;
+}}
+
+tabsBox.addEventListener('scroll', syncTabsNav, {{passive: true}});
+window.addEventListener('resize', syncTabsNav);
+syncTabsNav();
+
 function switchBrand(slug) {{
   document.querySelectorAll('.brand-tab').forEach(t => t.classList.remove('active'));
   document.querySelectorAll('[id^="bpanel_"]').forEach(p => p.style.display = 'none');
-  document.getElementById('btab_' + slug).classList.add('active');
+  const tab = document.getElementById('btab_' + slug);
+  tab.classList.add('active');
   document.getElementById('bpanel_' + slug).style.display = 'block';
+  tab.scrollIntoView({{behavior: 'smooth', block: 'nearest', inline: 'nearest'}});
 }}
 
 function toggleLoc(id, btn) {{
