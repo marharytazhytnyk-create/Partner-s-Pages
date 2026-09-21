@@ -141,6 +141,15 @@ MONTH_BAR_COLORS = [
     "#ef5350","#f44336","#ef9a9a","#ffcdd2",
 ]
 
+# ─── АКЦІЇ ─────────────────────────────────────────────────────────────────────
+# Smart Promotion у даних позначається кількома spend objective з префіксом sp_.
+PROMO_SMART_PREFIX   = "sp_"
+PROMO_OBJ_MARKETING  = "provider_campaign_marketing"            # тематичні тижні
+PROMO_OBJ_OBLIGATION = "provider_campaign_obligations_commitments"
+PROMO_OBLIGATION_BRAND = "josper_zp"        # зобов'язання показуємо по Josper у Запоріжжі
+PROMO_TAB_SLUG = "promo"
+PROMO_COLORS = {"sl": "#1565C0", "smart": "#6A1B9A", "mkt": "#00838F", "obl": "#EF6C00"}
+
 # Color palettes per brand slug
 BRAND_BAR_COLORS = {
     "mavra_pizza_zp": ["#b71c1c","#c62828","#d32f2f","#e53935","#ef5350","#f44336","#ef9a9a","#ffcdd2"],
@@ -859,7 +868,291 @@ def build_brand_panel(brand: dict, data: dict, bar_colors: list) -> str:
     """
 
 
-def build_html(brands_data: list[tuple[dict, dict]]) -> str:
+def fetch_promo_data() -> dict:
+    """Замовлення по типах просування, по місяцях і брендах.
+
+    Sponsored Listing береться з mart-таблиці атрибуції спонсорованих оголошень,
+    решта — з fact_order_campaign_delivery за spend objective кампанії.
+    """
+    months = last_n_full_months(N_MONTHS)
+    y0, m0 = months[0]
+    y1, m1 = months[-1]
+    start, _ = month_range(y0, m0)
+    _, end   = month_range(y1, m1)
+    mkeys = [month_key(y, m) for y, m in months]
+
+    all_pids = [p for b in BRANDS_CONFIG for p in b["provider_ids"]]
+    pids_sql = ", ".join(str(p) for p in all_pids)
+
+    print(f"  [Ефективність акцій] fetching {N_MONTHS} months {start} → {end}")
+    ctx = create_ctx()
+    try:
+        camp_rows = run_query(ctx, f"""
+            SELECT provider_id,
+                   DATE_FORMAT(order_created_date_local, 'yyyy-MM') AS mkey,
+                   COUNT(DISTINCT CASE WHEN campaign_spend_objective
+                        LIKE '{PROMO_SMART_PREFIX}%' THEN order_id END)          AS smart,
+                   COUNT(DISTINCT CASE WHEN campaign_spend_objective
+                        = '{PROMO_OBJ_MARKETING}' THEN order_id END)             AS mkt,
+                   COUNT(DISTINCT CASE WHEN campaign_spend_objective
+                        = '{PROMO_OBJ_OBLIGATION}' THEN order_id END)            AS obl
+            FROM main.core_models.fact_order_campaign_delivery
+            WHERE provider_id IN ({pids_sql})
+              AND order_created_date_local >= '{start}'
+              AND order_created_date_local <  '{end}'
+            GROUP BY 1, 2
+        """)
+
+        sl_rows = run_query(ctx, f"""
+            SELECT provider_id,
+                   DATE_FORMAT(sponsored_listing_date_local, 'yyyy-MM') AS mkey,
+                   SUM(attributed_orders) AS orders
+            FROM main.mart_models.mart_provider_sponsored_listing_attribution_hourly
+            WHERE provider_id IN ({pids_sql})
+              AND sponsored_listing_date_local >= '{start}'
+              AND sponsored_listing_date_local <  '{end}'
+            GROUP BY 1, 2
+        """)
+
+        tot_rows = run_query(ctx, f"""
+            SELECT provider_id,
+                   DATE_FORMAT(DATE_TRUNC('month', metric_timestamp_partition), 'yyyy-MM') AS mkey,
+                   SUM(delivered_orders_count) AS orders
+            FROM {SCHEMA}.fact_provider_monthly
+            WHERE provider_id IN ({pids_sql})
+              AND metric_timestamp_partition >= '{start}'
+              AND metric_timestamp_partition <  '{end}'
+            GROUP BY 1, 2
+        """)
+    finally:
+        destroy_ctx(ctx)
+
+    camp = {(_si(r[0]), str(r[1])): (_si(r[2]), _si(r[3]), _si(r[4])) for r in camp_rows}
+    sl   = {(_si(r[0]), str(r[1])): _si(r[2]) for r in sl_rows}
+    tot  = {(_si(r[0]), str(r[1])): _si(r[2]) for r in tot_rows}
+
+    brands, totals = [], {}
+    for brand in BRANDS_CONFIG:
+        b = {"slug": brand["slug"], "title": brand["title"], "m": {}}
+        for mk in mkeys:
+            c = {"sl": 0, "smart": 0, "mkt": 0, "obl": 0, "total": 0}
+            for p in brand["provider_ids"]:
+                smart, mkt, obl = camp.get((p, mk), (0, 0, 0))
+                c["smart"] += smart
+                c["mkt"]   += mkt
+                c["obl"]   += obl
+                c["sl"]    += sl.get((p, mk), 0)
+                c["total"] += tot.get((p, mk), 0)
+            b["m"][mk] = c
+        brands.append(b)
+
+    for mk in mkeys:
+        t = {"sl": 0, "smart": 0, "mkt": 0, "obl": 0, "obl_jz": 0, "total": 0}
+        for b in brands:
+            c = b["m"][mk]
+            for k in ("sl", "smart", "mkt", "obl", "total"):
+                t[k] += c[k]
+            if b["slug"] == PROMO_OBLIGATION_BRAND:
+                t["obl_jz"] += c["obl"]
+        totals[mk] = t
+
+    return {
+        "months": mkeys,
+        "month_labels":   [month_label(y, m) for y, m in months],
+        "month_labels_s": [month_label(y, m, short=True) for y, m in months],
+        "brands": brands,
+        "totals": totals,
+    }
+
+
+def build_promo_panel(promo: dict) -> str:
+    """Вкладка «Ефективність акцій»: замовлення по типах просування, по місяцях."""
+    mkeys   = promo["months"]
+    labels  = promo["month_labels"]
+    labels_s= promo["month_labels_s"]
+    T       = promo["totals"]
+    brands  = promo["brands"]
+
+    sum_sl    = sum(T[m]["sl"]    for m in mkeys)
+    sum_smart = sum(T[m]["smart"] for m in mkeys)
+    sum_mkt   = sum(T[m]["mkt"]   for m in mkeys)
+    sum_obl   = sum(T[m]["obl_jz"] for m in mkeys)
+    sum_tot   = sum(T[m]["total"] for m in mkeys)
+
+    kpis = (
+        _kpi_card("Sponsored Listing", _fmt(sum_sl, "шт."), "", PROMO_COLORS["sl"]) +
+        _kpi_card("Smart Promo", _fmt(sum_smart, "шт."), "", PROMO_COLORS["smart"]) +
+        _kpi_card("Тематичні тижні", _fmt(sum_mkt, "шт."), "", PROMO_COLORS["mkt"]) +
+        _kpi_card("Зобов'язання · Josper ЗП", _fmt(sum_obl, "шт."), "", PROMO_COLORS["obl"]) +
+        _kpi_card("Усього доставлених", _fmt(sum_tot, "шт."), "", "var(--gray-400)")
+    )
+
+    # ── головна помісячна таблиця ────────────────────────────────────────────
+    rows = ""
+    for mk, lbl in zip(mkeys, labels):
+        t = promo["totals"][mk]
+        promo_sum = t["sl"] + t["smart"] + t["mkt"] + t["obl_jz"]
+        share = (promo_sum / t["total"] * 100) if t["total"] else 0
+        zero = ' class="pz"' if promo_sum == 0 else ""
+        rows += (
+            f'<tr{zero}><td>{lbl}</td>'
+            f'<td>{_fmt(t["sl"], "")}</td>'
+            f'<td>{_fmt(t["smart"], "")}</td>'
+            f'<td>{_fmt(t["mkt"], "")}</td>'
+            f'<td>{_fmt(t["obl_jz"], "")}</td>'
+            f'<td><b>{_fmt(promo_sum, "")}</b></td>'
+            f'<td>{_fmt(t["total"], "")}</td>'
+            f'<td>{share:.1f}%</td></tr>'
+        )
+    tot_promo = sum_sl + sum_smart + sum_mkt + sum_obl
+    tot_share = (tot_promo / sum_tot * 100) if sum_tot else 0
+    rows += (
+        f'<tr class="ptot"><td>Разом за {len(mkeys)} міс.</td>'
+        f'<td>{_fmt(sum_sl, "")}</td><td>{_fmt(sum_smart, "")}</td>'
+        f'<td>{_fmt(sum_mkt, "")}</td><td>{_fmt(sum_obl, "")}</td>'
+        f'<td><b>{_fmt(tot_promo, "")}</b></td><td>{_fmt(sum_tot, "")}</td>'
+        f'<td>{tot_share:.1f}%</td></tr>'
+    )
+
+    main_table = f"""
+  <div class="ptable-wrap"><table class="ptable">
+    <thead><tr>
+      <th>Місяць</th><th>Sponsored<br/>Listing</th><th>Smart<br/>Promo</th>
+      <th>Тематичні<br/>тижні</th><th>Зобов'язання<br/>Josper ЗП</th>
+      <th>Разом<br/>по акціях</th><th>Усього<br/>замовлень</th><th>Частка<br/>акційних</th>
+    </tr></thead>
+    <tbody>{rows}</tbody>
+  </table></div>
+  <div class="ptable-note">
+    <b>Sponsored Listing</b> — замовлення, атрибутовані до платного просування: гість зробив
+    замовлення після показу або кліку по спонсорованому оголошенню.
+    <b>Smart Promo</b> — замовлення за кампаніями Smart Promotion (spend objective
+    <code>sp_activation</code>, <code>sp_engagement</code>, <code>sp_reactivation</code>,
+    <code>sp_fully_funded</code>).
+    <b>Тематичні тижні</b> — кампанії зі spend objective <code>provider_campaign_marketing</code>.
+    <b>Зобов'язання</b> — <code>provider_campaign_obligations_commitments</code>, показано
+    по Josper Svintuz у Запоріжжі.
+    <br/><br/>
+    Колонка «Разом по акціях» — це сума чотирьох стовпців. Вона може містити повтори:
+    одне замовлення могло прийти через спонсороване оголошення й водночас мати знижку
+    за кампанією, тож ці типи не є взаємовиключними.
+  </div>"""
+
+    # ── графіки по місяцях ───────────────────────────────────────────────────
+    charts = ""
+    for key, title, desc in [
+        ("sl", "Sponsored Listing", "Замовлення, атрибутовані до платного просування"),
+        ("smart", "Smart Promo", "Замовлення за кампаніями Smart Promotion"),
+        ("mkt", "Тематичні тижні", "Кампанії provider_campaign_marketing"),
+        ("obl_jz", "Зобов'язання · Josper ЗП", "provider_campaign_obligations_commitments"),
+    ]:
+        vals = [promo["totals"][m][key] for m in mkeys]
+        col  = PROMO_COLORS["obl" if key == "obl_jz" else key]
+        charts += (
+            f'<div class="chart-card"><h3>{title}</h3>'
+            f'<div class="metric-desc">{desc}</div>'
+            f'<div class="unit">замовлень, шт.</div>'
+            f'{_bar_chart(vals, labels_s, "", [col] * len(mkeys))}</div>'
+        )
+
+    # ── розподіл по брендах ──────────────────────────────────────────────────
+    brows = ""
+    for b in brands:
+        s = {k: sum(b["m"][mk][k] for mk in mkeys) for k in ("sl", "smart", "mkt", "obl", "total")}
+        if not any((s["sl"], s["smart"], s["mkt"], s["obl"])):
+            brows += (f'<tr class="pz"><td>{b["title"]}</td><td>0</td><td>0</td><td>0</td>'
+                      f'<td>0</td><td>{_fmt(s["total"], "")}</td><td>—</td></tr>')
+            continue
+        psum = s["sl"] + s["smart"] + s["mkt"] + s["obl"]
+        share = (psum / s["total"] * 100) if s["total"] else 0
+        brows += (
+            f'<tr><td>{b["title"]}</td>'
+            f'<td>{_fmt(s["sl"], "")}</td><td>{_fmt(s["smart"], "")}</td>'
+            f'<td>{_fmt(s["mkt"], "")}</td><td>{_fmt(s["obl"], "")}</td>'
+            f'<td>{_fmt(s["total"], "")}</td><td>{share:.1f}%</td></tr>'
+        )
+    brand_table = f"""
+  <div class="ptable-wrap"><table class="ptable">
+    <thead><tr>
+      <th>Бренд</th><th>Sponsored Listing</th><th>Smart Promo</th>
+      <th>Тематичні тижні</th><th>Зобов'язання</th><th>Усього замовлень</th><th>Частка акційних</th>
+    </tr></thead>
+    <tbody>{brows}</tbody>
+  </table></div>"""
+
+    # ── що показують дані ────────────────────────────────────────────────────
+    def first_month_with(key):
+        for mk, lbl in zip(mkeys, labels):
+            if promo["totals"][mk][key] > 0:
+                return lbl
+        return None
+
+    def brands_with(key):
+        out = []
+        for b in brands:
+            if sum(b["m"][mk][key] for mk in mkeys) > 0:
+                out.append(b["title"])
+        return out
+
+    notes = []
+    for key, name in [("sl", "Sponsored Listing"), ("smart", "Smart Promo"),
+                      ("mkt", "Тематичні тижні")]:
+        fm = first_month_with(key)
+        bw = brands_with(key)
+        total = sum(promo["totals"][m][key] for m in mkeys)
+        if not fm:
+            notes.append(f"<li><b>{name}.</b> За цей період замовлень немає.</li>")
+            continue
+        notes.append(
+            f"<li><b>{name}.</b> Перші замовлення — {fm}, разом "
+            f"{_fmt(total, '')} замовлень. Беруть участь: {', '.join(bw)}.</li>")
+    fm_obl = first_month_with("obl_jz")
+    if fm_obl:
+        notes.append(
+            f"<li><b>Зобов'язання (Josper Svintuz — Запоріжжя).</b> "
+            f"{_fmt(sum_obl, '')} замовлень, усі — {fm_obl}. В інших брендів групи "
+            f"замовлень за цим spend objective за період немає.</li>")
+    else:
+        notes.append("<li><b>Зобов'язання (Josper Svintuz — Запоріжжя).</b> "
+                     "За цей період замовлень немає.</li>")
+    best = max(mkeys, key=lambda m: (promo["totals"][m]["sl"] + promo["totals"][m]["smart"]
+                                     + promo["totals"][m]["mkt"] + promo["totals"][m]["obl_jz"]))
+    bt = promo["totals"][best]
+    bsum = bt["sl"] + bt["smart"] + bt["mkt"] + bt["obl_jz"]
+    notes.append(
+        f"<li><b>Пік активності</b> — {labels[mkeys.index(best)]}: {_fmt(bsum, '')} "
+        f"замовлень по акціях при {_fmt(bt['total'], '')} усіх доставлених "
+        f"({bsum / bt['total'] * 100:.1f}%).</li>" if bt["total"] else "")
+
+    return f"""
+<div class="period-bar">
+  <span class="period-label">Ефективність акцій</span>
+  <span style="color:var(--gray-400);font-size:12px">
+    Замовлення по типах просування за {len(mkeys)} {'місяць' if len(mkeys)==1 else 'місяців'} ·
+    усі бренди групи
+  </span>
+</div>
+
+<div class="section-title">Підсумок за період</div>
+<div class="kpi-grid">{kpis}</div>
+
+<div class="section-title">Замовлення по типах акцій, по місяцях</div>
+{main_table}
+
+<div class="section-title">Динаміка по місяцях</div>
+<div class="charts-grid">{charts}</div>
+
+<div class="section-title">Розподіл по брендах</div>
+{brand_table}
+
+<div class="section-title">Що показують дані</div>
+<div class="loc-analysis sev-ok">
+  <ul>{''.join(n for n in notes if n)}</ul>
+</div>
+"""
+
+
+def build_html(brands_data: list[tuple[dict, dict]], promo: dict | None = None) -> str:
     today = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
     months = last_n_full_months(N_MONTHS)
     period = (f"{month_label(months[0][0], months[0][1])} — "
@@ -880,6 +1173,17 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
         vis = "block" if i == 0 else "none"
         brand_panels += (
             f'<div id="bpanel_{brand["slug"]}" style="display:{vis}">{panel_html}</div>'
+        )
+
+    if promo:
+        brand_tabs += (
+            f'<button class="brand-tab" id="btab_{PROMO_TAB_SLUG}" '
+            f'onclick="switchBrand(\'{PROMO_TAB_SLUG}\')" '
+            f'style="--bc:{PROMO_COLORS["sl"]}">🎯 Ефективність акцій</button>'
+        )
+        brand_panels += (
+            f'<div id="bpanel_{PROMO_TAB_SLUG}" style="display:none">'
+            f'{build_promo_panel(promo)}</div>'
         )
 
     return f"""<!DOCTYPE html>
@@ -969,6 +1273,22 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
     .loc-analysis ul{{margin-left:18px;font-size:13px}}
     .loc-analysis ul.advice{{color:var(--green-d)}}
     .sev-badge{{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--warning)}}
+
+    /* Таблиці вкладки «Ефективність акцій» */
+    .ptable-wrap{{overflow-x:auto;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
+    .ptable{{width:100%;border-collapse:collapse;background:#fff;font-size:13px;min-width:680px}}
+    .ptable thead th{{background:var(--black);color:#fff;font-size:10px;text-transform:uppercase;
+      letter-spacing:.4px;padding:10px 9px;text-align:right;font-weight:700;line-height:1.3}}
+    .ptable thead th:first-child{{text-align:left}}
+    .ptable tbody td{{padding:10px 9px;text-align:right;border-bottom:1px solid #f2f2f2;white-space:nowrap}}
+    .ptable tbody td:first-child{{text-align:left;font-weight:600}}
+    .ptable tbody tr:hover{{background:#f9fefb}}
+    .ptable tbody tr.pz td{{color:var(--gray-400)}}
+    .ptable tbody tr.ptot{{background:var(--gray-100);font-weight:700}}
+    .ptable tbody tr.ptot td{{border-bottom:none}}
+    .ptable-note{{font-size:11.5px;color:var(--gray-700);line-height:1.6;margin-top:10px;
+      background:#fff;border-radius:10px;padding:12px 14px;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
+    .ptable-note code{{background:var(--gray-100);padding:1px 5px;border-radius:4px;font-size:11px}}
     .footer{{background:var(--black);color:var(--gray-400);font-size:11px;padding:22px 40px;text-align:center}}
     .footer span{{color:var(--green)}}
     @media(max-width:700px){{
@@ -1051,6 +1371,16 @@ def main():
             print(f"  ERROR: {exc}")
             failures.append(f"{brand['title']}: {exc}")
 
+    print("🎯 Ефективність акцій...")
+    promo = None
+    try:
+        promo = fetch_promo_data()
+        tot = sum(v["sl"] + v["smart"] + v["mkt"] + v["obl_jz"] for v in promo["totals"].values())
+        print(f"  → {len(promo['months'])} months, {tot} акційних замовлень")
+    except Exception as exc:
+        print(f"  ERROR: {exc}")
+        failures.append(f"Ефективність акцій: {exc}")
+
     if failures:
         print("\n❌ Не вдалося отримати дані з Databricks:")
         for f in failures:
@@ -1058,7 +1388,7 @@ def main():
         print(f"\nЗвіт НЕ перезаписано, попередня версія збережена:\n   {OUTPUT_HTML}")
         sys.exit(1)
 
-    html = build_html(brands_data)
+    html = build_html(brands_data, promo)
     OUTPUT_HTML.write_text(html, encoding="utf-8")
     print(f"\n✅ Saved → {OUTPUT_HTML}")
 
