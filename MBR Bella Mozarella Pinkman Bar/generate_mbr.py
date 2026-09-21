@@ -29,6 +29,13 @@ CLUSTER_ID_ENV  = os.getenv("DATABRICKS_CLUSTER_ID") or ""
 # Актуальний — Unity Catalog, де таблиці лежать у main.ng_delivery.
 CLUSTER_CANDIDATES = ["0505-112942-d3yviznw", "0221-081903-9ag4bh69"]
 SCHEMA_CANDIDATES  = ["main.ng_delivery", "ng_delivery_spark"]
+SCHEMA_TABLES      = [
+    "dim_provider_v2",
+    "fact_provider_monthly",
+    "int_provider_metrics_non_additive",
+    "dim_order_campaign_delivery",
+    "dim_campaign_delivery_v2",
+]
 N_MONTHS        = 8
 SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Bella Mozzarella Pinkman Bar.html"
@@ -92,7 +99,18 @@ METRIC_UK = {
     "discounts":  ("Total Discounts",                "Загальна сума знижок для клієнтів",               "₴"),
     "camp_bolt":  ("Campaigns Spend by Bolt",        "Витрати Bolt на знижки та промо",                 "₴"),
     "camp_merch": ("Campaigns Spend by Merchant",    "Сума, яку партнер вклав у знижки та промо",       "₴"),
+    "sl_orders":  ("Sponsored Listing",              "Замовлення, що прийшли з платного просування",    "шт."),
+    "smart_orders":("Smart Promo",                   "Замовлення зі знижкою Smart Promo",               "шт."),
+    "theme_orders":("Тематичні тижні",               "Замовлення з кампаній provider_campaign_marketing","шт."),
 }
+
+# Метрики вкладки «Ефективність акцій». Одне й те саме замовлення може потрапити
+# у кілька рядків — наприклад, прийти з платного просування і мати знижку Smart
+# Promo, — тому їх не можна додавати між собою.
+PROMO_METRICS = ["sl_orders", "smart_orders", "theme_orders"]
+
+# Spend objective кампаній тематичних тижнів.
+THEME_SPEND_OBJECTIVE = "provider_campaign_marketing"
 
 MONTH_BAR_COLORS = [
     "#3b0f6e","#4a1485","#5e239d","#7b1fa2",
@@ -110,6 +128,7 @@ EMPTY_MONTH = {
     "new_users":0,"sessions":0,"imp_menu":0,"menu_prod":0,"rating":0,
     "discounts":0,"camp_bolt":0,"camp_merch":0,
     "active_users":0,"freq":0,
+    "sl_orders":0,"smart_orders":0,"theme_orders":0,
 }
 
 
@@ -261,19 +280,23 @@ def run_query(ctx: str, sql: str) -> list[list]:
     raise TimeoutError("Query timed out")
 
 def pick_schema(ctx: str) -> str:
-    """Той самий набір таблиць живе і в Unity Catalog, і в старому hive_metastore."""
+    """Той самий набір таблиць живе і в Unity Catalog, і в старому hive_metastore.
+
+    Усі таблиці звіту мають читатися з однієї схеми, інакше беремо наступну.
+    """
     global SCHEMA
     if SCHEMA:
         return SCHEMA
     for schema in SCHEMA_CANDIDATES:
         try:
-            run_query(ctx, f"SELECT 1 FROM {schema}.dim_provider_v2 LIMIT 1")
+            for table in SCHEMA_TABLES:
+                run_query(ctx, f"SELECT 1 FROM {schema}.{table} LIMIT 1")
             print(f"  схема: {schema}")
             SCHEMA = schema
             return SCHEMA
         except Exception:
             continue
-    raise RuntimeError("Не знайдено схему з dim_provider_v2")
+    raise RuntimeError(f"Не знайдено схему, де читаються всі таблиці: {', '.join(SCHEMA_TABLES)}")
 
 def destroy_ctx(ctx: str):
     try:
@@ -351,7 +374,9 @@ def fetch_brand_data(brand: dict) -> dict:
                     / NULLIF(SUM(f.provider_rating_per_order_weight), 0)             AS rating,
                 SUM(f.total_campaign_discount)                                       AS discounts,
                 SUM(f.total_campaign_spend_bolt)                                     AS camp_bolt,
-                SUM(f.total_campaign_spend_provider)                                 AS camp_merch
+                SUM(f.total_campaign_spend_provider)                                 AS camp_merch,
+                SUM(f.sponsored_listing_attributed_orders_count)                      AS sl_orders,
+                SUM(f.smart_promotion_campaign_orders_count)                          AS smart_orders
             FROM {schema}.fact_provider_monthly f
             JOIN {schema}.dim_provider_v2 d ON f.provider_id = d.provider_id
             WHERE f.provider_id IN ({pids_sql})
@@ -377,6 +402,22 @@ def fetch_brand_data(brand: dict) -> dict:
             GROUP BY 1, 2
         """)
 
+        # Тематичні тижні: у місячній таблиці немає розрізу за spend objective,
+        # тому рахуємо замовлення через прив'язку замовлення до кампанії.
+        theme_rows = run_query(ctx, f"""
+            SELECT o.provider_id,
+                   DATE_FORMAT(DATE_TRUNC('month', o.order_created_date_local), 'yyyy-MM-dd') AS mstart,
+                   COUNT(DISTINCT o.order_id) AS theme_orders
+            FROM {schema}.dim_order_campaign_delivery o
+            JOIN {schema}.dim_campaign_delivery_v2 c ON c.campaign_id = o.campaign_id
+            WHERE o.provider_id IN ({pids_sql})
+              AND c.campaign_spend_objective = '{THEME_SPEND_OBJECTIVE}'
+              AND o.order_state = 'delivered'
+              AND o.order_created_date_local >= '{global_start}'
+              AND o.order_created_date_local <  '{global_end}'
+            GROUP BY 1, 2
+        """)
+
     finally:
         destroy_ctx(ctx)
 
@@ -388,6 +429,10 @@ def fetch_brand_data(brand: dict) -> dict:
     users_map: dict[tuple[int, str], int] = {}
     for row in users_rows:
         users_map[(int(row[0]), str(row[1])[:7])] = _si(row[2])
+
+    theme_map: dict[tuple[int, str], int] = {}
+    for row in theme_rows:
+        theme_map[(int(row[0]), str(row[1])[:7])] = _si(row[2])
 
     # Parse fact rows into by_pid structure
     by_pid: dict[int, dict] = {}
@@ -411,6 +456,8 @@ def fetch_brand_data(brand: dict) -> dict:
         discounts = round(_sf(row[17]), 0)
         camp_bolt = round(_sf(row[18]), 0)
         camp_merch= round(_sf(row[19]), 0)
+        sl_orders = _si(row[20])
+        smart_ord = _si(row[21])
         active_u  = users_map.get((pid, mk)) or orders
         aov       = round(gross / orders, 0) if orders else 0
         freq      = round(orders / active_u, 2) if active_u else 0
@@ -424,6 +471,8 @@ def fetch_brand_data(brand: dict) -> dict:
             "menu_prod": menu_prod, "rating": rating,
             "discounts": discounts, "camp_bolt": camp_bolt, "camp_merch": camp_merch,
             "active_users": active_u, "freq": freq,
+            "sl_orders": sl_orders, "smart_orders": smart_ord,
+            "theme_orders": theme_map.get((pid, mk), 0),
         }
         if pid not in by_pid:
             by_pid[pid] = {"by_month": {}}
@@ -457,7 +506,8 @@ def fetch_brand_data(brand: dict) -> dict:
         agg = dict(EMPTY_MONTH)
         for loc in locations:
             w = loc["months"][i]
-            for k in ("orders","gross","net","new_users","sessions","discounts","camp_bolt","camp_merch","active_users"):
+            for k in ("orders","gross","net","new_users","sessions","discounts","camp_bolt","camp_merch",
+                      "active_users","sl_orders","smart_orders","theme_orders"):
                 agg[k] = agg.get(k, 0) + w.get(k, 0)
         # weighted averages
         weighted = [
@@ -799,6 +849,77 @@ def build_brand_panel(brand: dict, data: dict, bar_colors: list) -> str:
     """
 
 
+def _promo_card(label: str, orders, share, delta: str, color: str) -> str:
+    return (
+        f'<div class="kpi-card" style="border-top-color:{color}">'
+        f'<div class="kpi-label">{label}</div>'
+        f'<div class="kpi-value">{_fmt(orders, "шт.")}{delta}</div>'
+        f'<div class="kpi-sub">{share}</div>'
+        f'</div>'
+    )
+
+
+def build_promo_panel(brands_data: list[tuple[dict, dict]]) -> str:
+    """Вкладка «Ефективність акцій»: замовлення з кожного типу промо по місяцях."""
+    if not brands_data:
+        return '<p style="color:#999;padding:40px">Немає даних</p>'
+
+    period_label = brands_data[0][1]["period_label"]
+    blocks = ""
+
+    for brand, data in brands_data:
+        brand_months = data["brand_months"]
+        if not brand_months:
+            continue
+        labels_s   = data["month_labels_s"]
+        bar_colors = MONTH_BAR_COLORS_BELLA if brand["slug"] == "bella" else MONTH_BAR_COLORS
+        last = brand_months[-1]
+        prev = brand_months[-2] if len(brand_months) > 1 else {}
+
+        cards = _kpi_card("Delivered Orders", _fmt(last.get("orders"), "шт."),
+                          _pct_badge(prev.get("orders", 0), last.get("orders", 0)), brand["color"])
+        for mk in PROMO_METRICS:
+            name = METRIC_UK[mk][0]
+            val  = last.get(mk, 0)
+            share = (f'{val / last["orders"] * 100:.1f}% замовлень місяця'
+                     if last.get("orders") else "—")
+            cards += _promo_card(name, val, share,
+                                 _pct_badge(prev.get(mk, 0), val), brand["color"])
+
+        charts = ""
+        for mk in PROMO_METRICS:
+            name, desc, unit = METRIC_UK[mk]
+            vals = [bm.get(mk, 0) for bm in brand_months]
+            charts += (
+                f'<div class="chart-card">'
+                f'<h3>{name}</h3>'
+                f'<div class="metric-desc">{desc}</div>'
+                f'<div class="unit">{unit}</div>'
+                f'{_bar_chart(vals, labels_s, unit, bar_colors)}'
+                f'</div>'
+            )
+
+        blocks += (
+            f'<div class="section-title">{brand["emoji"]} {brand["title"]}</div>'
+            f'<div class="kpi-grid">{cards}</div>'
+            f'<div class="charts-grid">{charts}</div>'
+        )
+
+    return f"""
+    <div class="period-bar">
+      <span class="period-label">Місяці:</span>
+      <span>{period_label} &nbsp;·&nbsp; тільки доставлені замовлення &nbsp;·&nbsp; Харків</span>
+    </div>
+
+    <div class="promo-note">
+      Один тип промо не виключає іншого: замовлення може прийти з платного просування
+      і водночас мати знижку Smart Promo, тому ці три показники не додаються між собою.
+    </div>
+
+    {blocks}
+    """
+
+
 def build_html(brands_data: list[tuple[dict, dict]]) -> str:
     today = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
     months = last_n_full_months(N_MONTHS)
@@ -821,6 +942,14 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
         brand_panels += (
             f'<div id="bpanel_{brand["slug"]}" style="display:{vis}">{panel_html}</div>'
         )
+
+    brand_tabs += (
+        '<button class="brand-tab" id="btab_promo" onclick="switchBrand(\'promo\')" '
+        'style="--bc:#0d8a52">📣 Ефективність акцій</button>'
+    )
+    brand_panels += (
+        f'<div id="bpanel_promo" style="display:none">{build_promo_panel(brands_data)}</div>'
+    )
 
     return f"""<!DOCTYPE html>
 <html lang="uk">
@@ -869,21 +998,26 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
       box-shadow:0 1px 4px rgba(0,0,0,.06)}}
     .kpi-label{{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray-400);margin-bottom:4px}}
     .kpi-value{{font-size:19px;font-weight:700}}
+    .kpi-sub{{font-size:10px;color:var(--gray-400);margin-top:2px}}
+    .promo-note{{background:#fff;border-left:3px solid var(--green);border-radius:8px;
+      padding:12px 16px;font-size:12px;color:var(--gray-700);box-shadow:0 1px 4px rgba(0,0,0,.06)}}
     .delta{{font-size:11px;font-weight:600;margin-left:4px}}
     .delta.positive{{color:var(--positive)}}
     .delta.danger{{color:var(--danger)}}
-    .charts-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;margin-bottom:12px}}
+    .charts-grid{{display:grid;grid-template-columns:repeat(auto-fill,minmax(400px,1fr));gap:16px;margin-bottom:12px}}
     .chart-card{{background:#fff;border-radius:12px;padding:16px 18px;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
     .chart-card h3{{font-size:12px;font-weight:700;color:var(--gray-700);margin-bottom:4px}}
     .metric-desc{{font-size:11px;color:var(--gray-700);margin-bottom:4px;line-height:1.4}}
     .unit{{font-size:10px;color:var(--gray-400);margin-bottom:8px}}
     .bars-scroll{{overflow-x:auto;padding-bottom:4px}}
     .bars{{display:flex;gap:6px;align-items:flex-end;min-height:120px;padding-top:6px}}
-    .bar-col{{display:flex;flex-direction:column;align-items:center;min-width:44px;flex-shrink:0;
+    /* Стовпці стискаються під ширину картки, щоб останній місяць не ховався
+       за горизонтальним скролом — саме він найважливіший у звіті. */
+    .bar-col{{display:flex;flex-direction:column;align-items:center;flex:1 1 40px;min-width:0;
       height:110px;justify-content:flex-end}}
     .bar-val{{font-size:8px;font-weight:700;color:var(--gray-700);margin-bottom:3px;
-      text-align:center;max-width:52px;line-height:1.15}}
-    .bar{{width:36px;border-radius:5px 5px 0 0;min-height:4px}}
+      text-align:center;line-height:1.15}}
+    .bar{{width:100%;max-width:36px;border-radius:5px 5px 0 0;min-height:4px}}
     .bar-lbl{{font-size:8px;color:var(--gray-400);margin-top:3px;text-align:center;line-height:1.2}}
     .loc-card{{background:#fff;border-radius:12px;margin:0 0 10px;
       box-shadow:0 1px 4px rgba(0,0,0,.06);border:1px solid #eee;overflow:hidden}}
