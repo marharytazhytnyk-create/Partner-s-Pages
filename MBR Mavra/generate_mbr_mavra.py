@@ -148,7 +148,8 @@ PROMO_OBJ_MARKETING  = "provider_campaign_marketing"            # тематич
 PROMO_OBJ_OBLIGATION = "provider_campaign_obligations_commitments"
 PROMO_OBLIGATION_BRAND = "josper_zp"        # зобов'язання показуємо по Josper у Запоріжжі
 PROMO_TAB_SLUG = "promo"
-PROMO_COLORS = {"sl": "#1565C0", "smart": "#6A1B9A", "mkt": "#00838F", "obl": "#EF6C00"}
+PROMO_COLORS = {"sl": "#1565C0", "smart": "#6A1B9A", "mkt": "#00838F",
+                "obl": "#EF6C00", "bp": "#C2185B"}
 
 # Color palettes per brand slug
 BRAND_BAR_COLORS = {
@@ -917,7 +918,8 @@ def fetch_promo_data() -> dict:
         tot_rows = run_query(ctx, f"""
             SELECT provider_id,
                    DATE_FORMAT(DATE_TRUNC('month', metric_timestamp_partition), 'yyyy-MM') AS mkey,
-                   SUM(delivered_orders_count) AS orders
+                   SUM(delivered_orders_count)            AS orders,
+                   SUM(delivered_bolt_plus_orders_count)  AS bolt_plus
             FROM {SCHEMA}.fact_provider_monthly
             WHERE provider_id IN ({pids_sql})
               AND metric_timestamp_partition >= '{start}'
@@ -929,28 +931,30 @@ def fetch_promo_data() -> dict:
 
     camp = {(_si(r[0]), str(r[1])): (_si(r[2]), _si(r[3]), _si(r[4])) for r in camp_rows}
     sl   = {(_si(r[0]), str(r[1])): _si(r[2]) for r in sl_rows}
-    tot  = {(_si(r[0]), str(r[1])): _si(r[2]) for r in tot_rows}
+    tot  = {(_si(r[0]), str(r[1])): (_si(r[2]), _si(r[3])) for r in tot_rows}
 
     brands, totals = [], {}
     for brand in BRANDS_CONFIG:
         b = {"slug": brand["slug"], "title": brand["title"], "m": {}}
         for mk in mkeys:
-            c = {"sl": 0, "smart": 0, "mkt": 0, "obl": 0, "total": 0}
+            c = {"sl": 0, "smart": 0, "mkt": 0, "obl": 0, "bp": 0, "total": 0}
             for p in brand["provider_ids"]:
                 smart, mkt, obl = camp.get((p, mk), (0, 0, 0))
+                total, bolt_plus = tot.get((p, mk), (0, 0))
                 c["smart"] += smart
                 c["mkt"]   += mkt
                 c["obl"]   += obl
                 c["sl"]    += sl.get((p, mk), 0)
-                c["total"] += tot.get((p, mk), 0)
+                c["bp"]    += bolt_plus
+                c["total"] += total
             b["m"][mk] = c
         brands.append(b)
 
     for mk in mkeys:
-        t = {"sl": 0, "smart": 0, "mkt": 0, "obl": 0, "obl_jz": 0, "total": 0}
+        t = {"sl": 0, "smart": 0, "mkt": 0, "obl": 0, "obl_jz": 0, "bp": 0, "total": 0}
         for b in brands:
             c = b["m"][mk]
-            for k in ("sl", "smart", "mkt", "obl", "total"):
+            for k in ("sl", "smart", "mkt", "obl", "bp", "total"):
                 t[k] += c[k]
             if b["slug"] == PROMO_OBLIGATION_BRAND:
                 t["obl_jz"] += c["obl"]
@@ -977,6 +981,7 @@ def build_promo_panel(promo: dict) -> str:
     sum_smart = sum(T[m]["smart"] for m in mkeys)
     sum_mkt   = sum(T[m]["mkt"]   for m in mkeys)
     sum_obl   = sum(T[m]["obl_jz"] for m in mkeys)
+    sum_bp    = sum(T[m]["bp"]    for m in mkeys)
     sum_tot   = sum(T[m]["total"] for m in mkeys)
 
     kpis = (
@@ -984,6 +989,7 @@ def build_promo_panel(promo: dict) -> str:
         _kpi_card("Smart Promo", _fmt(sum_smart, "шт."), "", PROMO_COLORS["smart"]) +
         _kpi_card("Тематичні тижні", _fmt(sum_mkt, "шт."), "", PROMO_COLORS["mkt"]) +
         _kpi_card("Промо+бігборд", _fmt(sum_obl, "шт."), "", PROMO_COLORS["obl"]) +
+        _kpi_card("Bolt Plus", _fmt(sum_bp, "шт."), "", PROMO_COLORS["bp"]) +
         _kpi_card("Усього доставлених", _fmt(sum_tot, "шт."), "", "var(--gray-400)")
     )
 
@@ -994,6 +1000,7 @@ def build_promo_panel(promo: dict) -> str:
         ("smart", "Smart Promo", "Замовлення за кампаніями Smart Promotion"),
         ("mkt", "Тематичні тижні", "Кампанії provider_campaign_marketing"),
         ("obl_jz", "Промо+бігборд", "Josper Svintuz — Запоріжжя"),
+        ("bp", "Bolt Plus", "Замовлення від підписників програми Bolt Plus"),
     ]:
         vals = [promo["totals"][m][key] for m in mkeys]
         col  = PROMO_COLORS["obl" if key == "obl_jz" else key]
@@ -1007,24 +1014,27 @@ def build_promo_panel(promo: dict) -> str:
     # ── розподіл по брендах ──────────────────────────────────────────────────
     brows = ""
     for b in brands:
-        s = {k: sum(b["m"][mk][k] for mk in mkeys) for k in ("sl", "smart", "mkt", "obl", "total")}
-        if not any((s["sl"], s["smart"], s["mkt"], s["obl"])):
-            brows += (f'<tr class="pz"><td>{b["title"]}</td><td>0</td><td>0</td><td>0</td>'
-                      f'<td>0</td><td>{_fmt(s["total"], "")}</td><td>—</td></tr>')
-            continue
+        s = {k: sum(b["m"][mk][k] for mk in mkeys)
+             for k in ("sl", "smart", "mkt", "obl", "bp", "total")}
         psum = s["sl"] + s["smart"] + s["mkt"] + s["obl"]
+        if not psum and not s["bp"]:
+            brows += (f'<tr class="pz"><td>{b["title"]}</td><td>0</td><td>0</td><td>0</td>'
+                      f'<td>0</td><td>0</td><td>{_fmt(s["total"], "")}</td><td>—</td></tr>')
+            continue
         share = (psum / s["total"] * 100) if s["total"] else 0
         brows += (
             f'<tr><td>{b["title"]}</td>'
             f'<td>{_fmt(s["sl"], "")}</td><td>{_fmt(s["smart"], "")}</td>'
             f'<td>{_fmt(s["mkt"], "")}</td><td>{_fmt(s["obl"], "")}</td>'
+            f'<td>{_fmt(s["bp"], "")}</td>'
             f'<td>{_fmt(s["total"], "")}</td><td>{share:.1f}%</td></tr>'
         )
     brand_table = f"""
   <div class="ptable-wrap"><table class="ptable">
     <thead><tr>
       <th>Бренд</th><th>Sponsored Listing</th><th>Smart Promo</th>
-      <th>Тематичні тижні</th><th>Промо+бігборд</th><th>Усього замовлень</th><th>Частка акційних</th>
+      <th>Тематичні тижні</th><th>Промо+бігборд</th><th>Bolt Plus</th>
+      <th>Усього замовлень</th><th>Частка акційних</th>
     </tr></thead>
     <tbody>{brows}</tbody>
   </table></div>"""
@@ -1064,6 +1074,17 @@ def build_promo_panel(promo: dict) -> str:
     else:
         notes.append("<li><b>Промо+бігборд (Josper Svintuz — Запоріжжя).</b> "
                      "За цей період замовлень немає.</li>")
+    bp_brands = [b["title"] for b in brands if sum(b["m"][mk]["bp"] for mk in mkeys) > 0]
+    if sum_bp:
+        bp_share = (sum_bp / sum_tot * 100) if sum_tot else 0
+        notes.append(
+            f"<li><b>Bolt Plus.</b> {_fmt(sum_bp, '')} замовлень від підписників програми — "
+            f"{bp_share:.1f}% усіх доставлених. Це замовлення передплатників Bolt Plus, "
+            f"а не окрема акція, тож вони можуть збігатися з іншими типами. "
+            f"Присутні в {len(bp_brands)} з {len(brands)} брендів групи.</li>")
+    else:
+        notes.append("<li><b>Bolt Plus.</b> За цей період замовлень від підписників немає.</li>")
+
     best = max(mkeys, key=lambda m: (promo["totals"][m]["sl"] + promo["totals"][m]["smart"]
                                      + promo["totals"][m]["mkt"] + promo["totals"][m]["obl_jz"]))
     bt = promo["totals"][best]
