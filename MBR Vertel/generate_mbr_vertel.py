@@ -97,6 +97,9 @@ MONTH_BAR_COLORS_VERTEL = [
     "#e6550d","#f16913","#fd8d3c","#fdae6b",
 ]
 
+PROMO_TAB_SLUG = "promo"
+PROMO_COLORS = {"bp": "#C2185B", "camp": "#1565C0", "total": "#9a9a9a"}
+
 EMPTY_MONTH = {
     "orders":0,"gross":0,"net":0,"aov":0,
     "avail":0,"accept":0,"refunds":0,
@@ -104,6 +107,7 @@ EMPTY_MONTH = {
     "new_users":0,"sessions":0,"imp_menu":0,"menu_prod":0,"rating":0,
     "discounts":0,"camp_bolt":0,"camp_merch":0,
     "active_users":0,"freq":0,
+    "bolt_plus":0,"camp_orders":0,
 }
 
 
@@ -355,7 +359,9 @@ def fetch_brand_data(brand: dict) -> dict:
                     / NULLIF(SUM(f.provider_rating_per_order_weight), 0)             AS rating,
                 SUM(f.total_campaign_discount)                                       AS discounts,
                 SUM(f.total_campaign_spend_bolt)                                     AS camp_bolt,
-                SUM(f.total_campaign_spend_provider)                                 AS camp_merch
+                SUM(f.total_campaign_spend_provider)                                 AS camp_merch,
+                SUM(f.delivered_bolt_plus_orders_count)                              AS bolt_plus,
+                SUM(f.campaign_orders_count)                                         AS camp_orders
             FROM {SCHEMA}.fact_provider_monthly f
             JOIN {SCHEMA}.dim_provider_v2 d ON f.provider_id = d.provider_id
             WHERE f.provider_id IN ({pids_sql})
@@ -415,6 +421,8 @@ def fetch_brand_data(brand: dict) -> dict:
         discounts = round(_sf(row[17]), 0)
         camp_bolt = round(_sf(row[18]), 0)
         camp_merch= round(_sf(row[19]), 0)
+        bolt_plus = _si(row[20])
+        camp_orders = _si(row[21])
         # Fallback to `orders` keeps freq at 1.0 when the users query has no row,
         # so a missing figure never looks like an implausible ordering pattern.
         active_u  = users_map.get((pid, mk)) or orders
@@ -430,6 +438,7 @@ def fetch_brand_data(brand: dict) -> dict:
             "menu_prod": menu_prod, "rating": rating,
             "discounts": discounts, "camp_bolt": camp_bolt, "camp_merch": camp_merch,
             "active_users": active_u, "freq": freq,
+            "bolt_plus": bolt_plus, "camp_orders": camp_orders,
         }
         if pid not in by_pid:
             by_pid[pid] = {"by_month": {}}
@@ -463,7 +472,8 @@ def fetch_brand_data(brand: dict) -> dict:
         agg = dict(EMPTY_MONTH)
         for loc in locations:
             w = loc["months"][i]
-            for k in ("orders","gross","net","new_users","sessions","discounts","camp_bolt","camp_merch","active_users"):
+            for k in ("orders","gross","net","new_users","sessions","discounts",
+                      "camp_bolt","camp_merch","active_users","bolt_plus","camp_orders"):
                 agg[k] = agg.get(k, 0) + w.get(k, 0)
         # weighted averages
         weighted = [
@@ -822,6 +832,147 @@ def build_brand_panel(brand: dict, data: dict, bar_colors: list) -> str:
     """
 
 
+def _share(part, total) -> str:
+    if not total:
+        return "—"
+    return f"{part / total * 100:.1f}%"
+
+
+def build_promo_panel(data: dict) -> str:
+    """Вкладка «Ефективність акцій»: Bolt Plus vs інші кампанії, по місяцях."""
+    months = data["brand_months"]
+    locations = data["locations"]
+    labels = data["month_labels"]
+    labels_s = data["month_labels_s"]
+    if not months:
+        return '<p style="color:#999;padding:40px">Немає даних</p>'
+
+    bp = [m.get("bolt_plus", 0) for m in months]
+    camp = [m.get("camp_orders", 0) for m in months]
+    tot = [m.get("orders", 0) for m in months]
+    sum_bp = sum(bp)
+    sum_camp = sum(camp)
+    sum_tot = sum(tot)
+
+    kpis = (
+        _kpi_card("Bolt Plus", _fmt(sum_bp, "шт."), "", PROMO_COLORS["bp"]) +
+        _kpi_card("Інші акції", _fmt(sum_camp, "шт."), "", PROMO_COLORS["camp"]) +
+        _kpi_card("Усього доставлених", _fmt(sum_tot, "шт."), "", PROMO_COLORS["total"]) +
+        _kpi_card("Частка Bolt Plus", _share(sum_bp, sum_tot), "", PROMO_COLORS["bp"]) +
+        _kpi_card("Частка інших акцій", _share(sum_camp, sum_tot), "", PROMO_COLORS["camp"])
+    )
+
+    charts = (
+        f'<div class="chart-card"><h3>Bolt Plus</h3>'
+        f'<div class="metric-desc">Замовлення від підписників програми Bolt Plus</div>'
+        f'<div class="unit">замовлень, шт.</div>'
+        f'{_bar_chart(bp, labels_s, "", [PROMO_COLORS["bp"]] * len(months))}</div>'
+        f'<div class="chart-card"><h3>Інші акції</h3>'
+        f'<div class="metric-desc">Замовлення зі знижкою або промокампанією (Smart Promo, тематичні тижні тощо)</div>'
+        f'<div class="unit">замовлень, шт.</div>'
+        f'{_bar_chart(camp, labels_s, "", [PROMO_COLORS["camp"]] * len(months))}</div>'
+    )
+
+    month_rows = ""
+    for m, lbl in zip(months, labels):
+        o = m.get("orders", 0)
+        b = m.get("bolt_plus", 0)
+        c = m.get("camp_orders", 0)
+        month_rows += (
+            f"<tr><td>{lbl}</td>"
+            f"<td>{_fmt(b, '')}</td>"
+            f"<td>{_fmt(c, '')}</td>"
+            f"<td>{_fmt(o, '')}</td>"
+            f"<td>{_share(b, o)}</td>"
+            f"<td>{_share(c, o)}</td></tr>"
+        )
+    month_rows += (
+        f'<tr class="ptot"><td>Разом</td>'
+        f"<td>{_fmt(sum_bp, '')}</td>"
+        f"<td>{_fmt(sum_camp, '')}</td>"
+        f"<td>{_fmt(sum_tot, '')}</td>"
+        f"<td>{_share(sum_bp, sum_tot)}</td>"
+        f"<td>{_share(sum_camp, sum_tot)}</td></tr>"
+    )
+    month_table = f"""
+  <div class="ptable-wrap"><table class="ptable">
+    <thead><tr>
+      <th>Місяць</th><th>Bolt Plus</th><th>Інші акції</th>
+      <th>Усього замовлень</th><th>Частка Bolt Plus</th><th>Частка інших акцій</th>
+    </tr></thead>
+    <tbody>{month_rows}</tbody>
+  </table></div>"""
+
+    loc_rows = ""
+    for loc in locations:
+        lb = sum(m.get("bolt_plus", 0) for m in loc["months"])
+        lc = sum(m.get("camp_orders", 0) for m in loc["months"])
+        lo = sum(m.get("orders", 0) for m in loc["months"])
+        cls = ' class="pz"' if not lb and not lc else ""
+        loc_rows += (
+            f"<tr{cls}><td>{loc['short_name']}</td>"
+            f"<td>{_fmt(lb, '')}</td><td>{_fmt(lc, '')}</td>"
+            f"<td>{_fmt(lo, '')}</td>"
+            f"<td>{_share(lb, lo)}</td><td>{_share(lc, lo)}</td></tr>"
+        )
+    loc_table = f"""
+  <div class="ptable-wrap"><table class="ptable">
+    <thead><tr>
+      <th>Локація</th><th>Bolt Plus</th><th>Інші акції</th>
+      <th>Усього замовлень</th><th>Частка Bolt Plus</th><th>Частка інших акцій</th>
+    </tr></thead>
+    <tbody>{loc_rows}</tbody>
+  </table></div>"""
+
+    notes = [
+        "<li><b>Bolt Plus</b> — досталені замовлення від підписників програми. "
+        "Це не окрема акція ресторану, тож частина з них може збігатися з іншими промо.</li>",
+        "<li><b>Інші акції</b> — досталені замовлення, які пройшли через кампанію "
+        "(Smart Promo, тематичні тижні, знижки партнера або Bolt). "
+        "Суму з Bolt Plus складати не варто: гість може бути і підписником, і учасником акції.</li>",
+    ]
+    if sum_bp:
+        notes.append(
+            f"<li>За період <b>{_fmt(sum_bp, '')}</b> замовлень прийшли через Bolt Plus "
+            f"({_share(sum_bp, sum_tot)} усіх доставлених).</li>"
+        )
+    else:
+        notes.append("<li>За цей період замовлень від підписників Bolt Plus немає.</li>")
+    if sum_camp:
+        notes.append(
+            f"<li>Через інші акції прийшло <b>{_fmt(sum_camp, '')}</b> замовлень "
+            f"({_share(sum_camp, sum_tot)} усіх доставлених).</li>"
+        )
+    else:
+        notes.append("<li>За цей період замовлень через інші акції немає.</li>")
+
+    return f"""
+<div class="period-bar">
+  <span class="period-label">Ефективність акцій</span>
+  <span style="color:var(--gray-400);font-size:12px">
+    {data['period_label']} · {CITY} · замовлення, шт.
+  </span>
+</div>
+
+<div class="section-title">Підсумок за період</div>
+<div class="kpi-grid">{kpis}</div>
+
+<div class="section-title">Динаміка по місяцях</div>
+<div class="charts-grid promo-charts">{charts}</div>
+
+<div class="section-title">По місяцях</div>
+{month_table}
+
+<div class="section-title">По локаціях за період</div>
+{loc_table}
+
+<div class="section-title">Що показують дані</div>
+<div class="loc-analysis sev-ok">
+  <ul>{''.join(notes)}</ul>
+</div>
+"""
+
+
 def build_html(brands_data: list[tuple[dict, dict]]) -> str:
     today = datetime.datetime.now().strftime("%d.%m.%Y %H:%M")
     months = last_n_full_months(N_MONTHS)
@@ -842,6 +993,17 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
         vis = "block" if i == 0 else "none"
         brand_panels += (
             f'<div id="bpanel_{brand["slug"]}" style="display:{vis}">{panel_html}</div>'
+        )
+
+    if brands_data:
+        brand_tabs += (
+            f'<button class="brand-tab" id="btab_{PROMO_TAB_SLUG}" '
+            f'onclick="switchBrand(\'{PROMO_TAB_SLUG}\')" '
+            f'style="--bc:{PROMO_COLORS["bp"]}">🎯 Ефективність акцій</button>'
+        )
+        brand_panels += (
+            f'<div id="bpanel_{PROMO_TAB_SLUG}" style="display:none">'
+            f'{build_promo_panel(brands_data[0][1])}</div>'
         )
 
     return f"""<!DOCTYPE html>
@@ -931,6 +1093,19 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
     .loc-analysis ul{{margin-left:18px;font-size:13px}}
     .loc-analysis ul.advice{{color:var(--green-d)}}
     .sev-badge{{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--warning)}}
+    .promo-charts{{grid-template-columns:repeat(auto-fill,minmax(440px,1fr))}}
+    .promo-charts .bar-col{{min-width:40px}}
+    .ptable-wrap{{overflow-x:auto;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06)}}
+    .ptable{{width:100%;border-collapse:collapse;background:#fff;font-size:13px;min-width:640px}}
+    .ptable thead th{{background:var(--black);color:#fff;font-size:10px;text-transform:uppercase;
+      letter-spacing:.4px;padding:10px 9px;text-align:right;font-weight:700;line-height:1.3}}
+    .ptable thead th:first-child{{text-align:left}}
+    .ptable tbody td{{padding:10px 9px;text-align:right;border-bottom:1px solid #f2f2f2;white-space:nowrap}}
+    .ptable tbody td:first-child{{text-align:left;font-weight:600}}
+    .ptable tbody tr:hover{{background:#f9fefb}}
+    .ptable tbody tr.pz td{{color:var(--gray-400)}}
+    .ptable tbody tr.ptot{{background:var(--gray-100);font-weight:700}}
+    .ptable tbody tr.ptot td{{border-bottom:none}}
     .footer{{background:var(--black);color:var(--gray-400);font-size:11px;padding:22px 40px;text-align:center}}
     .footer span{{color:var(--green)}}
     @media(max-width:700px){{
@@ -1007,7 +1182,10 @@ def main():
         print(f"📊 {brand['title']}...")
         try:
             data = fetch_brand_data_checked(brand)
-            print(f"  → {len(data['brand_months'])} months, {len(data['locations'])} locations")
+            bp = sum(m.get("bolt_plus", 0) for m in data["brand_months"])
+            camp = sum(m.get("camp_orders", 0) for m in data["brand_months"])
+            print(f"  → {len(data['brand_months'])} months, {len(data['locations'])} locations"
+                  f", Bolt Plus {bp}, інші акції {camp}")
             brands_data.append((brand, data))
         except Exception as exc:
             print(f"  ERROR: {exc}")
