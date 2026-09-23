@@ -77,6 +77,8 @@ UK_MONTHS_FULL  = ["","Січень","Лютий","Березень","Квіте
                     "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"]
 UK_MONTHS_GEN   = ["","січня","лютого","березня","квітня","травня","червня",
                     "липня","серпня","вересня","жовтня","листопада","грудня"]
+UK_MONTHS_LOC   = ["","січні","лютому","березні","квітні","травні","червні",
+                    "липні","серпні","вересні","жовтні","листопаді","грудні"]
 
 TOP_ITEMS_LIMIT = 5
 
@@ -464,6 +466,89 @@ def fetch_fun_facts(ctx, schema: str, pids_sql: str) -> dict:
     return facts
 
 
+def fetch_bolt_plus(ctx, schema: str, pids_sql: str, start: str, end: str) -> dict:
+    """Замовлення від підписників Bolt Plus.
+
+    Прапорець is_bolt_plus_order живе на рівні замовлення, тож усі зрізи —
+    помісячний, по локаціях і підсумковий — рахуються з однієї таблиці.
+    Межі ті самі, що й у решті звіту: до кінця останнього повного місяця.
+    """
+    where = (f"provider_id IN ({pids_sql}) AND order_state = 'delivered' "
+             f"AND order_created_date_local >= '{start}' "
+             f"AND order_created_date_local <  '{end}'")
+
+    monthly = run_query(ctx, f"""
+        SELECT
+            DATE_FORMAT(DATE_TRUNC('month', order_created_date_local), 'yyyy-MM') AS mkey,
+            SUM(CASE WHEN is_bolt_plus_order THEN 1 ELSE 0 END)          AS plus_orders,
+            COUNT(*)                                                     AS all_orders,
+            SUM(CASE WHEN is_bolt_plus_order THEN order_gmv ELSE 0 END)  AS plus_gross,
+            AVG(CASE WHEN is_bolt_plus_order THEN order_gmv END)         AS plus_aov,
+            AVG(CASE WHEN NOT is_bolt_plus_order THEN order_gmv END)     AS rest_aov
+        FROM {schema}.fact_order_delivery
+        WHERE {where}
+        GROUP BY 1
+    """)
+
+    by_loc = run_query(ctx, f"""
+        SELECT
+            provider_id,
+            SUM(CASE WHEN is_bolt_plus_order THEN 1 ELSE 0 END)                 AS plus_orders,
+            COUNT(*)                                                            AS all_orders,
+            SUM(CASE WHEN is_bolt_plus_order THEN order_gmv ELSE 0 END)         AS plus_gross,
+            COUNT(DISTINCT CASE WHEN is_bolt_plus_order THEN user_id END)       AS plus_users
+        FROM {schema}.fact_order_delivery
+        WHERE {where}
+        GROUP BY 1
+    """)
+
+    totals = run_query(ctx, f"""
+        SELECT
+            SUM(CASE WHEN is_bolt_plus_order THEN 1 ELSE 0 END)                 AS plus_orders,
+            COUNT(*)                                                            AS all_orders,
+            SUM(CASE WHEN is_bolt_plus_order THEN order_gmv ELSE 0 END)         AS plus_gross,
+            COUNT(DISTINCT CASE WHEN is_bolt_plus_order THEN user_id END)       AS plus_users,
+            AVG(CASE WHEN is_bolt_plus_order THEN order_gmv END)                AS plus_aov,
+            AVG(CASE WHEN NOT is_bolt_plus_order THEN order_gmv END)            AS rest_aov,
+            MIN(CASE WHEN is_bolt_plus_order THEN order_created_date_local END) AS first_plus
+        FROM {schema}.fact_order_delivery
+        WHERE {where}
+    """)
+
+    plus = {
+        "by_month": {
+            str(r[0])[:7]: {
+                "plus_orders": _si(r[1]),
+                "all_orders":  _si(r[2]),
+                "plus_gross":  round(_sf(r[3]), 0),
+                "plus_aov":    round(_sf(r[4]), 0),
+                "rest_aov":    round(_sf(r[5]), 0),
+            } for r in monthly
+        },
+        "by_pid": {
+            int(r[0]): {
+                "plus_orders": _si(r[1]),
+                "all_orders":  _si(r[2]),
+                "plus_gross":  round(_sf(r[3]), 0),
+                "plus_users":  _si(r[4]),
+            } for r in by_loc
+        },
+        "total": {},
+    }
+    if totals and totals[0]:
+        r = totals[0]
+        plus["total"] = {
+            "plus_orders": _si(r[0]),
+            "all_orders":  _si(r[1]),
+            "plus_gross":  round(_sf(r[2]), 0),
+            "plus_users":  _si(r[3]),
+            "plus_aov":    round(_sf(r[4]), 0),
+            "rest_aov":    round(_sf(r[5]), 0),
+            "first_date":  str(r[6])[:10] if r[6] else "",
+        }
+    return plus
+
+
 def fetch_data() -> dict:
     months = last_n_full_months(N_MONTHS)
     y0, m0 = months[0]
@@ -578,13 +663,19 @@ def fetch_data() -> dict:
             GROUP BY 1
         """)
 
-        # «Цікаві цифри» — приємний бонус, а не основа звіту. Якщо ці запити
+        # «Цікаві цифри» та Bolt Plus — додаткові розділи. Якщо ці запити
         # впадуть, решта звіту має вийти як зазвичай.
         try:
             fun = fetch_fun_facts(ctx, schema, pids_sql)
         except Exception as exc:
             print(f"  ⚠️  не вдалося зібрати «Цікаві цифри»: {exc}")
             fun = {}
+
+        try:
+            plus = fetch_bolt_plus(ctx, schema, pids_sql, history_start, global_end)
+        except Exception as exc:
+            print(f"  ⚠️  не вдалося зібрати дані Bolt Plus: {exc}")
+            plus = {}
 
     finally:
         destroy_ctx(ctx)
@@ -709,6 +800,7 @@ def fetch_data() -> dict:
         "locations": locations,
         "cities": cities_list,
         "fun": fun,
+        "plus": plus,
         "years": years,
         "brand_months": brand_months,
         "month_keys": month_keys,
@@ -822,6 +914,175 @@ def analyze(months: list[dict], title: str) -> dict:
     }
 
 
+# ─── РЕКОМЕНДАЦІЇ ──────────────────────────────────────────────────────────────
+
+# Орієнтири, нижче яких показник вартий уваги партнера.
+TARGET_AVAIL   = 97.0
+TARGET_ACCEPT  = 98.0
+TARGET_REFUNDS = 3.0
+TARGET_RATING  = 4.5
+TARGET_PREP    = 30.0
+TARGET_IMP_MENU = 10.0
+TARGET_PLUS_SHARE = 12.0
+
+
+def _avg(values: list) -> float:
+    vals = [v for v in values if v is not None]
+    return sum(vals) / len(vals) if vals else 0.0
+
+
+def month_loc(rec: dict) -> str:
+    """'2026-08' → 'серпні 2026' — щоб у тексті було «у серпні», а не «у Серпень»."""
+    mk = rec.get("month_key", "")
+    try:
+        return f"{UK_MONTHS_LOC[int(mk[5:7])]} {mk[:4]}"
+    except (ValueError, IndexError):
+        return rec.get("label", "")
+
+
+def build_advice(months: list[dict], scope: str = "мережа",
+                 plus_share: float | None = None) -> list[dict]:
+    """Рекомендації «на що звернути увагу» за останнім місяцем і трендом.
+
+    Кожен пункт — це спостереження з цифрою і конкретна дія. Список завжди
+    непорожній: якщо проблем немає, повертаються поради щодо зростання.
+    """
+    if not months:
+        return []
+    last = months[-1]
+    prev = months[-2] if len(months) > 1 else last
+    tail = months[-4:-1] if len(months) >= 4 else months[:-1] or [last]
+    items: list[dict] = []
+
+    def add(prio, title, text):
+        items.append({"prio": prio, "title": title, "text": text})
+
+    # Обсяг замовлень проти середнього за попередні місяці
+    base_orders = _avg([m.get("orders", 0) for m in tail])
+    if base_orders:
+        chg = (last.get("orders", 0) - base_orders) / base_orders * 100
+        if chg <= -15:
+            add(5, "Замовлень стало помітно менше",
+                f"У {month_loc(last)} було {_fmt(last.get('orders'),'шт.')} замовлень — "
+                f"на {abs(chg):.0f}% менше за середнє по попередніх місяцях "
+                f"({_fmt(round(base_orders),'шт.')}). Перевірте, чи не було довгих пауз офлайн, "
+                f"чи не зникли з меню популярні позиції, і розгляньте акцію на повернення гостей.")
+        elif chg >= 15:
+            add(2, "Замовлення зростають — закріпіть результат",
+                f"У {month_loc(last)} — {_fmt(last.get('orders'),'шт.')} замовлень, "
+                f"на {chg:.0f}% більше за середнє по попередніх місяцях. Переконайтеся, що кухня "
+                f"витримує темп у пікові години: саме зараз затримки коштують найдорожче.")
+
+    # Доступність
+    avail = last.get("avail", 0)
+    if avail and avail < TARGET_AVAIL:
+        lost = int(last.get("orders", 0) * (TARGET_AVAIL - avail) / 100)
+        add(5, "Тримайте заклад онлайн у пікові години",
+            f"Заклад був доступний {avail:.1f}% часу замість орієнтиру {TARGET_AVAIL:.0f}%. "
+            f"У масштабі минулого місяця це приблизно {lost} втрачених замовлень: поки заклад "
+            f"офлайн, гість просто не бачить вас у застосунку. Найчастіша причина — ручне "
+            f"вимкнення в години завантаження кухні.")
+
+    # Прийняття замовлень
+    accept = last.get("accept", 0)
+    if accept and accept < TARGET_ACCEPT:
+        add(4, "Приймайте замовлення швидше",
+            f"Вчасно прийнято {accept:.1f}% замовлень. Орієнтир — від {TARGET_ACCEPT:.0f}%. "
+            f"Кожне непідтверджене замовлення скасовується і псує враження гостя. "
+            f"Тримайте планшет із увімкненим звуком на видному місці, ціль — прийняти за хвилину.")
+
+    # Компенсації
+    refunds = last.get("refunds", 0)
+    if refunds >= TARGET_REFUNDS:
+        add(4, "Зменшіть кількість компенсацій",
+            f"Компенсації отримали {refunds:.1f}% замовлень (було {prev.get('refunds',0):.1f}% "
+            f"місяць тому). Найчастіші причини — забуті позиції в пакунку та неактуальне меню. "
+            f"Варто ввести контроль комплектації перед видачею кур'єру.")
+
+    # Рейтинг
+    rating = last.get("rating", 0)
+    if rating and rating < TARGET_RATING:
+        add(4, "Попрацюйте з відгуками",
+            f"Середня оцінка — {rating:.2f} з 5. Нижче 4,5 заклад втрачає позиції у видачі, бо "
+            f"рейтинг впливає на ранжування. Перегляньте останні негативні відгуки: зазвичай "
+            f"80% з них припадає на дві-три повторювані причини.")
+
+    # Час приготування
+    prep = last.get("prep_time", 0)
+    if prep >= TARGET_PREP:
+        add(3, "Перевірте час приготування",
+            f"Середнє приготування — {prep:.1f} хв. Довге очікування збільшує загальний час "
+            f"доставки і знижує ймовірність повторного замовлення. Якщо реальний час саме такий, "
+            f"оновіть його в порталі: тоді гість бачитиме чесний ETA і менше розчаровується.")
+
+    # Нові гості
+    new_base = _avg([m.get("new_users", 0) for m in tail])
+    if new_base and last.get("new_users", 0) < new_base * 0.85:
+        add(3, "Нових гостей стало менше",
+            f"У {month_loc(last)} вперше замовили {_fmt(last.get('new_users'),'осіб')} "
+            f"проти {_fmt(round(new_base),'осіб')} у середньому раніше. Приплив нових клієнтів — "
+            f"це паливо для зростання: розгляньте знижку на перше замовлення або участь "
+            f"у тематичних добірках застосунку.")
+
+    # Конверсія з показів у меню
+    imp = last.get("imp_menu", 0)
+    if imp and imp < TARGET_IMP_MENU and last.get("sessions", 0) > 300:
+        add(3, "Оновіть головне фото закладу",
+            f"Лише {imp:.1f}% гостей, які побачили заклад у стрічці, відкрили меню. "
+            f"Показів було {_fmt(last.get('sessions'),'')} — аудиторія є, але картка не чіпляє. "
+            f"Якісне фото страви-хіта та бейдж акції зазвичай дають найбільший приріст.")
+
+    # Участь у промо
+    if not any(m.get("camp_merch", 0) for m in months[-6:]):
+        bolt_spend = sum(m.get("camp_bolt", 0) for m in months[-6:])
+        if bolt_spend:
+            add(2, "Спробуйте спільні акції з Bolt",
+                f"За останні пів року Bolt вклав {_fmt(bolt_spend,'₴')} у знижки для ваших гостей, "
+                f"а з боку закладу співфінансування не було. Спільні акції отримують більше "
+                f"видимості в застосунку, а вартість ділиться між сторонами.")
+
+    # Bolt Plus
+    if plus_share is not None and plus_share < TARGET_PLUS_SHARE:
+        add(3, "Використайте аудиторію Bolt Plus",
+            f"Через Bolt Plus приходить {plus_share:.1f}% замовлень. Підписники замовляють "
+            f"частіше і з більшим чеком, бо доставку їм компенсує Bolt. Переконайтеся, що заклад "
+            f"має позначку «+» у застосунку, і додайте позиції, які допомагають гостю дотягнути "
+            f"кошик до порога безкоштовної доставки.")
+
+    if len(items) < 3:
+        add(1, "Підніміть середній чек комбо-наборами",
+            f"Поточний середній чек — {_fmt(last.get('aov'),'₴')}. Готові набори на двох та "
+            f"пропозиція соусу чи напою на етапі кошика — найпростіший спосіб додати "
+            f"100–150 ₴ до замовлення без витрат на рекламу.")
+        add(1, "Перевірте меню на фото та описи",
+            "Позиції без фото замовляють помітно рідше. Пройдіться списком страв і додайте "
+            "зображення хоча б до топ-20 позицій — це разова робота з тривалим ефектом.")
+
+    items.sort(key=lambda x: -x["prio"])
+    return items[:5]
+
+
+def build_advice_block(items: list[dict], heading: str = "На що звернути увагу") -> str:
+    if not items:
+        return ""
+    cards = ""
+    for i, it in enumerate(items, 1):
+        cls = "prio-high" if it["prio"] >= 4 else "prio-mid" if it["prio"] >= 3 else "prio-low"
+        label = ("Важливо" if it["prio"] >= 4 else
+                 "Варто зробити" if it["prio"] >= 3 else "Ідея для зростання")
+        cards += (
+            f'<div class="adv-card {cls}">'
+            f'<div class="adv-head"><span class="adv-num">{i}</span>'
+            f'<h4>{it["title"]}</h4><span class="adv-tag">{label}</span></div>'
+            f'<p>{it["text"]}</p>'
+            f'</div>'
+        )
+    return f"""
+    <div class="section-title">{heading}</div>
+    <div class="adv-list">{cards}</div>
+    """
+
+
 # ─── HTML HELPERS ──────────────────────────────────────────────────────────────
 
 def _fmt(v, unit="₴", decimals=0) -> str:
@@ -932,6 +1193,7 @@ def _kpi_block(months: list[dict], color: str) -> str:
 
 
 def _charts_block(months: list[dict], labels_s: list[str]) -> str:
+    """Секції графіків згорнуті: спершу партнер бачить головне, деталі — за кліком."""
     html = ""
     for sec_title, metric_keys in CHART_SECTIONS:
         charts = ""
@@ -946,7 +1208,17 @@ def _charts_block(months: list[dict], labels_s: list[str]) -> str:
                 f'{_bar_chart(vals, labels_s, unit, MONTH_BAR_COLORS)}'
                 f'</div>'
             )
-        html += f'<div class="section-title">{sec_title}</div><div class="charts-grid">{charts}</div>'
+        count = len(metric_keys)
+        html += (
+            f'<details class="chart-section">'
+            f'<summary class="section-title">'
+            f'<span class="chev">▸</span>{sec_title}'
+            f'<span class="sec-count">{count} '
+            f'{_plural_uk(count, "графік", "графіки", "графіків")}</span>'
+            f'</summary>'
+            f'<div class="charts-grid">{charts}</div>'
+            f'</details>'
+        )
     return html
 
 
@@ -1056,6 +1328,165 @@ def build_fun_facts(data: dict) -> str:
     """
 
 
+def _plus_share(data: dict) -> float | None:
+    """Частка замовлень через Bolt Plus за весь період, %."""
+    total = (data.get("plus") or {}).get("total") or {}
+    if not total.get("all_orders"):
+        return None
+    return total["plus_orders"] / total["all_orders"] * 100
+
+
+def build_plus_panel(data: dict) -> str:
+    plus = data.get("plus") or {}
+    total = plus.get("total") or {}
+    if not total.get("plus_orders"):
+        return '<p style="color:#999;padding:40px">Немає даних по Bolt Plus</p>'
+
+    share      = _plus_share(data) or 0
+    plus_aov   = total.get("plus_aov", 0)
+    rest_aov   = total.get("rest_aov", 0)
+    aov_diff   = (plus_aov - rest_aov) / rest_aov * 100 if rest_aov else 0
+    by_month   = plus.get("by_month", {})
+    month_keys = data["month_keys"]
+    labels_s   = data["month_labels_s"]
+
+    kpi = (
+        _kpi_card("Замовлень через Bolt Plus", _fmt(total["plus_orders"], "шт."), "", BRAND_COLOR) +
+        _kpi_card("Частка від усіх замовлень", f"{share:.1f}%", "", BRAND_COLOR) +
+        _kpi_card("Дохід із Plus-замовлень", _fmt(total.get("plus_gross"), "₴"), "", BRAND_COLOR) +
+        _kpi_card("Середній чек Plus", _fmt(plus_aov, "₴")) +
+        _kpi_card("Середній чек решти", _fmt(rest_aov, "₴")) +
+        _kpi_card("Гостей з підпискою", _fmt(total.get("plus_users"), "осіб"))
+    )
+
+    plus_orders_series = [by_month.get(mk, {}).get("plus_orders", 0) for mk in month_keys]
+    share_series = [
+        round(by_month.get(mk, {}).get("plus_orders", 0)
+              / by_month[mk]["all_orders"] * 100, 1)
+        if by_month.get(mk, {}).get("all_orders") else 0
+        for mk in month_keys
+    ]
+    gross_series = [by_month.get(mk, {}).get("plus_gross", 0) for mk in month_keys]
+
+    charts = ""
+    for name, desc, unit, vals in (
+        ("Замовлення через Bolt Plus", "Скільки замовлень за місяць зробили підписники", "шт.", plus_orders_series),
+        ("Частка Bolt Plus", "Яку частку всіх замовлень закладу дали підписники", "%", share_series),
+        ("Дохід із Plus-замовлень", "Сума цих замовлень до знижок", "₴", gross_series),
+    ):
+        charts += (
+            f'<div class="chart-card">'
+            f'<h3>{name}</h3>'
+            f'<div class="metric-desc">{desc}</div>'
+            f'<div class="unit">{unit}</div>'
+            f'{_bar_chart(vals, labels_s, unit, MONTH_BAR_COLORS)}'
+            f'</div>'
+        )
+
+    rows = ""
+    for city in data["cities"]:
+        c_plus = sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("plus_orders", 0)
+                     for l in city["locations"])
+        c_all  = sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("all_orders", 0)
+                     for l in city["locations"])
+        c_gross = sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("plus_gross", 0)
+                      for l in city["locations"])
+        c_users = sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("plus_users", 0)
+                      for l in city["locations"])
+        c_share = c_plus / c_all * 100 if c_all else 0
+        rows += (
+            f'<tr><td class="city-cell">{city["city"]}</td>'
+            f'<td>{_fmt(c_plus, "шт.")}</td>'
+            f'<td>{_fmt(c_all, "шт.")}</td>'
+            f'<td>{c_share:.1f}%</td>'
+            f'<td>{_fmt(c_gross, "₴")}</td>'
+            f'<td>{_fmt(c_users, "осіб")}</td></tr>'
+        )
+
+    advice_items = []
+    if share < TARGET_PLUS_SHARE:
+        advice_items.append({
+            "prio": 4, "title": "Частку Bolt Plus можна наростити",
+            "text": (f"Зараз підписники дають {share:.1f}% замовлень. Доставку їм компенсує Bolt "
+                     f"(до 100 ₴ при чеку від 249 ₴), тобто ці гості обирають заклад без знижки "
+                     f"з вашого боку. Перевірте, що всі заклади мережі мають позначку «+» "
+                     f"у застосунку — без неї гість не бачить вигоди й обирає конкурента."),
+        })
+    if aov_diff > 3:
+        advice_items.append({
+            "prio": 3, "title": "Підписники залишають більший чек",
+            "text": (f"Середній чек Plus-замовлення — {_fmt(plus_aov,'₴')} проти "
+                     f"{_fmt(rest_aov,'₴')} у решти, тобто на {aov_diff:.0f}% більше. "
+                     f"Причина проста: щоб отримати безкоштовну доставку, гість добирає кошик "
+                     f"до 249 ₴. Позиції в діапазоні 80–150 ₴ — соуси, десерти, напої — "
+                     f"допомагають йому це зробити."),
+        })
+    elif aov_diff < -3:
+        advice_items.append({
+            "prio": 3, "title": "Чек підписників нижчий за середній",
+            "text": (f"Plus-замовлення в середньому {_fmt(plus_aov,'₴')} проти "
+                     f"{_fmt(rest_aov,'₴')} у решти. Схоже, підписники беруть переважно дрібні "
+                     f"замовлення. Комбо-набори та пропозиція доповнити кошик на етапі оформлення "
+                     f"допоможуть підтягнути чек."),
+        })
+    weak = [c for c in data["cities"]
+            if sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("all_orders", 0)
+                   for l in c["locations"]) >= 100
+            and sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("plus_orders", 0)
+                    for l in c["locations"])
+                / max(sum((plus.get("by_pid", {}).get(l["provider_id"], {}) or {}).get("all_orders", 0)
+                          for l in c["locations"]), 1) * 100 < share * 0.7]
+    if weak:
+        advice_items.append({
+            "prio": 3, "title": "Є міста з помітно нижчою часткою Plus",
+            "text": (f"Нижче за середню по мережі частку дають: {', '.join(c['city'] for c in weak)}. "
+                     f"Варто перевірити, чи коректно там підключена програма і чи видно позначку «+» "
+                     f"у картці закладу."),
+        })
+    advice_items.append({
+        "prio": 2, "title": "Порахуйте економіку разом із менеджером",
+        "text": (f"За весь період підписники принесли {_fmt(total['plus_orders'],'шт.')} замовлень "
+                 f"на {_fmt(total.get('plus_gross'),'₴')}. Це аудиторія, яка вже оплатила підписку "
+                 f"й тому замовляє частіше — попросіть менеджера показати, як ці замовлення "
+                 f"вплинули на завантаження кухні в непікові години."),
+    })
+
+    first_note = ""
+    if total.get("first_date"):
+        first_note = (f'<div class="table-note">Перше замовлення через Bolt Plus — '
+                      f'{date_uk(total["first_date"])}. Програма працює в Україні з липня 2025 року.</div>')
+
+    return f"""
+    <div class="period-bar">
+      <span class="period-label">Bolt Plus:</span>
+      <span>підписка гостей &nbsp;·&nbsp; безкоштовна доставка при чеку від 249 ₴,
+        Bolt компенсує до 100 ₴ &nbsp;·&nbsp; заклади-учасники позначені «+»</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">
+        Дані за весь період по {date_uk(data['month_keys'][-1] + '-01')[-13:]}</span>
+    </div>
+
+    <div class="section-title">Bolt Plus — підсумок за весь період</div>
+    <div class="kpi-grid">{kpi}</div>
+
+    {build_advice_block(advice_items, "На що звернути увагу — Bolt Plus")}
+
+    <div class="section-title">Динаміка за останні {len(month_keys)} місяців</div>
+    <div class="charts-grid">{charts}</div>
+
+    <div class="section-title">Bolt Plus по містах — за весь період</div>
+    <div class="table-card">
+      <table class="cmp-table">
+        <thead><tr>
+          <th>Місто</th><th>Plus-замовлень</th><th>Усього замовлень</th>
+          <th>Частка Plus</th><th>Дохід із Plus</th><th>Гостей з підпискою</th>
+        </tr></thead>
+        <tbody>{rows}</tbody>
+      </table>
+    </div>
+    {first_note}
+    """
+
+
 def build_cities_table(data: dict) -> str:
     """Порівняння міст за останній місяць — одразу видно, де мережа росте."""
     rows = ""
@@ -1096,7 +1527,7 @@ def build_brand_panel(data: dict) -> str:
         return '<p style="color:#999;padding:40px">Немає даних</p>'
 
     cities_str = ", ".join(c["city"] for c in data["cities"])
-    anal = analyze(brand_months, "Мережа")
+    advice = build_advice(brand_months, "мережа", plus_share=_plus_share(data))
 
     return f"""
     <div class="period-bar">
@@ -1110,9 +1541,9 @@ def build_brand_panel(data: dict) -> str:
     <div class="section-title">Мережа загалом — останній місяць</div>
     <div class="kpi-grid">{_kpi_block(brand_months, BRAND_COLOR)}</div>
 
-    {_charts_block(brand_months, labels_s)}
+    {build_advice_block(advice, "На що звернути увагу — мережа")}
 
-    {_analysis_block(anal, "Аналіз мережі")}
+    {_charts_block(brand_months, labels_s)}
 
     <div class="section-title">Міста — порівняння за {data['month_labels'][-1]}</div>
     {build_cities_table(data)}
@@ -1231,6 +1662,112 @@ def build_years_compare(years: list[dict]) -> str:
     """
 
 
+def build_years_advice(years: list[dict]) -> list[dict]:
+    """Рекомендації річної вкладки: порівнюємо середнє за місяць, бо роки
+    різної довжини."""
+    if len(years) < 2:
+        return []
+    new, old = years[0], years[1]
+    n_new, n_old = len(new["months"]), len(old["months"])
+    if not (n_new and n_old):
+        return []
+    items = []
+
+    def per_month(rec, key, n, nested=True):
+        src = rec["total"] if nested else rec
+        return src.get(key, 0) / n
+
+    o_old = per_month(old, "orders", n_old)
+    o_new = per_month(new, "orders", n_new)
+    g_old = per_month(old, "gross", n_old)
+    g_new = per_month(new, "gross", n_new)
+    o_chg = (o_new - o_old) / o_old * 100 if o_old else 0
+    g_chg = (g_new - g_old) / g_old * 100 if g_old else 0
+
+    if o_chg < -3 and g_chg > 3:
+        items.append({
+            "prio": 4, "title": "Дохід росте за рахунок чека, а не кількості замовлень",
+            "text": (f"У {new['year']} році в середньому {_fmt(round(o_new),'шт.')} замовлень "
+                     f"на місяць проти {_fmt(round(o_old),'шт.')} у {old['year']} "
+                     f"({o_chg:+.0f}%), але дохід на місяць виріс на {g_chg:.0f}%. "
+                     f"Середній чек піднявся з {_fmt(old['total'].get('aov'),'₴')} до "
+                     f"{_fmt(new['total'].get('aov'),'₴')}. Модель робоча, але вона вразлива: "
+                     f"якщо чек перестане рости, падіння кількості замовлень одразу вдарить "
+                     f"по виторгу. Варто паралельно працювати над потоком нових гостей."),
+        })
+    elif o_chg <= -10:
+        items.append({
+            "prio": 5, "title": "Замовлень на місяць стало менше",
+            "text": (f"{_fmt(round(o_new),'шт.')} на місяць у {new['year']} проти "
+                     f"{_fmt(round(o_old),'шт.')} у {old['year']} ({o_chg:.0f}%). "
+                     f"Це системне падіння, а не коливання одного місяця — варто розібрати "
+                     f"з менеджером причини по кожному місту окремо."),
+        })
+    elif o_chg >= 10:
+        items.append({
+            "prio": 2, "title": "Мережа зростає в кількості замовлень",
+            "text": (f"{_fmt(round(o_new),'шт.')} замовлень на місяць проти "
+                     f"{_fmt(round(o_old),'шт.')} роком раніше (+{o_chg:.0f}%). "
+                     f"Переконайтеся, що кухня та пакування витримують зрослий потік."),
+        })
+
+    nu_old = per_month(old, "new_users", n_old)
+    nu_new = per_month(new, "new_users", n_new)
+    nu_chg = (nu_new - nu_old) / nu_old * 100 if nu_old else 0
+    if nu_chg <= -10:
+        items.append({
+            "prio": 4, "title": "Приплив нових гостей скорочується",
+            "text": (f"У {new['year']} щомісяця вперше замовляють {_fmt(round(nu_new),'осіб')} "
+                     f"проти {_fmt(round(nu_old),'осіб')} у {old['year']} ({nu_chg:.0f}%). "
+                     f"Постійні гості рано чи пізно змінюють звички, тому без припливу нових "
+                     f"база поступово вимивається. Найшвидші інструменти — знижка на перше "
+                     f"замовлення та участь у тематичних добірках застосунку."),
+        })
+
+    c_old = old.get("commission", 0) / n_old
+    c_new = new.get("commission", 0) / n_new
+    net_old = old.get("net_after_commission", 0) / n_old
+    net_new = new.get("net_after_commission", 0) / n_new
+    net_chg = (net_new - net_old) / net_old * 100 if net_old else 0
+    items.append({
+        "prio": 3, "title": "Як змінився чистий дохід",
+        "text": (f"Після знижок і комісії залишається {_fmt(round(net_new),'₴')} на місяць проти "
+                 f"{_fmt(round(net_old),'₴')} роком раніше ({net_chg:+.0f}%). "
+                 f"Комісія за той самий період — {_fmt(round(c_new),'₴')} на місяць проти "
+                 f"{_fmt(round(c_old),'₴')}. Ці суми варто тримати поруч, коли обговорюєте "
+                 f"комерційні умови."),
+    })
+
+    for key, name, unit, good_is_low in (
+        ("prep_time", "Час приготування", "хв", True),
+        ("refunds",   "Частка компенсацій", "%", True),
+        ("avail",     "Доступність закладу", "%", False),
+    ):
+        v_old = old["total"].get(key, 0)
+        v_new = new["total"].get(key, 0)
+        if not v_old:
+            continue
+        chg = (v_new - v_old) / v_old * 100
+        improved = chg < -5 if good_is_low else chg > 2
+        worsened = chg > 5 if good_is_low else chg < -2
+        if worsened:
+            items.append({
+                "prio": 3, "title": f"{name} погіршився рік до року",
+                "text": (f"{_fmt(v_old, unit)} у {old['year']} проти {_fmt(v_new, unit)} "
+                         f"у {new['year']}. Показник впливає і на задоволеність гостя, "
+                         f"і на позицію закладу у видачі."),
+            })
+        elif improved:
+            items.append({
+                "prio": 1, "title": f"{name} покращився рік до року",
+                "text": (f"{_fmt(v_old, unit)} → {_fmt(v_new, unit)}. Хороша динаміка, "
+                         f"варто утримати цей рівень."),
+            })
+
+    items.sort(key=lambda x: -x["prio"])
+    return items[:5]
+
+
 def build_years_panel(data: dict) -> str:
     years = data.get("years") or []
     if not years:
@@ -1258,6 +1795,8 @@ def build_years_panel(data: dict) -> str:
         Останній повний місяць: {data['month_labels'][-1]}</span>
     </div>
 
+    {build_advice_block(build_years_advice(years), "На що звернути увагу — рік до року")}
+
     {build_years_compare(years)}
 
     {blocks}
@@ -1267,7 +1806,14 @@ def build_years_panel(data: dict) -> str:
 def build_city_panel(city: dict, data: dict) -> str:
     months   = city["months"]
     labels_s = data["month_labels_s"]
-    anal     = analyze(months, city["city"])
+
+    by_pid = (data.get("plus") or {}).get("by_pid", {})
+    c_plus = sum((by_pid.get(l["provider_id"], {}) or {}).get("plus_orders", 0)
+                 for l in city["locations"])
+    c_all  = sum((by_pid.get(l["provider_id"], {}) or {}).get("all_orders", 0)
+                 for l in city["locations"])
+    city_plus_share = c_plus / c_all * 100 if c_all else None
+    advice = build_advice(months, city["city"], plus_share=city_plus_share)
 
     loc_items = ""
     # Один заклад у місті — його графіки дублювали б міські, тож показуємо лише картку.
@@ -1312,9 +1858,9 @@ def build_city_panel(city: dict, data: dict) -> str:
     <div class="section-title">{city['city']} — останній місяць</div>
     <div class="kpi-grid">{_kpi_block(months, BRAND_COLOR)}</div>
 
-    {_charts_block(months, labels_s)}
+    {build_advice_block(advice, f"На що звернути увагу — {city['city']}")}
 
-    {_analysis_block(anal, f"Аналіз — {city['city']}")}
+    {_charts_block(months, labels_s)}
 
     <div class="section-title">Заклади в місті</div>
     <div class="loc-list">{loc_items}</div>
@@ -1334,6 +1880,12 @@ def build_html(data: dict) -> str:
                  f'style="--bc:{BRAND_COLOR}">📅 РІЧНІ ЗВІТИ</button>')
         panels += (f'<div id="bpanel_years" style="display:none">'
                    f'{build_years_panel(data)}</div>')
+
+    if (data.get("plus") or {}).get("total", {}).get("plus_orders"):
+        tabs += (f'<button class="brand-tab" id="btab_plus" onclick="switchTab(\'plus\')" '
+                 f'style="--bc:{BRAND_COLOR}">⭐ BOLT PLUS</button>')
+        panels += (f'<div id="bpanel_plus" style="display:none">'
+                   f'{build_plus_panel(data)}</div>')
 
     for city in data["cities"]:
         tabs += (f'<button class="brand-tab" id="btab_{city["slug"]}" '
@@ -1433,6 +1985,36 @@ def build_html(data: dict) -> str:
     .item-qty{{flex-shrink:0;font-size:13px;font-weight:700;white-space:nowrap}}
     .item-qty span{{font-size:10px;font-weight:400;color:var(--gray-400)}}
     .fun-note{{font-size:11px;color:var(--gray-400);margin-top:10px}}
+
+    /* Згортання секцій графіків */
+    .chart-section{{margin:0}}
+    .chart-section>summary{{cursor:pointer;list-style:none;display:flex;align-items:center;gap:10px}}
+    .chart-section>summary::-webkit-details-marker{{display:none}}
+    .chart-section>summary:hover{{color:{BRAND_COLOR}}}
+    .chev{{display:inline-block;font-size:12px;color:{BRAND_COLOR};transition:transform .18s}}
+    .chart-section[open]>summary .chev{{transform:rotate(90deg)}}
+    .sec-count{{margin-left:auto;font-size:10px;font-weight:500;color:var(--gray-400);
+      text-transform:none;letter-spacing:0}}
+    .chart-section[open] .charts-grid{{margin-top:12px}}
+
+    /* Рекомендації */
+    .adv-list{{display:flex;flex-direction:column;gap:8px}}
+    .adv-card{{background:#fff;border-radius:12px;padding:14px 18px;
+      box-shadow:0 1px 4px rgba(0,0,0,.06);border-left:4px solid var(--gray-400)}}
+    .adv-card.prio-high{{border-left-color:var(--danger);background:#fffaf9}}
+    .adv-card.prio-mid{{border-left-color:var(--warning);background:#fffdf8}}
+    .adv-card.prio-low{{border-left-color:var(--positive)}}
+    .adv-head{{display:flex;align-items:center;gap:10px;margin-bottom:5px;flex-wrap:wrap}}
+    .adv-num{{flex-shrink:0;width:21px;height:21px;border-radius:50%;background:var(--black);
+      color:#fff;font-size:11px;font-weight:700;display:flex;align-items:center;justify-content:center}}
+    .adv-head h4{{font-size:14px;font-weight:700;color:var(--black)}}
+    .adv-tag{{margin-left:auto;font-size:9px;font-weight:700;text-transform:uppercase;
+      letter-spacing:.6px;padding:3px 8px;border-radius:20px;background:var(--gray-100);
+      color:var(--gray-700)}}
+    .prio-high .adv-tag{{background:#fdecea;color:var(--danger)}}
+    .prio-mid .adv-tag{{background:#fdf3e4;color:var(--warning)}}
+    .prio-low .adv-tag{{background:#e8f8ef;color:var(--positive)}}
+    .adv-card p{{font-size:13px;color:var(--gray-700);line-height:1.5}}
 
     /* Річні звіти */
     .year-head{{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;
