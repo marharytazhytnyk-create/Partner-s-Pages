@@ -26,8 +26,8 @@ CLUSTER_CANDIDATES = ["0505-112942-d3yviznw", "0221-081903-9ag4bh69"]
 SCHEMA_CANDIDATES = ["main.ng_delivery", "ng_delivery_spark"]
 SCHEMA_TABLES = [
     "dim_provider_v2",
+    "fact_provider_daily",
     "fact_provider_monthly",
-    "fact_provider_weekly",
     "dim_order_campaign_delivery",
     "dim_campaign_delivery_v2",
     "delivery_order_order",
@@ -320,6 +320,32 @@ def fetch_data() -> dict:
         GROUP BY 1 ORDER BY 1
         """)
 
+        conversions = run_query(ctx, f"""
+        SELECT DATE_FORMAT(DATE_TRUNC('month', observation_date),'yyyy-MM') AS m,
+               SUM(sessions_available) AS available,
+               SUM(sessions_viewed) AS viewed,
+               SUM(sessions_added) AS added,
+               SUM(sessions_ordered) AS ordered
+        FROM {SCHEMA}.fact_provider_daily
+        WHERE provider_id IN ({pids_sql})
+          AND observation_date >= '{start}' AND observation_date <= '{end}'
+        GROUP BY 1 ORDER BY 1
+        """)
+
+        sponsored = run_query(ctx, f"""
+        SELECT DATE_FORMAT(DATE_TRUNC('month', sponsored_listing_date_local),'yyyy-MM') AS m,
+               SUM(hourly_price_local) AS spend,
+               SUM(attributed_orders) AS attributed_orders,
+               SUM(provider_net_revenue_local) AS attributed_net_revenue,
+               SUM(attributed_users) AS attributed_users,
+               SUM(attributed_new_users) AS attributed_new_users
+        FROM main.mart_models.mart_provider_sponsored_listing_attribution_hourly
+        WHERE provider_id IN ({pids_sql})
+          AND sponsored_listing_date_local >= '{start}'
+          AND sponsored_listing_date_local <= '{end}'
+        GROUP BY 1 ORDER BY 1
+        """)
+
         promo_share = run_query(ctx, f"""
         SELECT DATE_FORMAT(DATE_TRUNC('month', o.created_date),'yyyy-MM') AS m,
                COUNT(*) AS delivered,
@@ -347,18 +373,6 @@ def fetch_data() -> dict:
         GROUP BY 1
         """)
 
-        weekly = run_query(ctx, f"""
-        SELECT DATE_FORMAT(DATE_TRUNC('week', metric_timestamp_partition),'yyyy-MM-dd') AS w,
-               SUM(delivered_orders_count) AS orders,
-               SUM(total_gmv_before_discounts) AS gross,
-               SUM(total_campaign_discount) AS discounts
-        FROM {SCHEMA}.fact_provider_weekly
-        WHERE provider_id IN ({pids_sql})
-          AND metric_timestamp_partition >= '{FOCUS_MONTH}-01'
-          AND metric_timestamp_partition <= '{last_day(FOCUS_MONTH)}'
-        GROUP BY 1 ORDER BY 1
-        """)
-
         bad = run_query(ctx, f"""
         SELECT DATE_FORMAT(DATE_TRUNC('month', o.created_date),'yyyy-MM') AS m,
                SUM(CASE WHEN f.is_bad_order AND LOWER(COALESCE(a.bad_order_actor_at_fault,''))='provider'
@@ -369,18 +383,6 @@ def fetch_data() -> dict:
         WHERE o.provider_id IN ({pids_sql})
           AND o.created_date >= '{start}' AND o.created_date <= '{end}'
         GROUP BY 1 ORDER BY 1
-        """)
-
-        locs = run_query(ctx, f"""
-        SELECT d.provider_name,
-               DATE_FORMAT(f.metric_timestamp_partition,'yyyy-MM') AS m,
-               SUM(f.delivered_orders_count) AS orders,
-               SUM(f.total_gmv_before_discounts) AS gross
-        FROM {SCHEMA}.fact_provider_monthly f
-        JOIN {SCHEMA}.dim_provider_v2 d ON d.provider_id = f.provider_id
-        WHERE f.provider_id IN ({pids_sql})
-          AND f.metric_timestamp_partition >= '{start}' AND f.metric_timestamp_partition <= '{end}'
-        GROUP BY 1,2
         """)
     finally:
         destroy_context(ctx)
@@ -399,6 +401,23 @@ def fetch_data() -> dict:
     for r in users:
         if str(r[0]) in months:
             months[str(r[0])]["active_users"] = _si(r[1])
+    for r in conversions:
+        if str(r[0]) in months:
+            months[str(r[0])].update({
+                "sessions_available": _si(r[1]),
+                "sessions_viewed": _si(r[2]),
+                "sessions_added": _si(r[3]),
+                "sessions_ordered": _si(r[4]),
+            })
+    for r in sponsored:
+        if str(r[0]) in months:
+            months[str(r[0])].update({
+                "sl_spend": _sf(r[1]),
+                "sl_orders": _si(r[2]),
+                "sl_revenue": _sf(r[3]),
+                "sl_users": _si(r[4]),
+                "sl_new_users": _si(r[5]),
+            })
     for r in promo_share:
         if str(r[0]) in months:
             d, p = _si(r[1]), _si(r[2])
@@ -411,15 +430,34 @@ def fetch_data() -> dict:
     for k in keys:
         m = months[k]
         m.setdefault("orders", 0)
-        for f in ("gross", "net", "discounts", "camp_bolt", "camp_merch", "rating", "prep", "refunds"):
+        for f in ("gross", "net", "discounts", "camp_bolt", "camp_merch", "rating", "prep",
+                  "refunds", "sl_spend", "sl_revenue"):
             m.setdefault(f, 0.0)
-        for f in ("new_users", "active_users", "bad_provider"):
+        for f in ("new_users", "active_users", "bad_provider", "sessions_available",
+                  "sessions_viewed", "sessions_added", "sessions_ordered",
+                  "sl_orders", "sl_users", "sl_new_users"):
             m.setdefault(f, 0)
         m.setdefault("promo_share", 0.0)
         m["aov"] = round(m["gross"] / m["orders"]) if m["orders"] else 0
         m["net_per_order"] = round(m["net"] / m["orders"]) if m["orders"] else 0
         m["disc_share"] = round(m["discounts"] / m["gross"] * 100, 1) if m["gross"] else 0.0
         m["bad_provider_pct"] = round(m["bad_provider"] / m["orders"] * 100, 2) if m["orders"] else 0.0
+        m["view_rate"] = round(
+            m["sessions_viewed"] / m["sessions_available"] * 100, 2
+        ) if m["sessions_available"] else 0.0
+        m["add_rate"] = round(
+            m["sessions_added"] / m["sessions_viewed"] * 100, 2
+        ) if m["sessions_viewed"] else 0.0
+        m["order_rate"] = round(
+            m["sessions_ordered"] / m["sessions_added"] * 100, 2
+        ) if m["sessions_added"] else 0.0
+        m["overall_conversion"] = round(
+            m["sessions_ordered"] / m["sessions_available"] * 100, 2
+        ) if m["sessions_available"] else 0.0
+        m["sl_order_share"] = round(
+            m["sl_orders"] / m["orders"] * 100, 1
+        ) if m["orders"] else 0.0
+        m["sl_roas"] = round(m["sl_revenue"] / m["sl_spend"], 1) if m["sl_spend"] else 0.0
         series.append(m)
 
     # Кампанії фокусного місяця → зрозумілі категорії
@@ -444,28 +482,10 @@ def fetch_data() -> dict:
         b["share"] = round(b["discount"] / total_disc * 100)
         b["provider_pct"] = round(b["provider_pays"] / b["discount"] * 100) if b["discount"] else 0
 
-    weeks = [{"start": str(r[0]), "orders": _si(r[1]),
-              "gross": _sf(r[2]), "discounts": _sf(r[3])} for r in weekly]
-
-    by_loc: dict[str, dict] = {}
-    for r in locs:
-        by_loc.setdefault(str(r[0]), {})[str(r[1])] = {"orders": _si(r[2]), "gross": _sf(r[3])}
-    loc_list = []
-    prev_key = keys[-2]
-    for name, data in by_loc.items():
-        cur = data.get(FOCUS_MONTH, {"orders": 0, "gross": 0.0})
-        prv = data.get(prev_key, {"orders": 0, "gross": 0.0})
-        loc_list.append({
-            "name": name, "orders": cur["orders"], "gross": cur["gross"],
-            "growth": round((cur["gross"] / prv["gross"] - 1) * 100) if prv["gross"] else None,
-        })
-    loc_list.sort(key=lambda x: x["gross"], reverse=True)
-
     return {
         "series": series,
         "campaigns": campaign_list,
-        "weeks": weeks,
-        "locations": loc_list,
+        "location_count": len(PROVIDER_IDS),
         "generated_at": datetime.datetime.now().strftime("%d.%m.%Y"),
     }
 
@@ -496,52 +516,62 @@ def bar_chart(series: list[dict], key: str, fmt, focus_key: str, unit: str = "")
     bars = ""
     for m in series:
         v = float(m[key])
-        h = max(3, round(v / top * 100))
+        h = max(3, round(v / top * 100)) if v > 0 else 0
+        zero_style = ";min-height:0" if v <= 0 else ""
         is_focus = m["key"] == focus_key
         bars += f"""
         <div class="bar-col{' is-focus' if is_focus else ''}">
           <div class="bar-val">{fmt(v)}</div>
-          <div class="bar" style="height:{h}%"></div>
+          <div class="bar" style="height:{h}%{zero_style}"></div>
           <div class="bar-lbl">{m['label']}</div>
         </div>"""
     return f'<div class="bars">{bars}</div><div class="chart-unit">{unit}</div>'
 
 
-def dual_chart(series: list[dict], focus_key: str) -> str:
-    """Gross і Net поруч — видно, скільки обороту зʼїдає знижка."""
-    top = max([m["gross"] for m in series] or [1]) or 1
-    bars = ""
+def funding_chart(series: list[dict], focus_key: str) -> str:
+    top = max([max(m["camp_bolt"], m["camp_merch"]) for m in series] or [1]) or 1
+    groups = ""
     for m in series:
-        gh = max(3, round(m["gross"] / top * 100))
-        nh = max(3, round(m["net"] / top * 100))
+        bh = max(3, round(m["camp_bolt"] / top * 100)) if m["camp_bolt"] > 0 else 0
+        ph = max(3, round(m["camp_merch"] / top * 100)) if m["camp_merch"] > 0 else 0
+        bz = ";min-height:0" if m["camp_bolt"] <= 0 else ""
+        pz = ";min-height:0" if m["camp_merch"] <= 0 else ""
         focus = " is-focus" if m["key"] == focus_key else ""
-        bars += f"""
-        <div class="bar-col pair{focus}">
-          <div class="bar-val">{num(m['gross'] / 1000)}к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:{gh}%"></div>
-            <div class="bar bar-net" style="height:{nh}%"></div>
+        groups += f"""
+        <div class="fund-col{focus}">
+          <div class="fund-bars">
+            <div class="fund-item"><span>{num(m['camp_bolt'])} ₴</span>
+              <div class="fund-bar bolt" style="height:{bh}%{bz}"></div></div>
+            <div class="fund-item"><span>{num(m['camp_merch'])} ₴</span>
+              <div class="fund-bar partner" style="height:{ph}%{pz}"></div></div>
           </div>
           <div class="bar-lbl">{m['label']}</div>
         </div>"""
-    return f'<div class="bars">{bars}</div>'
+    return f'<div class="fund-chart">{groups}</div>'
 
 
-def week_chart(weeks: list[dict]) -> str:
-    top = max([w["orders"] for w in weeks] or [1]) or 1
-    bars = ""
-    for w in weeks:
-        d = datetime.date.fromisoformat(w["start"])
-        h = max(3, round(w["orders"] / top * 100))
-        disc_h = max(2, round(w["discounts"] / (w["gross"] or 1) * 100))
-        bars += f"""
-        <div class="bar-col">
-          <div class="bar-val">{w['orders']}</div>
-          <div class="bar" style="height:{h}%"></div>
-          <div class="week-disc" title="частка знижок від обороту">{disc_h}%</div>
-          <div class="bar-lbl">{d.day:02d}.{d.month:02d}</div>
+def metric_series(series: list[dict], specs: list[tuple[str, str, object]]) -> str:
+    rows = ""
+    for key, label, formatter in specs:
+        vals = [float(m[key]) for m in series]
+        top = max(vals) if vals and max(vals) > 0 else 1.0
+        points = ""
+        for m, value in zip(series, vals):
+            h = max(4, round(value / top * 100)) if value > 0 else 0
+            zero_style = ";min-height:0" if value <= 0 else ""
+            focus = " is-focus" if m["key"] == FOCUS_MONTH else ""
+            points += f"""
+            <div class="spark-col{focus}">
+              <div class="spark-val">{formatter(value)}</div>
+              <div class="spark-bar" style="height:{h}%{zero_style}"></div>
+              <div class="spark-lbl">{m['label']}</div>
+            </div>"""
+        rows += f"""
+        <div class="metric-series">
+          <div class="metric-name">{label}</div>
+          <div class="spark-bars">{points}</div>
         </div>"""
-    return f'<div class="bars weeks">{bars}</div>'
+    return rows
 
 
 def generate_html(data: dict) -> str:
@@ -551,10 +581,6 @@ def generate_html(data: dict) -> str:
     focus_gen, focus_loc = month_gen(FOCUS_MONTH), month_loc(FOCUS_MONTH)
     prev_gen, prev_loc = month_gen(prev["key"]), month_loc(prev["key"])
     first = s[0]
-
-    # Ефективність власних витрат на промо: скільки чистих продажів на 1 ₴
-    eff_cur = cur["net"] / cur["camp_merch"] if cur["camp_merch"] else 0
-    eff_prev = prev["net"] / prev["camp_merch"] if prev["camp_merch"] else 0
 
     kpis = [
         ("Замовлення", num(cur["orders"]), "", *delta(cur["orders"], prev["orders"])),
@@ -584,23 +610,12 @@ def generate_html(data: dict) -> str:
           <td class="ta-r">{c['provider_pct']}%</td>
         </tr>"""
 
-    loc_rows = ""
-    for l in data["locations"]:
-        g = l["growth"]
-        gcls = "up" if (g or 0) > 1 else ("down" if (g or 0) < -1 else "flat")
-        loc_rows += f"""
-        <tr>
-          <td>{l['name']}</td>
-          <td class="ta-r">{num(l['orders'])}</td>
-          <td class="ta-r">{num(l['gross'])} ₴</td>
-          <td class="ta-r {gcls}">{f'{g:+d}%' if g is not None else '—'}</td>
-        </tr>"""
-
     orders_growth = (cur["orders"] / prev["orders"] - 1) * 100 if prev["orders"] else 0
     gross_growth = (cur["gross"] / prev["gross"] - 1) * 100 if prev["gross"] else 0
     net_growth = (cur["net"] / prev["net"] - 1) * 100 if prev["net"] else 0
-    npo_drop = (cur["net_per_order"] / prev["net_per_order"] - 1) * 100 if prev["net_per_order"] else 0
     merch_growth = (cur["camp_merch"] / prev["camp_merch"] - 1) * 100 if prev["camp_merch"] else 0
+    sl_spend_growth = (cur["sl_spend"] / prev["sl_spend"] - 1) * 100 if prev["sl_spend"] else 0
+    sl_order_growth = (cur["sl_orders"] / prev["sl_orders"] - 1) * 100 if prev["sl_orders"] else 0
 
     return f"""<!DOCTYPE html>
 <html lang="uk">
@@ -627,7 +642,7 @@ def generate_html(data: dict) -> str:
   h1{{font-size:24px;font-weight:700;letter-spacing:-.02em}}
   .sub{{color:var(--gray);margin-top:3px;font-size:12.5px}}
   .head-meta{{text-align:right;color:var(--gray);font-size:11px;line-height:1.8}}
-  .head-meta b{{color:var(--ink)}}
+  .head-meta b,.head-meta strong{{color:var(--ink)}}
 
   h2{{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
     color:var(--gray);margin:22px 0 10px;display:flex;align-items:center;gap:8px}}
@@ -655,14 +670,32 @@ def generate_html(data: dict) -> str:
   .is-focus .bar{{background:var(--green-d)}}
   .is-focus .bar-val{{color:var(--green-d)}}
   .is-focus .bar-lbl{{color:var(--ink);font-weight:700}}
-  .pair-bars{{display:flex;align-items:flex-end;gap:2px;width:100%;max-width:44px;height:100%}}
-  .bar-gross{{background:#cfe9db}} .bar-net{{background:#8fd9b6}}
-  .is-focus .bar-gross{{background:var(--green-d)}} .is-focus .bar-net{{background:var(--green)}}
   .chart-unit{{font-size:10px;color:var(--gray);margin-top:7px}}
   .legend{{display:flex;gap:12px;font-size:10.5px;color:var(--gray);margin-top:8px}}
   .legend i{{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:4px}}
-  .weeks .bar{{background:#f0c9a0}} .weeks .is-focus .bar{{background:var(--warn)}}
-  .week-disc{{font-size:9px;color:var(--warn);font-weight:700;margin-top:3px}}
+  .fund-chart{{display:flex;gap:7px;height:154px;align-items:flex-end;margin-top:8px}}
+  .fund-col{{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}}
+  .fund-bars{{display:flex;gap:3px;align-items:flex-end;width:100%;height:125px}}
+  .fund-item{{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}}
+  .fund-item span{{font-size:8.5px;font-weight:700;color:var(--gray);white-space:nowrap;margin-bottom:3px}}
+  .fund-bar{{width:100%;max-width:28px;border-radius:4px 4px 0 0;min-height:3px}}
+  .fund-bar.bolt{{background:#8fd9b6}} .fund-bar.partner{{background:#efb476}}
+  .fund-col.is-focus .fund-bar.bolt{{background:var(--green-d)}}
+  .fund-col.is-focus .fund-bar.partner{{background:var(--warn)}}
+  .fund-col.is-focus .bar-lbl{{color:var(--ink);font-weight:700}}
+  .metric-series{{margin-top:10px;padding-top:9px;border-top:1px solid #f0f1f2}}
+  .metric-series:first-child{{border-top:none;padding-top:0}}
+  .metric-name{{font-size:10.5px;font-weight:700;color:var(--gray);margin-bottom:4px}}
+  .spark-bars{{display:flex;gap:7px;height:72px;align-items:flex-end}}
+  .spark-col{{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}}
+  .spark-val{{font-size:9px;font-weight:700;color:var(--gray);white-space:nowrap;margin-bottom:2px}}
+  .spark-bar{{width:70%;max-width:40px;background:#cfe9db;border-radius:4px 4px 0 0;min-height:3px}}
+  .spark-lbl{{font-size:8.5px;color:var(--gray);margin-top:3px;white-space:nowrap}}
+  .spark-col.is-focus .spark-bar{{background:var(--green-d)}}
+  .spark-col.is-focus .spark-val{{color:var(--green-d)}}
+  .spark-col.is-focus .spark-lbl{{color:var(--ink);font-weight:700}}
+  .ad-series .metric-series:first-child .spark-bar{{background:#efb476}}
+  .ad-series .metric-series:first-child .is-focus .spark-bar{{background:var(--warn)}}
 
   table{{width:100%;border-collapse:collapse;font-size:12px}}
   th{{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);
@@ -678,8 +711,10 @@ def generate_html(data: dict) -> str:
   .takeaway{{background:#f3faf6;border-left:3px solid var(--green);border-radius:0 8px 8px 0;
     padding:9px 12px;font-size:12px;margin-top:11px}}
   .takeaway.warn{{background:#fff8f0;border-left-color:var(--warn)}}
+  .chart-note{{font-size:10.8px;color:#41464b;margin-top:10px;padding-top:8px;
+    border-top:1px dashed var(--line)}}
 
-  .advice{{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}}
+  .advice{{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}}
   .tip{{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 15px;
     border-left:3px solid var(--green)}}
   .tip.b{{border-left-color:var(--warn)}}
@@ -714,7 +749,7 @@ def generate_html(data: dict) -> str:
       <p class="sub">Фокус: <b>{focus_name} {FOCUS_MONTH[:4]}</b> · порівняння з попередніми місяцями</p>
     </div>
     <div class="head-meta">
-      <div>Локацій: <strong>{len(data['locations'])}</strong></div>
+      <div>Локацій: <strong>{data['location_count']}</strong></div>
       <div>Період: <strong>{first['label']} — {cur['label']}</strong></div>
       <div>Оновлено: <strong>{data['generated_at']}</strong></div>
     </div>
@@ -725,18 +760,14 @@ def generate_html(data: dict) -> str:
   <h2>1. Продажі місяць до місяця</h2>
   <div class="grid2">
     <div class="card">
-      <h3>Оборот і сума після знижок</h3>
-      <p class="hint">Темна колонка — {focus_name.lower()}. Розрив між колонками — це знижки.</p>
-      {dual_chart(s, FOCUS_MONTH)}
-      <div class="legend">
-        <span><i style="background:#cfe9db"></i>Оборот (Gross)</span>
-        <span><i style="background:#8fd9b6"></i>Після знижок (Net)</span>
-      </div>
+      <h3>Gross продажі — до знижок</h3>
+      <p class="hint">Повна вартість доставлених замовлень до промо</p>
+      {bar_chart(s, 'gross', lambda v: f'{num(v)} ₴', FOCUS_MONTH, 'гривні за місяць')}
     </div>
     <div class="card">
-      <h3>Доставлені замовлення</h3>
-      <p class="hint">Скільки замовлень виконано за місяць</p>
-      {bar_chart(s, 'orders', lambda v: num(v), FOCUS_MONTH, 'штук на місяць')}
+      <h3>Чисті продажі партнера (Net)</h3>
+      <p class="hint">Після знижок; без урахування комісії, податків і собівартості</p>
+      {bar_chart(s, 'net', lambda v: f'{num(v)} ₴', FOCUS_MONTH, 'гривні за місяць')}
     </div>
   </div>
   <div class="takeaway">
@@ -762,6 +793,19 @@ def generate_html(data: dict) -> str:
       {bar_chart(s, 'promo_share', lambda v: f'{v:.0f}%', FOCUS_MONTH, '% замовлень із промо')}
     </div>
   </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Хто фінансував знижки: Bolt чи партнер</h3>
+    <p class="hint">Зелений — витрати Bolt, помаранчевий — кошти партнера; суми в гривнях</p>
+    {funding_chart(s, FOCUS_MONTH)}
+    <div class="legend">
+      <span><i style="background:#8fd9b6"></i>Bolt</span>
+      <span><i style="background:#efb476"></i>Партнер</span>
+    </div>
+    <p class="chart-note">У серпні Bolt профінансував <b>{num(cur['camp_bolt'])} ₴</b>, партнер —
+      <b>{num(cur['camp_merch'])} ₴</b>. Порівняно з липнем внесок партнера зріс на
+      <b>{merch_growth:+.0f}%</b>; разом це дало значно більше замовлень, але збільшило
+      залежність продажів від промо.</p>
+  </div>
   <div class="takeaway warn">
     <b>Знижки стали основним двигуном.</b> Промо було в {cur['promo_share']:.0f}% замовлень проти
     {prev['promo_share']:.0f}% у {prev_loc}. Знижки зʼїли {cur['disc_share']:.0f}% обороту
@@ -769,27 +813,41 @@ def generate_html(data: dict) -> str:
     {num(prev['camp_merch'])} до {num(cur['camp_merch'])} ₴ ({merch_growth:+.0f}%).
   </div>
 
-  <h2>3. Як це вплинуло — по тижнях {focus_gen}</h2>
+  <h2>3. Конверсія та Sponsored Listing</h2>
   <div class="grid2">
     <div class="card">
-      <h3>Замовлення по тижнях</h3>
-      <p class="hint">Помаранчевим під колонкою — частка знижок від обороту тижня</p>
-      {week_chart(data['weeks'])}
+      <h3>Конверсія воронки місяць до місяця</h3>
+      <p class="hint">Як клієнти переходили від показу закладу до замовлення</p>
+      {metric_series(s, [
+          ('view_rate', 'Показ → меню', lambda v: f'{v:.1f}%'),
+          ('add_rate', 'Меню → кошик', lambda v: f'{v:.1f}%'),
+          ('order_rate', 'Кошик → замовлення', lambda v: f'{v:.1f}%'),
+      ])}
+      <p class="chart-note">Загальна конверсія «показ → замовлення» зросла з
+        <b>{dec(prev['overall_conversion'], 2)}%</b> у {prev_loc} до
+        <b>{dec(cur['overall_conversion'], 2)}%</b> у {focus_loc}. Найбільше покращився
+        перехід із показу в меню.</p>
     </div>
-    <div class="card">
-      <h3>Продажі по локаціях за {focus_name.lower()}</h3>
-      <p class="hint">Зростання обороту до {prev_gen}</p>
-      <table>
-        <thead><tr><th>Локація</th><th class="ta-r">Замовлень</th><th class="ta-r">Оборот</th>
-        <th class="ta-r">Динаміка</th></tr></thead>
-        <tbody>{loc_rows}</tbody>
-      </table>
+    <div class="card ad-series">
+      <h3>Sponsored Listing: витрати та атрибутовані замовлення</h3>
+      <p class="hint">Платне підняття закладу у видачі Bolt Food</p>
+      {metric_series(s, [
+          ('sl_spend', 'Витрати партнера', lambda v: f'{num(v)} ₴'),
+          ('orders', 'Усі замовлення', lambda v: num(v)),
+          ('sl_orders', 'Замовлення, атрибутовані рекламі', lambda v: num(v)),
+      ])}
+      <p class="chart-note">У серпні партнер витратив <b>{num(cur['sl_spend'])} ₴</b>
+        ({sl_spend_growth:+.0f}% до липня). До Sponsored Listing атрибутовано
+        <b>{num(cur['sl_orders'])} замовлення</b> ({sl_order_growth:+.0f}%), тоді як
+        усі замовлення зросли на {orders_growth:+.0f}%. Реклама торкнулася
+        {dec(cur['sl_order_share'])}% усіх замовлень. Атрибутовані Net-продажі:
+        <b>{num(cur['sl_revenue'])} ₴</b>, або {dec(cur['sl_roas'])} ₴ на 1 ₴ реклами.</p>
     </div>
   </div>
-  <div class="takeaway">
-    Пік припав на тиждень із найбільшою знижкою, далі замовлення плавно знижувалися разом із промо.
-    Попит реагує на знижку майже миттєво — тому головне питання не «чи працює промо»,
-    а <b>чи повернуться ці клієнти без нього</b>.
+  <div class="takeaway warn">
+    <b>Sponsored Listing посилив видимість і супроводжував ріст замовлень.</b>
+    Атрибуція означає, що клієнт контактував із рекламним показом перед замовленням;
+    вона не доводить, що всі ці замовлення були додатковими саме завдяки рекламі.
   </div>
 
   <h2>4. Що покращити далі</h2>
@@ -799,23 +857,13 @@ def generate_html(data: dict) -> str:
       <div class="tip-h"><h4>1. Утримати нових клієнтів</h4>
         <span class="tip-num">{num(cur['new_users'])} нових</span></div>
       <p>Знижки привели {num(cur['new_users'])} нових клієнтів — найбільше за пів року.
-      Головна цінність {focus_gen} не в обороті, а в цій базі.
-      Просіть менеджера Bolt запустити окремий офер «на друге замовлення» саме для них.</p>
-      <p class="why">Чому: утримати клієнта дешевше, ніж купувати нового знижкою щомісяця.</p>
+      Головна цінність {focus_gen} — у новій клієнтській базі.
+      <b>Зберігаємо розумні акції й утримуємо цільову аудиторію.</b></p>
+      <p class="why">Чому: утримати залученого клієнта дешевше, ніж щомісяця купувати нового великою знижкою.</p>
     </div>
 
     <div class="tip b">
-      <div class="tip-h"><h4>2. Повернути маржу</h4>
-        <span class="tip-num">{num(prev['net_per_order'])} → {num(cur['net_per_order'])} ₴ / замовлення</span></div>
-      <p>Чистими з одного замовлення стало на {abs(npo_drop):.0f}% менше.
-      Промо було вже в {cur['promo_share']:.0f}% замовлень — це майже кожне.
-      Варто знижувати глибину поступово: почати зі Smart Promo 10%, де заклад платить усі 100%.</p>
-      <p class="why">Чому: на 1 ₴ власних витрат на промо припадало {eff_prev:.0f} ₴ чистих продажів
-      у {prev_loc} і лише {dec(eff_cur)} ₴ у {focus_loc}.</p>
-    </div>
-
-    <div class="tip b">
-      <div class="tip-h"><h4>3. Втримати якість під навантаженням</h4>
+      <div class="tip-h"><h4>2. Втримати якість під навантаженням</h4>
         <span class="tip-num">погані замовлення {prev['bad_provider']} → {cur['bad_provider']}</span></div>
       <p>Обсяг зріс майже вдвічі, і кухня почала не встигати: приготування
       {dec(prev['prep'])} → {dec(cur['prep'])} хв, компенсації клієнтам
@@ -825,12 +873,13 @@ def generate_html(data: dict) -> str:
     </div>
 
     <div class="tip">
-      <div class="tip-h"><h4>4. Підняти середній чек</h4>
+      <div class="tip-h"><h4>3. Підняти середній чек</h4>
         <span class="tip-num">{num(prev['aov'])} → {num(cur['aov'])} ₴</span></div>
       <p>Середній чек не зрушив попри всі знижки — клієнти брали те саме, тільки дешевше.
-      Замість «мінус 30% на все» спробуйте комбо-набори та поріг безкоштовної доставки
-      трохи вище поточного чека.</p>
-      <p class="why">Чому: це піднімає оборот без додаткових витрат на знижку.</p>
+      Рекомендуємо взяти участь у тематичних тижнях: дати <b>20% на все меню або вибрані
+      позиції</b> за мінімального чека від <b>1 000 грн</b>.</p>
+      <p class="why">Чому: поріг вищий за поточний AOV 820 грн стимулює додати ще одну позицію,
+      а тематичний тиждень дає додаткову видимість у застосунку.</p>
     </div>
 
   </div>

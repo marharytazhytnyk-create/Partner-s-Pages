@@ -23,7 +23,7 @@
   h1{font-size:24px;font-weight:700;letter-spacing:-.02em}
   .sub{color:var(--gray);margin-top:3px;font-size:12.5px}
   .head-meta{text-align:right;color:var(--gray);font-size:11px;line-height:1.8}
-  .head-meta b{color:var(--ink)}
+  .head-meta b,.head-meta strong{color:var(--ink)}
 
   h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
     color:var(--gray);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
@@ -51,14 +51,32 @@
   .is-focus .bar{background:var(--green-d)}
   .is-focus .bar-val{color:var(--green-d)}
   .is-focus .bar-lbl{color:var(--ink);font-weight:700}
-  .pair-bars{display:flex;align-items:flex-end;gap:2px;width:100%;max-width:44px;height:100%}
-  .bar-gross{background:#cfe9db} .bar-net{background:#8fd9b6}
-  .is-focus .bar-gross{background:var(--green-d)} .is-focus .bar-net{background:var(--green)}
   .chart-unit{font-size:10px;color:var(--gray);margin-top:7px}
   .legend{display:flex;gap:12px;font-size:10.5px;color:var(--gray);margin-top:8px}
   .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:4px}
-  .weeks .bar{background:#f0c9a0} .weeks .is-focus .bar{background:var(--warn)}
-  .week-disc{font-size:9px;color:var(--warn);font-weight:700;margin-top:3px}
+  .fund-chart{display:flex;gap:7px;height:154px;align-items:flex-end;margin-top:8px}
+  .fund-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  .fund-bars{display:flex;gap:3px;align-items:flex-end;width:100%;height:125px}
+  .fund-item{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  .fund-item span{font-size:8.5px;font-weight:700;color:var(--gray);white-space:nowrap;margin-bottom:3px}
+  .fund-bar{width:100%;max-width:28px;border-radius:4px 4px 0 0;min-height:3px}
+  .fund-bar.bolt{background:#8fd9b6} .fund-bar.partner{background:#efb476}
+  .fund-col.is-focus .fund-bar.bolt{background:var(--green-d)}
+  .fund-col.is-focus .fund-bar.partner{background:var(--warn)}
+  .fund-col.is-focus .bar-lbl{color:var(--ink);font-weight:700}
+  .metric-series{margin-top:10px;padding-top:9px;border-top:1px solid #f0f1f2}
+  .metric-series:first-child{border-top:none;padding-top:0}
+  .metric-name{font-size:10.5px;font-weight:700;color:var(--gray);margin-bottom:4px}
+  .spark-bars{display:flex;gap:7px;height:72px;align-items:flex-end}
+  .spark-col{flex:1;height:100%;display:flex;flex-direction:column;justify-content:flex-end;align-items:center}
+  .spark-val{font-size:9px;font-weight:700;color:var(--gray);white-space:nowrap;margin-bottom:2px}
+  .spark-bar{width:70%;max-width:40px;background:#cfe9db;border-radius:4px 4px 0 0;min-height:3px}
+  .spark-lbl{font-size:8.5px;color:var(--gray);margin-top:3px;white-space:nowrap}
+  .spark-col.is-focus .spark-bar{background:var(--green-d)}
+  .spark-col.is-focus .spark-val{color:var(--green-d)}
+  .spark-col.is-focus .spark-lbl{color:var(--ink);font-weight:700}
+  .ad-series .metric-series:first-child .spark-bar{background:#efb476}
+  .ad-series .metric-series:first-child .is-focus .spark-bar{background:var(--warn)}
 
   table{width:100%;border-collapse:collapse;font-size:12px}
   th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);
@@ -74,8 +92,10 @@
   .takeaway{background:#f3faf6;border-left:3px solid var(--green);border-radius:0 8px 8px 0;
     padding:9px 12px;font-size:12px;margin-top:11px}
   .takeaway.warn{background:#fff8f0;border-left-color:var(--warn)}
+  .chart-note{font-size:10.8px;color:#41464b;margin-top:10px;padding-top:8px;
+    border-top:1px dashed var(--line)}
 
-  .advice{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .advice{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
   .tip{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 15px;
     border-left:3px solid var(--green)}
   .tip.b{border-left-color:var(--warn)}
@@ -151,96 +171,74 @@
   <h2>1. Продажі місяць до місяця</h2>
   <div class="grid2">
     <div class="card">
-      <h3>Оборот і сума після знижок</h3>
-      <p class="hint">Темна колонка — серпень. Розрив між колонками — це знижки.</p>
-      <div class="bars">
-        <div class="bar-col pair">
-          <div class="bar-val">910к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:47%"></div>
-            <div class="bar bar-net" style="height:44%"></div>
-          </div>
-          <div class="bar-lbl">Бер 2026</div>
-        </div>
-        <div class="bar-col pair">
-          <div class="bar-val">802к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:42%"></div>
-            <div class="bar bar-net" style="height:41%"></div>
-          </div>
-          <div class="bar-lbl">Квіт 2026</div>
-        </div>
-        <div class="bar-col pair">
-          <div class="bar-val">938к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:49%"></div>
-            <div class="bar bar-net" style="height:43%"></div>
-          </div>
-          <div class="bar-lbl">Трав 2026</div>
-        </div>
-        <div class="bar-col pair">
-          <div class="bar-val">829к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:43%"></div>
-            <div class="bar bar-net" style="height:39%"></div>
-          </div>
-          <div class="bar-lbl">Черв 2026</div>
-        </div>
-        <div class="bar-col pair">
-          <div class="bar-val">1 053к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:55%"></div>
-            <div class="bar bar-net" style="height:46%"></div>
-          </div>
-          <div class="bar-lbl">Лип 2026</div>
-        </div>
-        <div class="bar-col pair is-focus">
-          <div class="bar-val">1 929к</div>
-          <div class="pair-bars">
-            <div class="bar bar-gross" style="height:100%"></div>
-            <div class="bar bar-net" style="height:72%"></div>
-          </div>
-          <div class="bar-lbl">Серп 2026</div>
-        </div></div>
-      <div class="legend">
-        <span><i style="background:#cfe9db"></i>Оборот (Gross)</span>
-        <span><i style="background:#8fd9b6"></i>Після знижок (Net)</span>
-      </div>
-    </div>
-    <div class="card">
-      <h3>Доставлені замовлення</h3>
-      <p class="hint">Скільки замовлень виконано за місяць</p>
+      <h3>Gross продажі — до знижок</h3>
+      <p class="hint">Повна вартість доставлених замовлень до промо</p>
       <div class="bars">
         <div class="bar-col">
-          <div class="bar-val">1 155</div>
-          <div class="bar" style="height:49%"></div>
+          <div class="bar-val">910 282 ₴</div>
+          <div class="bar" style="height:47%"></div>
           <div class="bar-lbl">Бер 2026</div>
         </div>
         <div class="bar-col">
-          <div class="bar-val">1 053</div>
-          <div class="bar" style="height:45%"></div>
+          <div class="bar-val">802 336 ₴</div>
+          <div class="bar" style="height:42%"></div>
           <div class="bar-lbl">Квіт 2026</div>
         </div>
         <div class="bar-col">
-          <div class="bar-val">1 160</div>
+          <div class="bar-val">938 332 ₴</div>
           <div class="bar" style="height:49%"></div>
           <div class="bar-lbl">Трав 2026</div>
         </div>
         <div class="bar-col">
-          <div class="bar-val">1 032</div>
-          <div class="bar" style="height:44%"></div>
+          <div class="bar-val">828 854 ₴</div>
+          <div class="bar" style="height:43%"></div>
           <div class="bar-lbl">Черв 2026</div>
         </div>
         <div class="bar-col">
-          <div class="bar-val">1 279</div>
-          <div class="bar" style="height:54%"></div>
+          <div class="bar-val">1 053 402 ₴</div>
+          <div class="bar" style="height:55%"></div>
           <div class="bar-lbl">Лип 2026</div>
         </div>
         <div class="bar-col is-focus">
-          <div class="bar-val">2 353</div>
+          <div class="bar-val">1 928 819 ₴</div>
           <div class="bar" style="height:100%"></div>
           <div class="bar-lbl">Серп 2026</div>
-        </div></div><div class="chart-unit">штук на місяць</div>
+        </div></div><div class="chart-unit">гривні за місяць</div>
+    </div>
+    <div class="card">
+      <h3>Чисті продажі партнера (Net)</h3>
+      <p class="hint">Після знижок; без урахування комісії, податків і собівартості</p>
+      <div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">845 453 ₴</div>
+          <div class="bar" style="height:61%"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">789 770 ₴</div>
+          <div class="bar" style="height:57%"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">830 764 ₴</div>
+          <div class="bar" style="height:60%"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">754 623 ₴</div>
+          <div class="bar" style="height:54%"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">887 048 ₴</div>
+          <div class="bar" style="height:64%"></div>
+          <div class="bar-lbl">Лип 2026</div>
+        </div>
+        <div class="bar-col is-focus">
+          <div class="bar-val">1 389 492 ₴</div>
+          <div class="bar" style="height:100%"></div>
+          <div class="bar-lbl">Серп 2026</div>
+        </div></div><div class="chart-unit">гривні за місяць</div>
     </div>
   </div>
   <div class="takeaway">
@@ -338,6 +336,73 @@
         </div></div><div class="chart-unit">% замовлень із промо</div>
     </div>
   </div>
+  <div class="card" style="margin-top:14px">
+    <h3>Хто фінансував знижки: Bolt чи партнер</h3>
+    <p class="hint">Зелений — витрати Bolt, помаранчевий — кошти партнера; суми в гривнях</p>
+    <div class="fund-chart">
+        <div class="fund-col">
+          <div class="fund-bars">
+            <div class="fund-item"><span>64 829 ₴</span>
+              <div class="fund-bar bolt" style="height:23%"></div></div>
+            <div class="fund-item"><span>0 ₴</span>
+              <div class="fund-bar partner" style="height:0%;min-height:0"></div></div>
+          </div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="fund-col">
+          <div class="fund-bars">
+            <div class="fund-item"><span>12 257 ₴</span>
+              <div class="fund-bar bolt" style="height:4%"></div></div>
+            <div class="fund-item"><span>309 ₴</span>
+              <div class="fund-bar partner" style="height:3%"></div></div>
+          </div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="fund-col">
+          <div class="fund-bars">
+            <div class="fund-item"><span>101 910 ₴</span>
+              <div class="fund-bar bolt" style="height:36%"></div></div>
+            <div class="fund-item"><span>5 658 ₴</span>
+              <div class="fund-bar partner" style="height:3%"></div></div>
+          </div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="fund-col">
+          <div class="fund-bars">
+            <div class="fund-item"><span>74 231 ₴</span>
+              <div class="fund-bar bolt" style="height:26%"></div></div>
+            <div class="fund-item"><span>0 ₴</span>
+              <div class="fund-bar partner" style="height:0%;min-height:0"></div></div>
+          </div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div>
+        <div class="fund-col">
+          <div class="fund-bars">
+            <div class="fund-item"><span>114 940 ₴</span>
+              <div class="fund-bar bolt" style="height:40%"></div></div>
+            <div class="fund-item"><span>51 415 ₴</span>
+              <div class="fund-bar partner" style="height:18%"></div></div>
+          </div>
+          <div class="bar-lbl">Лип 2026</div>
+        </div>
+        <div class="fund-col is-focus">
+          <div class="fund-bars">
+            <div class="fund-item"><span>284 670 ₴</span>
+              <div class="fund-bar bolt" style="height:100%"></div></div>
+            <div class="fund-item"><span>254 657 ₴</span>
+              <div class="fund-bar partner" style="height:89%"></div></div>
+          </div>
+          <div class="bar-lbl">Серп 2026</div>
+        </div></div>
+    <div class="legend">
+      <span><i style="background:#8fd9b6"></i>Bolt</span>
+      <span><i style="background:#efb476"></i>Партнер</span>
+    </div>
+    <p class="chart-note">У серпні Bolt профінансував <b>284 670 ₴</b>, партнер —
+      <b>254 657 ₴</b>. Порівняно з липнем внесок партнера зріс на
+      <b>+395%</b>; разом це дало значно більше замовлень, але збільшило
+      залежність продажів від промо.</p>
+  </div>
   <div class="takeaway warn">
     <b>Знижки стали основним двигуном.</b> Промо було в 91% замовлень проти
     64% у липні. Знижки зʼїли 28% обороту
@@ -345,75 +410,237 @@
     51 415 до 254 657 ₴ (+395%).
   </div>
 
-  <h2>3. Як це вплинуло — по тижнях серпня</h2>
+  <h2>3. Конверсія та Sponsored Listing</h2>
   <div class="grid2">
     <div class="card">
-      <h3>Замовлення по тижнях</h3>
-      <p class="hint">Помаранчевим під колонкою — частка знижок від обороту тижня</p>
-      <div class="bars weeks">
-        <div class="bar-col">
-          <div class="bar-val">435</div>
-          <div class="bar" style="height:69%"></div>
-          <div class="week-disc" title="частка знижок від обороту">24%</div>
-          <div class="bar-lbl">03.08</div>
+      <h3>Конверсія воронки місяць до місяця</h3>
+      <p class="hint">Як клієнти переходили від показу закладу до замовлення</p>
+      
+        <div class="metric-series">
+          <div class="metric-name">Показ → меню</div>
+          <div class="spark-bars">
+            <div class="spark-col">
+              <div class="spark-val">5.9%</div>
+              <div class="spark-bar" style="height:76%"></div>
+              <div class="spark-lbl">Бер 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">5.7%</div>
+              <div class="spark-bar" style="height:74%"></div>
+              <div class="spark-lbl">Квіт 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">5.7%</div>
+              <div class="spark-bar" style="height:73%"></div>
+              <div class="spark-lbl">Трав 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">5.3%</div>
+              <div class="spark-bar" style="height:68%"></div>
+              <div class="spark-lbl">Черв 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">6.0%</div>
+              <div class="spark-bar" style="height:77%"></div>
+              <div class="spark-lbl">Лип 2026</div>
+            </div>
+            <div class="spark-col is-focus">
+              <div class="spark-val">7.7%</div>
+              <div class="spark-bar" style="height:100%"></div>
+              <div class="spark-lbl">Серп 2026</div>
+            </div></div>
         </div>
-        <div class="bar-col">
-          <div class="bar-val">627</div>
-          <div class="bar" style="height:100%"></div>
-          <div class="week-disc" title="частка знижок від обороту">33%</div>
-          <div class="bar-lbl">10.08</div>
+        <div class="metric-series">
+          <div class="metric-name">Меню → кошик</div>
+          <div class="spark-bars">
+            <div class="spark-col">
+              <div class="spark-val">35.6%</div>
+              <div class="spark-bar" style="height:88%"></div>
+              <div class="spark-lbl">Бер 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">34.1%</div>
+              <div class="spark-bar" style="height:84%"></div>
+              <div class="spark-lbl">Квіт 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">34.6%</div>
+              <div class="spark-bar" style="height:85%"></div>
+              <div class="spark-lbl">Трав 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">34.1%</div>
+              <div class="spark-bar" style="height:84%"></div>
+              <div class="spark-lbl">Черв 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">34.6%</div>
+              <div class="spark-bar" style="height:85%"></div>
+              <div class="spark-lbl">Лип 2026</div>
+            </div>
+            <div class="spark-col is-focus">
+              <div class="spark-val">40.6%</div>
+              <div class="spark-bar" style="height:100%"></div>
+              <div class="spark-lbl">Серп 2026</div>
+            </div></div>
         </div>
-        <div class="bar-col">
-          <div class="bar-val">567</div>
-          <div class="bar" style="height:90%"></div>
-          <div class="week-disc" title="частка знижок від обороту">28%</div>
-          <div class="bar-lbl">17.08</div>
+        <div class="metric-series">
+          <div class="metric-name">Кошик → замовлення</div>
+          <div class="spark-bars">
+            <div class="spark-col">
+              <div class="spark-val">68.7%</div>
+              <div class="spark-bar" style="height:100%"></div>
+              <div class="spark-lbl">Бер 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">67.6%</div>
+              <div class="spark-bar" style="height:99%"></div>
+              <div class="spark-lbl">Квіт 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">67.4%</div>
+              <div class="spark-bar" style="height:98%"></div>
+              <div class="spark-lbl">Трав 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">67.1%</div>
+              <div class="spark-bar" style="height:98%"></div>
+              <div class="spark-lbl">Черв 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">68.1%</div>
+              <div class="spark-bar" style="height:99%"></div>
+              <div class="spark-lbl">Лип 2026</div>
+            </div>
+            <div class="spark-col is-focus">
+              <div class="spark-val">67.6%</div>
+              <div class="spark-bar" style="height:98%"></div>
+              <div class="spark-lbl">Серп 2026</div>
+            </div></div>
         </div>
-        <div class="bar-col">
-          <div class="bar-val">543</div>
-          <div class="bar" style="height:87%"></div>
-          <div class="week-disc" title="частка знижок від обороту">27%</div>
-          <div class="bar-lbl">24.08</div>
-        </div>
-        <div class="bar-col">
-          <div class="bar-val">526</div>
-          <div class="bar" style="height:84%"></div>
-          <div class="week-disc" title="частка знижок від обороту">28%</div>
-          <div class="bar-lbl">31.08</div>
-        </div></div>
+      <p class="chart-note">Загальна конверсія «показ → замовлення» зросла з
+        <b>1,41%</b> у липні до
+        <b>2,12%</b> у серпні. Найбільше покращився
+        перехід із показу в меню.</p>
     </div>
-    <div class="card">
-      <h3>Продажі по локаціях за серпень</h3>
-      <p class="hint">Зростання обороту до липня</p>
-      <table>
-        <thead><tr><th>Локація</th><th class="ta-r">Замовлень</th><th class="ta-r">Оборот</th>
-        <th class="ta-r">Динаміка</th></tr></thead>
-        <tbody>
-        <tr>
-          <td>IZI Burger пр.Ювілейний</td>
-          <td class="ta-r">855</td>
-          <td class="ta-r">717 357 ₴</td>
-          <td class="ta-r up">+119%</td>
-        </tr>
-        <tr>
-          <td>IZI BURGER Григорівське шосе</td>
-          <td class="ta-r">793</td>
-          <td class="ta-r">642 760 ₴</td>
-          <td class="ta-r up">+40%</td>
-        </tr>
-        <tr>
-          <td>IZI BURGER Стадіонний проїзд</td>
-          <td class="ta-r">705</td>
-          <td class="ta-r">568 702 ₴</td>
-          <td class="ta-r up">+114%</td>
-        </tr></tbody>
-      </table>
+    <div class="card ad-series">
+      <h3>Sponsored Listing: витрати та атрибутовані замовлення</h3>
+      <p class="hint">Платне підняття закладу у видачі Bolt Food</p>
+      
+        <div class="metric-series">
+          <div class="metric-name">Витрати партнера</div>
+          <div class="spark-bars">
+            <div class="spark-col">
+              <div class="spark-val">0 ₴</div>
+              <div class="spark-bar" style="height:0%;min-height:0"></div>
+              <div class="spark-lbl">Бер 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">3 563 ₴</div>
+              <div class="spark-bar" style="height:42%"></div>
+              <div class="spark-lbl">Квіт 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">3 875 ₴</div>
+              <div class="spark-bar" style="height:46%"></div>
+              <div class="spark-lbl">Трав 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">3 750 ₴</div>
+              <div class="spark-bar" style="height:44%"></div>
+              <div class="spark-lbl">Черв 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">4 370 ₴</div>
+              <div class="spark-bar" style="height:52%"></div>
+              <div class="spark-lbl">Лип 2026</div>
+            </div>
+            <div class="spark-col is-focus">
+              <div class="spark-val">8 467 ₴</div>
+              <div class="spark-bar" style="height:100%"></div>
+              <div class="spark-lbl">Серп 2026</div>
+            </div></div>
+        </div>
+        <div class="metric-series">
+          <div class="metric-name">Усі замовлення</div>
+          <div class="spark-bars">
+            <div class="spark-col">
+              <div class="spark-val">1 155</div>
+              <div class="spark-bar" style="height:49%"></div>
+              <div class="spark-lbl">Бер 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">1 053</div>
+              <div class="spark-bar" style="height:45%"></div>
+              <div class="spark-lbl">Квіт 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">1 160</div>
+              <div class="spark-bar" style="height:49%"></div>
+              <div class="spark-lbl">Трав 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">1 032</div>
+              <div class="spark-bar" style="height:44%"></div>
+              <div class="spark-lbl">Черв 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">1 279</div>
+              <div class="spark-bar" style="height:54%"></div>
+              <div class="spark-lbl">Лип 2026</div>
+            </div>
+            <div class="spark-col is-focus">
+              <div class="spark-val">2 353</div>
+              <div class="spark-bar" style="height:100%"></div>
+              <div class="spark-lbl">Серп 2026</div>
+            </div></div>
+        </div>
+        <div class="metric-series">
+          <div class="metric-name">Замовлення, атрибутовані рекламі</div>
+          <div class="spark-bars">
+            <div class="spark-col">
+              <div class="spark-val">0</div>
+              <div class="spark-bar" style="height:0%;min-height:0"></div>
+              <div class="spark-lbl">Бер 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">94</div>
+              <div class="spark-bar" style="height:11%"></div>
+              <div class="spark-lbl">Квіт 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">86</div>
+              <div class="spark-bar" style="height:10%"></div>
+              <div class="spark-lbl">Трав 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">70</div>
+              <div class="spark-bar" style="height:8%"></div>
+              <div class="spark-lbl">Черв 2026</div>
+            </div>
+            <div class="spark-col">
+              <div class="spark-val">236</div>
+              <div class="spark-bar" style="height:27%"></div>
+              <div class="spark-lbl">Лип 2026</div>
+            </div>
+            <div class="spark-col is-focus">
+              <div class="spark-val">864</div>
+              <div class="spark-bar" style="height:100%"></div>
+              <div class="spark-lbl">Серп 2026</div>
+            </div></div>
+        </div>
+      <p class="chart-note">У серпні партнер витратив <b>8 467 ₴</b>
+        (+94% до липня). До Sponsored Listing атрибутовано
+        <b>864 замовлення</b> (+266%), тоді як
+        усі замовлення зросли на +84%. Реклама торкнулася
+        36,7% усіх замовлень. Атрибутовані Net-продажі:
+        <b>424 526 ₴</b>, або 50,1 ₴ на 1 ₴ реклами.</p>
     </div>
   </div>
-  <div class="takeaway">
-    Пік припав на тиждень із найбільшою знижкою, далі замовлення плавно знижувалися разом із промо.
-    Попит реагує на знижку майже миттєво — тому головне питання не «чи працює промо»,
-    а <b>чи повернуться ці клієнти без нього</b>.
+  <div class="takeaway warn">
+    <b>Sponsored Listing посилив видимість і супроводжував ріст замовлень.</b>
+    Атрибуція означає, що клієнт контактував із рекламним показом перед замовленням;
+    вона не доводить, що всі ці замовлення були додатковими саме завдяки рекламі.
   </div>
 
   <h2>4. Що покращити далі</h2>
@@ -423,23 +650,13 @@
       <div class="tip-h"><h4>1. Утримати нових клієнтів</h4>
         <span class="tip-num">858 нових</span></div>
       <p>Знижки привели 858 нових клієнтів — найбільше за пів року.
-      Головна цінність серпня не в обороті, а в цій базі.
-      Просіть менеджера Bolt запустити окремий офер «на друге замовлення» саме для них.</p>
-      <p class="why">Чому: утримати клієнта дешевше, ніж купувати нового знижкою щомісяця.</p>
+      Головна цінність серпня — у новій клієнтській базі.
+      <b>Зберігаємо розумні акції й утримуємо цільову аудиторію.</b></p>
+      <p class="why">Чому: утримати залученого клієнта дешевше, ніж щомісяця купувати нового великою знижкою.</p>
     </div>
 
     <div class="tip b">
-      <div class="tip-h"><h4>2. Повернути маржу</h4>
-        <span class="tip-num">694 → 591 ₴ / замовлення</span></div>
-      <p>Чистими з одного замовлення стало на 15% менше.
-      Промо було вже в 91% замовлень — це майже кожне.
-      Варто знижувати глибину поступово: почати зі Smart Promo 10%, де заклад платить усі 100%.</p>
-      <p class="why">Чому: на 1 ₴ власних витрат на промо припадало 17 ₴ чистих продажів
-      у липні і лише 5,5 ₴ у серпні.</p>
-    </div>
-
-    <div class="tip b">
-      <div class="tip-h"><h4>3. Втримати якість під навантаженням</h4>
+      <div class="tip-h"><h4>2. Втримати якість під навантаженням</h4>
         <span class="tip-num">погані замовлення 8 → 34</span></div>
       <p>Обсяг зріс майже вдвічі, і кухня почала не встигати: приготування
       8,8 → 9,6 хв, компенсації клієнтам
@@ -449,12 +666,13 @@
     </div>
 
     <div class="tip">
-      <div class="tip-h"><h4>4. Підняти середній чек</h4>
+      <div class="tip-h"><h4>3. Підняти середній чек</h4>
         <span class="tip-num">824 → 820 ₴</span></div>
       <p>Середній чек не зрушив попри всі знижки — клієнти брали те саме, тільки дешевше.
-      Замість «мінус 30% на все» спробуйте комбо-набори та поріг безкоштовної доставки
-      трохи вище поточного чека.</p>
-      <p class="why">Чому: це піднімає оборот без додаткових витрат на знижку.</p>
+      Рекомендуємо взяти участь у тематичних тижнях: дати <b>20% на все меню або вибрані
+      позиції</b> за мінімального чека від <b>1 000 грн</b>.</p>
+      <p class="why">Чому: поріг вищий за поточний AOV 820 грн стимулює додати ще одну позицію,
+      а тематичний тиждень дає додаткову видимість у застосунку.</p>
     </div>
 
   </div>
