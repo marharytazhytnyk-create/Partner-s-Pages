@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>IZI BURGER · Продажі та знижки · Серпень 2026</title>
+<style>
+  :root {
+    --green:#34d186; --green-d:#0d8a52; --ink:#16181a; --gray:#6b7280;
+    --line:#e8eaed; --bg:#f7f8fa; --warn:#e67e22; --danger:#c0392b; --net:#9fe3c2;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+    background:var(--bg);color:var(--ink);font-size:13px;line-height:1.5;
+    -webkit-font-smoothing:antialiased}
+  .page{max-width:1180px;margin:0 auto;padding:28px 26px 40px}
+
+  header{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+    flex-wrap:wrap;padding-bottom:14px;border-bottom:3px solid var(--green);margin-bottom:18px}
+  .brand{display:inline-flex;align-items:center;gap:7px;padding:4px 10px;border-radius:999px;
+    background:rgba(52,209,134,.13);color:var(--green-d);font-size:10px;font-weight:700;
+    letter-spacing:.08em;text-transform:uppercase;margin-bottom:9px}
+  h1{font-size:24px;font-weight:700;letter-spacing:-.02em}
+  .sub{color:var(--gray);margin-top:3px;font-size:12.5px}
+  .head-meta{text-align:right;color:var(--gray);font-size:11px;line-height:1.8}
+  .head-meta b{color:var(--ink)}
+
+  h2{font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;
+    color:var(--gray);margin:22px 0 10px;display:flex;align-items:center;gap:8px}
+  h2::after{content:"";flex:1;height:1px;background:var(--line)}
+
+  .kpis{display:grid;grid-template-columns:repeat(6,1fr);gap:9px}
+  .kpi{background:#fff;border:1px solid var(--line);border-radius:11px;padding:11px 12px}
+  .kpi-label{font-size:10px;font-weight:600;text-transform:uppercase;letter-spacing:.04em;color:var(--gray)}
+  .kpi-value{font-size:20px;font-weight:700;margin-top:3px;letter-spacing:-.02em}
+  .kpi-unit{font-size:12px;font-weight:600;color:var(--gray);margin-left:2px}
+  .kpi-delta{font-size:10.5px;margin-top:2px;font-weight:600}
+  .up{color:var(--green-d)} .down{color:var(--danger)} .flat{color:var(--gray)}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+  .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+  .card{background:#fff;border:1px solid var(--line);border-radius:13px;padding:14px 16px}
+  .card h3{font-size:12.5px;font-weight:700;margin-bottom:2px}
+  .card .hint{font-size:11px;color:var(--gray);margin-bottom:10px}
+
+  .bars{display:flex;align-items:flex-end;gap:7px;height:122px;margin-top:6px}
+  .bar-col{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:flex-end;height:100%}
+  .bar-val{font-size:9.5px;font-weight:700;color:var(--gray);margin-bottom:3px;white-space:nowrap}
+  .bar{width:100%;max-width:44px;background:#cfe9db;border-radius:4px 4px 0 0;min-height:3px}
+  .bar-lbl{font-size:9.5px;color:var(--gray);margin-top:4px;white-space:nowrap}
+  .is-focus .bar{background:var(--green-d)}
+  .is-focus .bar-val{color:var(--green-d)}
+  .is-focus .bar-lbl{color:var(--ink);font-weight:700}
+  .pair-bars{display:flex;align-items:flex-end;gap:2px;width:100%;max-width:44px;height:100%}
+  .bar-gross{background:#cfe9db} .bar-net{background:#8fd9b6}
+  .is-focus .bar-gross{background:var(--green-d)} .is-focus .bar-net{background:var(--green)}
+  .chart-unit{font-size:10px;color:var(--gray);margin-top:7px}
+  .legend{display:flex;gap:12px;font-size:10.5px;color:var(--gray);margin-top:8px}
+  .legend i{width:9px;height:9px;border-radius:2px;display:inline-block;margin-right:4px}
+  .weeks .bar{background:#f0c9a0} .weeks .is-focus .bar{background:var(--warn)}
+  .week-disc{font-size:9px;color:var(--warn);font-weight:700;margin-top:3px}
+
+  table{width:100%;border-collapse:collapse;font-size:12px}
+  th{text-align:left;font-size:9.5px;text-transform:uppercase;letter-spacing:.05em;color:var(--gray);
+    padding:6px 8px;border-bottom:1px solid var(--line);font-weight:700}
+  td{padding:7px 8px;border-bottom:1px solid #f4f5f6;vertical-align:top}
+  tr:last-child td{border-bottom:none}
+  .ta-r{text-align:right;white-space:nowrap}
+  .camp-aud{display:block;font-size:10px;color:var(--gray);font-weight:400;margin-top:1px}
+  .share-bar{display:inline-block;width:38px;height:5px;border-radius:3px;background:#eef0f2;
+    margin-right:6px;vertical-align:middle;position:relative;overflow:hidden}
+  .share-bar::after{content:"";position:absolute;inset:0;width:var(--w);background:var(--green)}
+
+  .takeaway{background:#f3faf6;border-left:3px solid var(--green);border-radius:0 8px 8px 0;
+    padding:9px 12px;font-size:12px;margin-top:11px}
+  .takeaway.warn{background:#fff8f0;border-left-color:var(--warn)}
+
+  .advice{display:grid;grid-template-columns:repeat(2,1fr);gap:12px}
+  .tip{background:#fff;border:1px solid var(--line);border-radius:13px;padding:13px 15px;
+    border-left:3px solid var(--green)}
+  .tip.b{border-left-color:var(--warn)}
+  .tip-h{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:5px}
+  .tip-h h4{font-size:12.5px;font-weight:700}
+  .tip-num{font-size:11px;font-weight:700;color:var(--warn);white-space:nowrap}
+  .tip p{font-size:11.5px;color:#41464b}
+  .tip .why{font-size:10.5px;color:var(--gray);margin-top:5px;padding-top:5px;border-top:1px dashed var(--line)}
+
+  footer{margin-top:22px;padding-top:12px;border-top:1px solid var(--line);
+    font-size:10.5px;color:var(--gray);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
+
+  @media(max-width:900px){
+    .kpis{grid-template-columns:repeat(3,1fr)}
+    .grid2,.grid3,.advice{grid-template-columns:1fr}
+  }
+  @media print{
+    body{background:#fff;font-size:11px}
+    .page{padding:0;max-width:none}
+    .card,.tip,.kpi{break-inside:avoid}
+    h2{margin:12px 0 7px}
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <header>
+    <div>
+      <div class="brand">Bolt Food · Харків</div>
+      <h1>IZI BURGER — продажі та знижки</h1>
+      <p class="sub">Фокус: <b>Серпень 2026</b> · порівняння з попередніми місяцями</p>
+    </div>
+    <div class="head-meta">
+      <div>Локацій: <strong>3</strong></div>
+      <div>Період: <strong>Бер 2026 — Серп 2026</strong></div>
+      <div>Оновлено: <strong>24.09.2026</strong></div>
+    </div>
+  </header>
+
+  <div class="kpis">
+      <div class="kpi">
+        <div class="kpi-label">Замовлення</div>
+        <div class="kpi-value">2 353<span class="kpi-unit"></span></div>
+        <div class="kpi-delta up">+84% до липня</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Оборот (Gross)</div>
+        <div class="kpi-value">1 928 819<span class="kpi-unit">₴</span></div>
+        <div class="kpi-delta up">+83% до липня</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Після знижок (Net)</div>
+        <div class="kpi-value">1 389 492<span class="kpi-unit">₴</span></div>
+        <div class="kpi-delta up">+57% до липня</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Середній чек</div>
+        <div class="kpi-value">820<span class="kpi-unit">₴</span></div>
+        <div class="kpi-delta flat">-0% до липня</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Унікальні клієнти</div>
+        <div class="kpi-value">1 653<span class="kpi-unit"></span></div>
+        <div class="kpi-delta up">+74% до липня</div>
+      </div>
+      <div class="kpi">
+        <div class="kpi-label">Нові клієнти</div>
+        <div class="kpi-value">858<span class="kpi-unit"></span></div>
+        <div class="kpi-delta up">+79% до липня</div>
+      </div></div>
+
+  <h2>1. Продажі місяць до місяця</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Оборот і сума після знижок</h3>
+      <p class="hint">Темна колонка — серпень. Розрив між колонками — це знижки.</p>
+      <div class="bars">
+        <div class="bar-col pair">
+          <div class="bar-val">910к</div>
+          <div class="pair-bars">
+            <div class="bar bar-gross" style="height:47%"></div>
+            <div class="bar bar-net" style="height:44%"></div>
+          </div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col pair">
+          <div class="bar-val">802к</div>
+          <div class="pair-bars">
+            <div class="bar bar-gross" style="height:42%"></div>
+            <div class="bar bar-net" style="height:41%"></div>
+          </div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col pair">
+          <div class="bar-val">938к</div>
+          <div class="pair-bars">
+            <div class="bar bar-gross" style="height:49%"></div>
+            <div class="bar bar-net" style="height:43%"></div>
+          </div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col pair">
+          <div class="bar-val">829к</div>
+          <div class="pair-bars">
+            <div class="bar bar-gross" style="height:43%"></div>
+            <div class="bar bar-net" style="height:39%"></div>
+          </div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div>
+        <div class="bar-col pair">
+          <div class="bar-val">1 053к</div>
+          <div class="pair-bars">
+            <div class="bar bar-gross" style="height:55%"></div>
+            <div class="bar bar-net" style="height:46%"></div>
+          </div>
+          <div class="bar-lbl">Лип 2026</div>
+        </div>
+        <div class="bar-col pair is-focus">
+          <div class="bar-val">1 929к</div>
+          <div class="pair-bars">
+            <div class="bar bar-gross" style="height:100%"></div>
+            <div class="bar bar-net" style="height:72%"></div>
+          </div>
+          <div class="bar-lbl">Серп 2026</div>
+        </div></div>
+      <div class="legend">
+        <span><i style="background:#cfe9db"></i>Оборот (Gross)</span>
+        <span><i style="background:#8fd9b6"></i>Після знижок (Net)</span>
+      </div>
+    </div>
+    <div class="card">
+      <h3>Доставлені замовлення</h3>
+      <p class="hint">Скільки замовлень виконано за місяць</p>
+      <div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">1 155</div>
+          <div class="bar" style="height:49%"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1 053</div>
+          <div class="bar" style="height:45%"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1 160</div>
+          <div class="bar" style="height:49%"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1 032</div>
+          <div class="bar" style="height:44%"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">1 279</div>
+          <div class="bar" style="height:54%"></div>
+          <div class="bar-lbl">Лип 2026</div>
+        </div>
+        <div class="bar-col is-focus">
+          <div class="bar-val">2 353</div>
+          <div class="bar" style="height:100%"></div>
+          <div class="bar-lbl">Серп 2026</div>
+        </div></div><div class="chart-unit">штук на місяць</div>
+    </div>
+  </div>
+  <div class="takeaway">
+    <b>Серпень — найкращий місяць за пів року.</b> Замовлення 1 279 → 2 353
+    (+84%), оборот 1 053 402 → 1 928 819 ₴ (+83%).
+    Але сума після знижок зросла лише на +57%, бо знижок теж стало більше.
+  </div>
+
+  <h2>2. Що ми робили зі знижками</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Знижки в кампаніях за серпень</h3>
+      <p class="hint">Останній стовпець — скільки з цієї знижки оплатив заклад, решту доклав Bolt</p>
+      <table>
+        <thead><tr><th>Кампанія</th><th class="ta-r">Замовлень</th><th class="ta-r">Знижка</th>
+        <th class="ta-r">Частка</th><th class="ta-r">Платить заклад</th></tr></thead>
+        <tbody>
+        <tr>
+          <td><b>Меню-знижка 30%</b><span class="camp-aud">Ті, хто давно не замовляв, і рідкі клієнти</span></td>
+          <td class="ta-r">1 713</td>
+          <td class="ta-r">386 018 ₴</td>
+          <td class="ta-r"><span class="share-bar" style="--w:72%"></span>72%</td>
+          <td class="ta-r">50%</td>
+        </tr>
+        <tr>
+          <td><b>Безкоштовна доставка</b><span class="camp-aud">Ті ж сегменти, що й меню-знижка</span></td>
+          <td class="ta-r">1 689</td>
+          <td class="ta-r">80 934 ₴</td>
+          <td class="ta-r"><span class="share-bar" style="--w:15%"></span>15%</td>
+          <td class="ta-r">50%</td>
+        </tr>
+        <tr>
+          <td><b>Visa / ПриватБанк 50%</b><span class="camp-aud">Клієнти банку, знижка поверх інших</span></td>
+          <td class="ta-r">90</td>
+          <td class="ta-r">32 724 ₴</td>
+          <td class="ta-r"><span class="share-bar" style="--w:6%"></span>6%</td>
+          <td class="ta-r">0%</td>
+        </tr>
+        <tr>
+          <td><b>Smart Promo 10%</b><span class="camp-aud">Плюс-підписники та лояльні клієнти</span></td>
+          <td class="ta-r">308</td>
+          <td class="ta-r">21 181 ₴</td>
+          <td class="ta-r"><span class="share-bar" style="--w:4%"></span>4%</td>
+          <td class="ta-r">100%</td>
+        </tr>
+        <tr>
+          <td><b>20% для нових клієнтів</b><span class="camp-aud">Ті, хто вперше замовляє</span></td>
+          <td class="ta-r">74</td>
+          <td class="ta-r">12 274 ₴</td>
+          <td class="ta-r"><span class="share-bar" style="--w:2%"></span>2%</td>
+          <td class="ta-r">0%</td>
+        </tr>
+        <tr>
+          <td><b>Інші кампанії</b><span class="camp-aud">Різні сегменти</span></td>
+          <td class="ta-r">51</td>
+          <td class="ta-r">6 196 ₴</td>
+          <td class="ta-r"><span class="share-bar" style="--w:1%"></span>1%</td>
+          <td class="ta-r">0%</td>
+        </tr></tbody>
+      </table>
+    </div>
+    <div class="card">
+      <h3>Частка замовлень зі знижкою</h3>
+      <p class="hint">Скільки відсотків усіх замовлень пройшло з промо</p>
+      <div class="bars">
+        <div class="bar-col">
+          <div class="bar-val">64%</div>
+          <div class="bar" style="height:71%"></div>
+          <div class="bar-lbl">Бер 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">6%</div>
+          <div class="bar" style="height:7%"></div>
+          <div class="bar-lbl">Квіт 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">51%</div>
+          <div class="bar" style="height:56%"></div>
+          <div class="bar-lbl">Трав 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">39%</div>
+          <div class="bar" style="height:43%"></div>
+          <div class="bar-lbl">Черв 2026</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">64%</div>
+          <div class="bar" style="height:70%"></div>
+          <div class="bar-lbl">Лип 2026</div>
+        </div>
+        <div class="bar-col is-focus">
+          <div class="bar-val">91%</div>
+          <div class="bar" style="height:100%"></div>
+          <div class="bar-lbl">Серп 2026</div>
+        </div></div><div class="chart-unit">% замовлень із промо</div>
+    </div>
+  </div>
+  <div class="takeaway warn">
+    <b>Знижки стали основним двигуном.</b> Промо було в 91% замовлень проти
+    64% у липні. Знижки зʼїли 28% обороту
+    (було 16%), а витрати самого закладу на промо зросли з
+    51 415 до 254 657 ₴ (+395%).
+  </div>
+
+  <h2>3. Як це вплинуло — по тижнях серпня</h2>
+  <div class="grid2">
+    <div class="card">
+      <h3>Замовлення по тижнях</h3>
+      <p class="hint">Помаранчевим під колонкою — частка знижок від обороту тижня</p>
+      <div class="bars weeks">
+        <div class="bar-col">
+          <div class="bar-val">435</div>
+          <div class="bar" style="height:69%"></div>
+          <div class="week-disc" title="частка знижок від обороту">24%</div>
+          <div class="bar-lbl">03.08</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">627</div>
+          <div class="bar" style="height:100%"></div>
+          <div class="week-disc" title="частка знижок від обороту">33%</div>
+          <div class="bar-lbl">10.08</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">567</div>
+          <div class="bar" style="height:90%"></div>
+          <div class="week-disc" title="частка знижок від обороту">28%</div>
+          <div class="bar-lbl">17.08</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">543</div>
+          <div class="bar" style="height:87%"></div>
+          <div class="week-disc" title="частка знижок від обороту">27%</div>
+          <div class="bar-lbl">24.08</div>
+        </div>
+        <div class="bar-col">
+          <div class="bar-val">526</div>
+          <div class="bar" style="height:84%"></div>
+          <div class="week-disc" title="частка знижок від обороту">28%</div>
+          <div class="bar-lbl">31.08</div>
+        </div></div>
+    </div>
+    <div class="card">
+      <h3>Продажі по локаціях за серпень</h3>
+      <p class="hint">Зростання обороту до липня</p>
+      <table>
+        <thead><tr><th>Локація</th><th class="ta-r">Замовлень</th><th class="ta-r">Оборот</th>
+        <th class="ta-r">Динаміка</th></tr></thead>
+        <tbody>
+        <tr>
+          <td>IZI Burger пр.Ювілейний</td>
+          <td class="ta-r">855</td>
+          <td class="ta-r">717 357 ₴</td>
+          <td class="ta-r up">+119%</td>
+        </tr>
+        <tr>
+          <td>IZI BURGER Григорівське шосе</td>
+          <td class="ta-r">793</td>
+          <td class="ta-r">642 760 ₴</td>
+          <td class="ta-r up">+40%</td>
+        </tr>
+        <tr>
+          <td>IZI BURGER Стадіонний проїзд</td>
+          <td class="ta-r">705</td>
+          <td class="ta-r">568 702 ₴</td>
+          <td class="ta-r up">+114%</td>
+        </tr></tbody>
+      </table>
+    </div>
+  </div>
+  <div class="takeaway">
+    Пік припав на тиждень із найбільшою знижкою, далі замовлення плавно знижувалися разом із промо.
+    Попит реагує на знижку майже миттєво — тому головне питання не «чи працює промо»,
+    а <b>чи повернуться ці клієнти без нього</b>.
+  </div>
+
+  <h2>4. Що покращити далі</h2>
+  <div class="advice">
+
+    <div class="tip">
+      <div class="tip-h"><h4>1. Утримати нових клієнтів</h4>
+        <span class="tip-num">858 нових</span></div>
+      <p>Знижки привели 858 нових клієнтів — найбільше за пів року.
+      Головна цінність серпня не в обороті, а в цій базі.
+      Просіть менеджера Bolt запустити окремий офер «на друге замовлення» саме для них.</p>
+      <p class="why">Чому: утримати клієнта дешевше, ніж купувати нового знижкою щомісяця.</p>
+    </div>
+
+    <div class="tip b">
+      <div class="tip-h"><h4>2. Повернути маржу</h4>
+        <span class="tip-num">694 → 591 ₴ / замовлення</span></div>
+      <p>Чистими з одного замовлення стало на 15% менше.
+      Промо було вже в 91% замовлень — це майже кожне.
+      Варто знижувати глибину поступово: почати зі Smart Promo 10%, де заклад платить усі 100%.</p>
+      <p class="why">Чому: на 1 ₴ власних витрат на промо припадало 17 ₴ чистих продажів
+      у липні і лише 5,5 ₴ у серпні.</p>
+    </div>
+
+    <div class="tip b">
+      <div class="tip-h"><h4>3. Втримати якість під навантаженням</h4>
+        <span class="tip-num">погані замовлення 8 → 34</span></div>
+      <p>Обсяг зріс майже вдвічі, і кухня почала не встигати: приготування
+      8,8 → 9,6 хв, компенсації клієнтам
+      0,7% → 1,2%, рейтинг 4,75 → 4,69.
+      Додайте людину на кухню в пікові години перед наступною акцією.</p>
+      <p class="why">Чому: рейтинг нижче 4,7 помітно зменшує показ закладу в застосунку.</p>
+    </div>
+
+    <div class="tip">
+      <div class="tip-h"><h4>4. Підняти середній чек</h4>
+        <span class="tip-num">824 → 820 ₴</span></div>
+      <p>Середній чек не зрушив попри всі знижки — клієнти брали те саме, тільки дешевше.
+      Замість «мінус 30% на все» спробуйте комбо-набори та поріг безкоштовної доставки
+      трохи вище поточного чека.</p>
+      <p class="why">Чому: це піднімає оборот без додаткових витрат на знижку.</p>
+    </div>
+
+  </div>
+
+  <footer>
+    <span>Bolt Food · IZI BURGER · Харків · дані Bolt за Бер 2026 — Серп 2026</span>
+    <span>Питання по звіту — до вашого менеджера Bolt Food</span>
+  </footer>
+
+</div>
+</body>
+</html>

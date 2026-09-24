@@ -3,9 +3,9 @@
    Через file:// fetch заблокований — тоді підпис просто не з'являється. */
 
 (function () {
-  var card = document.querySelector('.card[href]');
-  if (!card) return;
+  Array.prototype.forEach.call(document.querySelectorAll('.card[href]'), annotate);
 
+  function annotate(card) {
   var slot = card.querySelector('.card-meta');
   if (!slot) return;
 
@@ -29,4 +29,5 @@
       slot.textContent = parts.join(' \u00b7 ');
     })
     .catch(function () {});
+  }
 })();
