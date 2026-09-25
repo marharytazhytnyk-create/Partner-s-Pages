@@ -72,16 +72,17 @@ UK_MONTHS_FULL  = ["","Січень","Лютий","Березень","Квіте
                     "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"]
 
 CHART_SECTIONS = [
-    ("1. Продажі",                    ["gross","net","prov_sales","orders","aov"]),
+    ("1. Продажі",                    ["gross","net","prov_sales","payout","orders","aov"]),
     ("2. Операційні показники",       ["avail","accept","refunds","prep_time","acc_time","del_time"]),
     ("3. Клієнти та поведінка",       ["active_users","freq","new_users","sessions","imp_menu","menu_prod","rating"]),
     ("4. Знижки",                     ["discounts","camp_bolt","camp_merch"]),
 ]
 
 METRIC_UK = {
-    "gross":      ("Gross Sales (продажі)",         "Сума вартості доставлених замовлень до знижок",   "₴"),
-    "net":        ("Net Sales (чисті продажі)",      "Сума після знижок разом зі зборами Bolt, які платить клієнт", "₴"),
-    "prov_sales": ("Виручка закладу",                "Сума за страви після знижок, без плати за доставку та сервісного збору", "₴"),
+    "gross":      ("Gross Sales (продажі)",         "Вартість замовлень до знижок. Показує масштаб — реально цих грошей ніхто не отримав", "₴"),
+    "net":        ("Net Sales (чисті продажі)",      "Скільки клієнти заплатили насправді: після знижок, разом зі зборами Bolt", "₴"),
+    "prov_sales": ("Виручка закладу",                "Кошик закладу після знижок, без зборів Bolt. Саме цю цифру показує Looker", "₴"),
+    "payout":     ("Отримано закладом",              "Скільки лишилось закладу після вирахування комісії Bolt", "₴"),
     "orders":     ("Delivered Orders",               "Кількість успішно доставлених замовлень",         "шт."),
     "aov":        ("AOV — середній чек",             "Середня сума одного доставленого замовлення",     "₴"),
     "avail":      ("Availability Rate",              "Частка часу, коли заклад був онлайн",             "%"),
@@ -121,13 +122,20 @@ MONTH_BAR_COLORS_BELLA = [
     "#7f0000","#b71c1c","#c62828","#d32f2f",
     "#e53935","#ef5350","#f44336","#ef9a9a",
 ]
+MONTH_BAR_COLORS_TOTAL = [
+    "#04452a","#0a6b41","#0d8a52","#10a862",
+    "#1abd72","#34D186","#5cdc9d","#8ce8bb",
+]
+
+# Вкладка «Разом»: чотири цифри продажів від найширшої до тієї, що дійшла закладу.
+TOTAL_METRICS = ["gross", "net", "prov_sales", "payout"]
 
 EMPTY_MONTH = {
     "orders":0,"gross":0,"net":0,"aov":0,
     "avail":0,"accept":0,"refunds":0,
     "del_time":0,"acc_time":0,"prep_time":0,
     "new_users":0,"sessions":0,"imp_menu":0,"menu_prod":0,"rating":0,
-    "prov_sales":0,
+    "prov_sales":0,"commission":0,"payout":0,
     "discounts":0,"camp_bolt":0,"camp_merch":0,
     "active_users":0,"freq":0,
     "sl_orders":0,"smart_orders":0,"theme_orders":0,
@@ -379,7 +387,8 @@ def fetch_brand_data(brand: dict) -> dict:
                 SUM(f.total_campaign_spend_provider)                                 AS camp_merch,
                 SUM(f.sponsored_listing_attributed_orders_count)                      AS sl_orders,
                 SUM(f.smart_promotion_campaign_orders_count)                          AS smart_orders,
-                SUM(f.total_provider_price_after_discounts)                           AS prov_sales
+                SUM(f.total_provider_price_after_discounts)                           AS prov_sales,
+                SUM(f.total_invoiced_provider_commission_local)                        AS commission
             FROM {schema}.fact_provider_monthly f
             JOIN {schema}.dim_provider_v2 d ON f.provider_id = d.provider_id
             WHERE f.provider_id IN ({pids_sql})
@@ -462,6 +471,7 @@ def fetch_brand_data(brand: dict) -> dict:
         sl_orders = _si(row[20])
         smart_ord = _si(row[21])
         prov_sales= round(_sf(row[22]), 0)
+        commission= round(_sf(row[23]), 0)
         active_u  = users_map.get((pid, mk)) or orders
         aov       = round(gross / orders, 0) if orders else 0
         freq      = round(orders / active_u, 2) if active_u else 0
@@ -469,7 +479,8 @@ def fetch_brand_data(brand: dict) -> dict:
 
         rec = {
             "orders": orders, "gross": round(gross, 0), "net": round(net, 0),
-            "prov_sales": prov_sales,
+            "prov_sales": prov_sales, "commission": commission,
+            "payout": round(prov_sales - commission, 0),
             "aov": aov, "avail": avail, "accept": accept, "refunds": refunds,
             "del_time": del_time, "acc_time": acc_time, "prep_time": prep_time,
             "new_users": new_users, "sessions": sessions, "imp_menu": imp_menu,
@@ -511,8 +522,9 @@ def fetch_brand_data(brand: dict) -> dict:
         agg = dict(EMPTY_MONTH)
         for loc in locations:
             w = loc["months"][i]
-            for k in ("orders","gross","net","prov_sales","new_users","sessions","discounts",
-                      "camp_bolt","camp_merch","active_users","sl_orders","smart_orders","theme_orders"):
+            for k in ("orders","gross","net","prov_sales","commission","payout","new_users",
+                      "sessions","discounts","camp_bolt","camp_merch","active_users",
+                      "sl_orders","smart_orders","theme_orders"):
                 agg[k] = agg.get(k, 0) + w.get(k, 0)
         # weighted averages
         weighted = [
@@ -866,6 +878,102 @@ def _promo_card(label: str, orders, share, delta: str, color: str) -> str:
     )
 
 
+def build_total_panel(brands_data: list[tuple[dict, dict]]) -> str:
+    """Вкладка «Разом»: продажі двох брендів однією сумою, по місяцях."""
+    if not brands_data:
+        return '<p style="color:#999;padding:40px">Немає даних</p>'
+
+    first = brands_data[0][1]
+    labels_s = first["month_labels_s"]
+    n = len(first["brand_months"])
+    if not n:
+        return '<p style="color:#999;padding:40px">Немає даних</p>'
+
+    # Усі бренди мають однакове вікно місяців, тому просто складаємо по індексу.
+    totals = []
+    for idx in range(n):
+        agg = {"label": first["brand_months"][idx].get("label", "")}
+        for mk in TOTAL_METRICS + ["orders", "commission"]:
+            agg[mk] = sum(data["brand_months"][idx].get(mk, 0) for _, data in brands_data)
+        totals.append(agg)
+
+    last = totals[-1]
+    prev = totals[-2] if len(totals) > 1 else {}
+
+    cards = ""
+    for mk in TOTAL_METRICS:
+        name, desc, unit = METRIC_UK[mk]
+        cards += (
+            f'<div class="kpi-card" style="border-top-color:var(--green-d)">'
+            f'<div class="kpi-label">{name}</div>'
+            f'<div class="kpi-value">{_fmt(last.get(mk), unit)}'
+            f'{_pct_badge(prev.get(mk, 0), last.get(mk, 0))}</div>'
+            f'<div class="kpi-sub">{desc}</div>'
+            f'</div>'
+        )
+
+    charts = ""
+    for mk in TOTAL_METRICS:
+        name, desc, unit = METRIC_UK[mk]
+        vals = [t.get(mk, 0) for t in totals]
+        charts += (
+            f'<div class="chart-card">'
+            f'<h3>{name}</h3>'
+            f'<div class="metric-desc">{desc}</div>'
+            f'<div class="unit">{unit}</div>'
+            f'{_bar_chart(vals, labels_s, unit, MONTH_BAR_COLORS_TOTAL)}'
+            f'</div>'
+        )
+
+    brand_rows = ""
+    for brand, data in brands_data:
+        bm = data["brand_months"][-1]
+        brand_rows += (
+            f'<tr><td>{brand["emoji"]} {brand["title"]}</td>'
+            f'<td>{_fmt(bm.get("orders"), "шт.")}</td>'
+            + "".join(f'<td>{_fmt(bm.get(mk), "₴")}</td>' for mk in TOTAL_METRICS)
+            + '</tr>'
+        )
+    brand_rows += (
+        f'<tr class="sum-row"><td>Разом</td>'
+        f'<td>{_fmt(last.get("orders"), "шт.")}</td>'
+        + "".join(f'<td>{_fmt(last.get(mk), "₴")}</td>' for mk in TOTAL_METRICS)
+        + '</tr>'
+    )
+
+    commission_pct = (f'{last["commission"] / last["prov_sales"] * 100:.1f}%'
+                      if last.get("prov_sales") else "—")
+
+    return f"""
+    <div class="period-bar">
+      <span class="period-label">Місяці:</span>
+      <span>{first['period_label']} &nbsp;·&nbsp; два бренди разом &nbsp;·&nbsp; валюта UAH (₴) &nbsp;·&nbsp; Харків</span>
+      <span style="margin-left:auto;font-size:11px;color:var(--gray-400)">Останній місяць: {first['month_labels'][-1]}</span>
+    </div>
+
+    <div class="promo-note">
+      Чотири цифри описують той самий оборот на різних етапах — від вартості замовлень
+      до грошей, що дійшли закладу. Різниця між <b>Net Sales</b> і <b>виручкою закладу</b> —
+      це плата за доставку та сервісний збір, які платить клієнт, а не заклад. Різниця між
+      <b>виручкою закладу</b> і <b>отриманим</b> — комісія Bolt, за останній місяць це
+      {commission_pct} від кошика ({_fmt(last.get('commission'), '₴')}).
+    </div>
+
+    <div class="section-title">Разом за {first['month_labels'][-1]}</div>
+    <div class="kpi-grid">{cards}</div>
+
+    <div class="section-title">По місяцях</div>
+    {charts and f'<div class="charts-grid">{charts}</div>'}
+
+    <div class="section-title">Останній місяць у розрізі брендів</div>
+    <table class="sum-table">
+      <tr><th>Бренд</th><th>Замовлень</th>
+          {"".join(f"<th>{METRIC_UK[mk][0]}</th>" for mk in TOTAL_METRICS)}</tr>
+      {brand_rows}
+    </table>
+    """
+
+
 def build_promo_panel(brands_data: list[tuple[dict, dict]]) -> str:
     """Вкладка «Ефективність акцій»: замовлення з кожного типу промо по місяцях."""
     if not brands_data:
@@ -933,21 +1041,27 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
     period = (f"{month_label(months[0][0], months[0][1])} — "
               f"{month_label(months[-1][0], months[-1][1])}") if months else ""
 
-    brand_tabs = ""
-    brand_panels = ""
-    for i, (brand, data) in enumerate(brands_data):
-        active = "active" if i == 0 else ""
+    # Зведення двох брендів іде першим: партнер спочатку бачить загальну картину.
+    brand_tabs = (
+        '<button class="brand-tab active" id="btab_total" '
+        'onclick="switchBrand(\'total\')" style="--bc:var(--green-d)">'
+        '📊 Разом по двох брендах</button>'
+    )
+    brand_panels = (
+        f'<div id="bpanel_total" style="display:block">{build_total_panel(brands_data)}</div>'
+    )
+
+    for brand, data in brands_data:
         bar_colors = MONTH_BAR_COLORS_BELLA if brand["slug"] == "bella" else MONTH_BAR_COLORS
         panel_html = build_brand_panel(brand, data, bar_colors)
         brand_tabs += (
-            f'<button class="brand-tab {active}" id="btab_{brand["slug"]}" '
+            f'<button class="brand-tab" id="btab_{brand["slug"]}" '
             f'onclick="switchBrand(\'{brand["slug"]}\')" '
             f'style="--bc:{brand["color"]}">'
             f'{brand["emoji"]} {brand["title"]}</button>'
         )
-        vis = "block" if i == 0 else "none"
         brand_panels += (
-            f'<div id="bpanel_{brand["slug"]}" style="display:{vis}">{panel_html}</div>'
+            f'<div id="bpanel_{brand["slug"]}" style="display:none">{panel_html}</div>'
         )
 
     brand_tabs += (
@@ -1005,7 +1119,14 @@ def build_html(brands_data: list[tuple[dict, dict]]) -> str:
       box-shadow:0 1px 4px rgba(0,0,0,.06)}}
     .kpi-label{{font-size:10px;font-weight:700;text-transform:uppercase;color:var(--gray-400);margin-bottom:4px}}
     .kpi-value{{font-size:19px;font-weight:700}}
-    .kpi-sub{{font-size:10px;color:var(--gray-400);margin-top:2px}}
+    .kpi-sub{{font-size:10px;color:var(--gray-400);margin-top:3px;line-height:1.35}}
+    .sum-table{{width:100%;border-collapse:collapse;background:#fff;border-radius:12px;
+      overflow:hidden;box-shadow:0 1px 4px rgba(0,0,0,.06);font-size:13px}}
+    .sum-table th,.sum-table td{{padding:10px 14px;text-align:right;border-bottom:1px solid #f0f0f0}}
+    .sum-table th{{font-size:10px;text-transform:uppercase;letter-spacing:.4px;
+      color:var(--gray-700);background:var(--gray-100);font-weight:700}}
+    .sum-table th:first-child,.sum-table td:first-child{{text-align:left}}
+    .sum-table tr.sum-row td{{font-weight:700;background:#fafafa;border-bottom:none}}
     .promo-note{{background:#fff;border-left:3px solid var(--green);border-radius:8px;
       padding:12px 16px;font-size:12px;color:var(--gray-700);box-shadow:0 1px 4px rgba(0,0,0,.06)}}
     .delta{{font-size:11px;font-weight:600;margin-left:4px}}
