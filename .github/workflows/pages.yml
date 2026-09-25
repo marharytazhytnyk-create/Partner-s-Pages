@@ -3,6 +3,12 @@ name: Deploy GitHub Pages
 on:
   push:
     branches: [main]
+  # Коміти від github-actions[bot] не запускають інші воркфлоу — GitHub так
+  # страхується від циклів. Через це звіти, перегенеровані за розписом, самі на
+  # Pages не потрапляли: сторінка оновлювалася лише після push від людини.
+  # Щоденний деплой закриває цю дірку.
+  schedule:
+    - cron: '0 18 * * *'
   workflow_dispatch:
 
 permissions:
