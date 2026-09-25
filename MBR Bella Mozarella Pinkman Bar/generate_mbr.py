@@ -72,7 +72,7 @@ UK_MONTHS_FULL  = ["","Січень","Лютий","Березень","Квіте
                     "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"]
 
 CHART_SECTIONS = [
-    ("1. Продажі",                    ["gross","net","orders","aov"]),
+    ("1. Продажі",                    ["gross","net","prov_sales","orders","aov"]),
     ("2. Операційні показники",       ["avail","accept","refunds","prep_time","acc_time","del_time"]),
     ("3. Клієнти та поведінка",       ["active_users","freq","new_users","sessions","imp_menu","menu_prod","rating"]),
     ("4. Знижки",                     ["discounts","camp_bolt","camp_merch"]),
@@ -80,7 +80,8 @@ CHART_SECTIONS = [
 
 METRIC_UK = {
     "gross":      ("Gross Sales (продажі)",         "Сума вартості доставлених замовлень до знижок",   "₴"),
-    "net":        ("Net Sales (чисті продажі)",      "Сума після застосування знижок клієнтам",         "₴"),
+    "net":        ("Net Sales (чисті продажі)",      "Сума після знижок разом зі зборами Bolt, які платить клієнт", "₴"),
+    "prov_sales": ("Виручка закладу",                "Сума за страви після знижок, без плати за доставку та сервісного збору", "₴"),
     "orders":     ("Delivered Orders",               "Кількість успішно доставлених замовлень",         "шт."),
     "aov":        ("AOV — середній чек",             "Середня сума одного доставленого замовлення",     "₴"),
     "avail":      ("Availability Rate",              "Частка часу, коли заклад був онлайн",             "%"),
@@ -126,6 +127,7 @@ EMPTY_MONTH = {
     "avail":0,"accept":0,"refunds":0,
     "del_time":0,"acc_time":0,"prep_time":0,
     "new_users":0,"sessions":0,"imp_menu":0,"menu_prod":0,"rating":0,
+    "prov_sales":0,
     "discounts":0,"camp_bolt":0,"camp_merch":0,
     "active_users":0,"freq":0,
     "sl_orders":0,"smart_orders":0,"theme_orders":0,
@@ -376,7 +378,8 @@ def fetch_brand_data(brand: dict) -> dict:
                 SUM(f.total_campaign_spend_bolt)                                     AS camp_bolt,
                 SUM(f.total_campaign_spend_provider)                                 AS camp_merch,
                 SUM(f.sponsored_listing_attributed_orders_count)                      AS sl_orders,
-                SUM(f.smart_promotion_campaign_orders_count)                          AS smart_orders
+                SUM(f.smart_promotion_campaign_orders_count)                          AS smart_orders,
+                SUM(f.total_provider_price_after_discounts)                           AS prov_sales
             FROM {schema}.fact_provider_monthly f
             JOIN {schema}.dim_provider_v2 d ON f.provider_id = d.provider_id
             WHERE f.provider_id IN ({pids_sql})
@@ -458,6 +461,7 @@ def fetch_brand_data(brand: dict) -> dict:
         camp_merch= round(_sf(row[19]), 0)
         sl_orders = _si(row[20])
         smart_ord = _si(row[21])
+        prov_sales= round(_sf(row[22]), 0)
         active_u  = users_map.get((pid, mk)) or orders
         aov       = round(gross / orders, 0) if orders else 0
         freq      = round(orders / active_u, 2) if active_u else 0
@@ -465,6 +469,7 @@ def fetch_brand_data(brand: dict) -> dict:
 
         rec = {
             "orders": orders, "gross": round(gross, 0), "net": round(net, 0),
+            "prov_sales": prov_sales,
             "aov": aov, "avail": avail, "accept": accept, "refunds": refunds,
             "del_time": del_time, "acc_time": acc_time, "prep_time": prep_time,
             "new_users": new_users, "sessions": sessions, "imp_menu": imp_menu,
@@ -506,8 +511,8 @@ def fetch_brand_data(brand: dict) -> dict:
         agg = dict(EMPTY_MONTH)
         for loc in locations:
             w = loc["months"][i]
-            for k in ("orders","gross","net","new_users","sessions","discounts","camp_bolt","camp_merch",
-                      "active_users","sl_orders","smart_orders","theme_orders"):
+            for k in ("orders","gross","net","prov_sales","new_users","sessions","discounts",
+                      "camp_bolt","camp_merch","active_users","sl_orders","smart_orders","theme_orders"):
                 agg[k] = agg.get(k, 0) + w.get(k, 0)
         # weighted averages
         weighted = [
@@ -735,6 +740,8 @@ def build_brand_panel(brand: dict, data: dict, bar_colors: list) -> str:
                   _pct_badge(prev.get("gross",0), last.get("gross",0)), brand["color"]) +
         _kpi_card("Net Sales", _fmt(last.get("net"), "₴"),
                   _pct_badge(prev.get("net",0), last.get("net",0)), brand["color"]) +
+        _kpi_card("Виручка закладу", _fmt(last.get("prov_sales"), "₴"),
+                  _pct_badge(prev.get("prov_sales",0), last.get("prov_sales",0)), brand["color"]) +
         _kpi_card("AOV", _fmt(last.get("aov"), "₴"),
                   _pct_badge(prev.get("aov",0), last.get("aov",0))) +
         _kpi_card("Availability", _fmt(last.get("avail"), "%"),
