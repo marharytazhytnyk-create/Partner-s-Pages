@@ -72,7 +72,7 @@ UK_MONTHS_FULL  = ["","Січень","Лютий","Березень","Квіте
                     "Липень","Серпень","Вересень","Жовтень","Листопад","Грудень"]
 
 CHART_SECTIONS = [
-    ("1. Продажі",                    ["gross","net","prov_sales","payout","orders","aov"]),
+    ("1. Продажі",                    ["gross","net","orders","aov"]),
     ("2. Операційні показники",       ["avail","accept","refunds","prep_time","acc_time","del_time"]),
     ("3. Клієнти та поведінка",       ["active_users","freq","new_users","sessions","imp_menu","menu_prod","rating"]),
     ("4. Знижки",                     ["discounts","camp_bolt","camp_merch"]),
@@ -127,8 +127,8 @@ MONTH_BAR_COLORS_TOTAL = [
     "#1abd72","#34D186","#5cdc9d","#8ce8bb",
 ]
 
-# Вкладка «Разом»: чотири цифри продажів від найширшої до тієї, що дійшла закладу.
-TOTAL_METRICS = ["gross", "net", "prov_sales", "payout"]
+# Вкладка «Разом»: продажі до знижок і після — обидва бренди однією сумою.
+TOTAL_METRICS = ["gross", "net"]
 
 EMPTY_MONTH = {
     "orders":0,"gross":0,"net":0,"aov":0,
@@ -752,8 +752,6 @@ def build_brand_panel(brand: dict, data: dict, bar_colors: list) -> str:
                   _pct_badge(prev.get("gross",0), last.get("gross",0)), brand["color"]) +
         _kpi_card("Net Sales", _fmt(last.get("net"), "₴"),
                   _pct_badge(prev.get("net",0), last.get("net",0)), brand["color"]) +
-        _kpi_card("Виручка закладу", _fmt(last.get("prov_sales"), "₴"),
-                  _pct_badge(prev.get("prov_sales",0), last.get("prov_sales",0)), brand["color"]) +
         _kpi_card("AOV", _fmt(last.get("aov"), "₴"),
                   _pct_badge(prev.get("aov",0), last.get("aov",0))) +
         _kpi_card("Availability", _fmt(last.get("avail"), "%"),
@@ -941,9 +939,6 @@ def build_total_panel(brands_data: list[tuple[dict, dict]]) -> str:
         + '</tr>'
     )
 
-    commission_pct = (f'{last["commission"] / last["prov_sales"] * 100:.1f}%'
-                      if last.get("prov_sales") else "—")
-
     return f"""
     <div class="period-bar">
       <span class="period-label">Місяці:</span>
@@ -952,11 +947,9 @@ def build_total_panel(brands_data: list[tuple[dict, dict]]) -> str:
     </div>
 
     <div class="promo-note">
-      Чотири цифри описують той самий оборот на різних етапах — від вартості замовлень
-      до грошей, що дійшли закладу. Різниця між <b>Net Sales</b> і <b>виручкою закладу</b> —
-      це плата за доставку та сервісний збір, які платить клієнт, а не заклад. Різниця між
-      <b>виручкою закладу</b> і <b>отриманим</b> — комісія Bolt, за останній місяць це
-      {commission_pct} від кошика ({_fmt(last.get('commission'), '₴')}).
+      <b>Gross Sales</b> — вартість замовлень до знижок, показує масштаб.
+      <b>Net Sales</b> — скільки клієнти заплатили насправді після знижок, разом
+      зі зборами Bolt. Різниця між ними — це всі знижки, які отримали клієнти.
     </div>
 
     <div class="section-title">Разом за {first['month_labels'][-1]}</div>
