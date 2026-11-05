@@ -36,7 +36,7 @@ SCHEMA_TABLES      = [
     "dim_order_campaign_delivery",
     "dim_campaign_delivery_v2",
 ]
-N_MONTHS        = 8
+N_MONTHS        = 4
 SCRIPT_DIR      = Path(__file__).parent
 OUTPUT_HTML     = SCRIPT_DIR / "MBR Bella Mozzarella Pinkman Bar.html"
 POLL_INTERVAL_S = 5
