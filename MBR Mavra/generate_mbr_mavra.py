@@ -331,6 +331,7 @@ def pick_schema(ctx: str) -> str:
     global SCHEMA
     if SCHEMA:
         return SCHEMA
+    reasons = []
     for schema in SCHEMA_CANDIDATES:
         try:
             for table in SCHEMA_TABLES:
@@ -338,11 +339,17 @@ def pick_schema(ctx: str) -> str:
             print(f"  схема: {schema}")
             SCHEMA = schema
             return SCHEMA
-        except Exception:
-            continue
+        except Exception as exc:
+            reasons.append(f"{schema}: {exc}")
+            if "INSUFFICIENT_PERMISSIONS" in str(exc):
+                raise PermissionError(
+                    f"Немає доступу до схеми {schema}. Потрібен грант USE SCHEMA — "
+                    f"повторні спроби не допоможуть.\n{exc}"
+                ) from exc
     raise RuntimeError(
         "Не знайдено схему, де читаються dim_provider_v2, "
-        "fact_provider_monthly і int_provider_metrics_non_additive"
+        "fact_provider_monthly і int_provider_metrics_non_additive:\n  "
+        + "\n  ".join(reasons)
     )
 
 def destroy_ctx(ctx: str):
@@ -574,6 +581,8 @@ def fetch_brand_data_checked(brand: dict) -> dict:
             if not any(m.get("orders") for m in data["brand_months"]):
                 raise RuntimeError("запит не повернув замовлень ні за один місяць")
             return data
+        except PermissionError:
+            raise
         except Exception as exc:
             last_exc = exc
             print(f"  спроба {attempt}/{FETCH_ATTEMPTS} не вдалася: {exc}")
@@ -888,6 +897,7 @@ def fetch_promo_data() -> dict:
     print(f"  [Ефективність акцій] fetching {N_MONTHS} months {start} → {end}")
     ctx = create_ctx()
     try:
+        pick_schema(ctx)
         camp_rows = run_query(ctx, f"""
             SELECT provider_id,
                    DATE_FORMAT(order_created_date_local, 'yyyy-MM') AS mkey,
