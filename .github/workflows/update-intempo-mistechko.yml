@@ -1,0 +1,43 @@
+name: Update Intempo Mistechko
+
+on:
+  schedule:
+    # 3-го числа кожного місяця о 13:00 Київ (EEST UTC+3 = 10:00 UTC).
+    # До звітів додається щойно завершений місяць.
+    - cron: '0 10 3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-intempo-mistechko:
+    name: Intempo Mistechko — sales + MBR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate Intempo Mistechko reports
+        env:
+          DATABRICKS_HOST:       ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN:      ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_CLUSTER_ID: ${{ secrets.DATABRICKS_CLUSTER_ID }}
+        run: |
+          python "Intempo Mistechko/generate_sales_intempo_mistechko.py"
+          python "Intempo Mistechko/generate_mbr_intempo_mistechko.py"
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "Intempo Mistechko/"
+          git diff --staged --quiet || git commit -m "Intempo Mistechko — auto-update $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push
