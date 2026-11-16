@@ -1285,7 +1285,6 @@ def _brand_block(brand: dict) -> str:
 
 def generate_html(data: dict) -> str:
     locations = data["locations"]
-    brands = data["brands"]
     group_months = data["brand_months"]
     last = group_months[-1] if group_months else EMPTY_MONTH
     prev = group_months[-2] if len(group_months) >= 2 else None
@@ -1294,13 +1293,12 @@ def generate_html(data: dict) -> str:
     group_rolling = data.get("brand_rolling_rating", 0)
     n = len(locations)
     n_months = len(group_months)
-    n_brands = len(brands)
 
     group_charts = _chart_folds(
         group_months, "group", data["brand_details"], show_loc=True,
         hint=f"Сума / середнє по всіх {n} локаціях · {n_months} міс.",
     )
-    brand_blocks = "\n".join(_brand_block(b) for b in brands)
+    loc_blocks = "\n".join(_location_block(loc) for loc in locations)
 
     return f"""<!DOCTYPE html>
 <html lang="uk">
@@ -1473,12 +1471,12 @@ def generate_html(data: dict) -> str:
     </div>
     <div class="header-title">
       <h1>MBR {PARTNER_TITLE}</h1>
-      <p>Bolt Food · Щомісячний звіт · {CITY} · {n_brands} брендів</p>
+      <p>Bolt Food · Щомісячний звіт · {CITY}</p>
     </div>
   </div>
   <div class="header-meta">
     <div>Період: <strong>{period}</strong></div>
-    <div>Місяців: <strong>{n_months}</strong> · Брендів: <strong>{n_brands}</strong> · Локацій: <strong>{n}</strong></div>
+    <div>Місяців: <strong>{n_months}</strong> · Локацій: <strong>{n}</strong></div>
     <div>Оновлено: <strong>{gen}</strong></div>
   </div>
 </header>
@@ -1491,7 +1489,7 @@ def generate_html(data: dict) -> str:
   </div>
 
   <div class="toolbar">
-    <button type="button" id="expand-brands">Розгорнути всі бренди</button>
+    <button type="button" id="expand-locs">Розгорнути всі локації</button>
     <button type="button" id="expand-sections">Розгорнути всі розділи</button>
     <button type="button" id="collapse-all">Згорнути все</button>
   </div>
@@ -1502,10 +1500,10 @@ def generate_html(data: dict) -> str:
   <p class="section-hint">{BAD_ORDERS_EXPLAIN_UA}</p>
   {group_charts}
 
-  <div class="section-title">Бренди</div>
-  <p class="section-hint">Кожен бренд і кожен розділ усередині можна згорнути. Локації — всередині бренду. Червоним підсвічені бренди й локації, де є проблема.</p>
-  <div id="brands">
-    {brand_blocks}
+  <div class="section-title">Локації</div>
+  <p class="section-hint">Кожну локацію і кожен розділ усередині можна згорнути. Червоним підсвічені локації, де є проблема.</p>
+  <div id="locations">
+    {loc_blocks}
   </div>
 </div>
 
@@ -1536,16 +1534,6 @@ def generate_html(data: dict) -> str:
     }});
   }});
 
-  document.querySelectorAll('.brand-open-btn').forEach(btn => {{
-    btn.addEventListener('click', () => {{
-      const slug = btn.dataset.brandId;
-      const body = document.getElementById('brand-body-' + slug);
-      const open = body.hidden;
-      setCard(btn, body, open, 'Відкрити бренд', 'Згорнути бренд');
-      if (open) document.getElementById('brand-' + slug).scrollIntoView({{behavior:'smooth',block:'start'}});
-    }});
-  }});
-
   document.querySelectorAll('.loc-open-btn').forEach(btn => {{
     btn.addEventListener('click', () => {{
       const pid = btn.dataset.locId;
@@ -1556,27 +1544,23 @@ def generate_html(data: dict) -> str:
     }});
   }});
 
-  document.getElementById('expand-brands').addEventListener('click', () => {{
-    document.querySelectorAll('.brand-open-btn').forEach(btn => {{
-      setCard(btn, document.getElementById('brand-body-' + btn.dataset.brandId), true,
-              'Відкрити бренд', 'Згорнути бренд');
+  document.getElementById('expand-locs').addEventListener('click', () => {{
+    document.querySelectorAll('.loc-open-btn').forEach(btn => {{
+      setCard(btn, document.getElementById('loc-body-' + btn.dataset.locId), true,
+              'Відкрити деталі', 'Згорнути');
     }});
   }});
 
   document.getElementById('expand-sections').addEventListener('click', () => {{
     document.querySelectorAll('.fold-btn').forEach(btn => setFold(btn, true));
-    document.querySelectorAll('.brand-open-btn').forEach(btn => {{
-      setCard(btn, document.getElementById('brand-body-' + btn.dataset.brandId), true,
-              'Відкрити бренд', 'Згорнути бренд');
+    document.querySelectorAll('.loc-open-btn').forEach(btn => {{
+      setCard(btn, document.getElementById('loc-body-' + btn.dataset.locId), true,
+              'Відкрити деталі', 'Згорнути');
     }});
   }});
 
   document.getElementById('collapse-all').addEventListener('click', () => {{
     document.querySelectorAll('.fold-btn').forEach(btn => setFold(btn, false));
-    document.querySelectorAll('.brand-open-btn').forEach(btn => {{
-      setCard(btn, document.getElementById('brand-body-' + btn.dataset.brandId), false,
-              'Відкрити бренд', 'Згорнути бренд');
-    }});
     document.querySelectorAll('.loc-open-btn').forEach(btn => {{
       setCard(btn, document.getElementById('loc-body-' + btn.dataset.locId), false,
               'Відкрити деталі', 'Згорнути');
