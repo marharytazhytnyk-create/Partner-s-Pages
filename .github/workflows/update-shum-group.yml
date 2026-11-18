@@ -1,0 +1,43 @@
+name: Update SHUM Group
+
+on:
+  schedule:
+    # 3-го числа кожного місяця о 13:00 Київ (EEST UTC+3 = 10:00 UTC).
+    # У звітах лишаються останні 8 повних місяців.
+    - cron: '0 10 3 * *'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  generate-shum-group:
+    name: SHUM Group — sales + MBR
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install requests
+
+      - name: Generate SHUM Group reports
+        env:
+          DATABRICKS_HOST:       ${{ secrets.DATABRICKS_HOST }}
+          DATABRICKS_TOKEN:      ${{ secrets.DATABRICKS_TOKEN }}
+          DATABRICKS_CLUSTER_ID: ${{ secrets.DATABRICKS_CLUSTER_ID }}
+        run: |
+          python "SHUM Group/generate_sales_shum_group.py"
+          python "SHUM Group/generate_mbr_shum_group.py"
+
+      - name: Commit and push
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add "SHUM Group/"
+          git diff --staged --quiet || git commit -m "SHUM Group — auto-update $(date -u +'%Y-%m-%d %H:%M UTC')"
+          git pull --rebase origin main
+          git push
